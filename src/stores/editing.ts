@@ -3,7 +3,7 @@ import type { direction } from "./cells"
 import { gridSize } from "./global"
 import { letters, args, setArg } from "./letters"
 import { cursor, anchor, placeCursor } from "./cursor"
-import { argsFor, paramsFor } from "./rules"
+import { argsFor, paramsFor } from "../rules"
 
 // The square whose letter has its arguments open for editing, or null
 export const editing = writable<number | null>(null)

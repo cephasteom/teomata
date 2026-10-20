@@ -21,3 +21,10 @@ export const step = (i: number, direction: direction, size: number) => {
     const y = (Math.floor(i / size) + dy + size) % size
     return y * size + x
 }
+
+// Indices of the eight squares around i
+// Wraps around the edges of the grid
+export const neighbours = (i: number, size: number) => {
+    const [n, s] = [step(i, "n", size), step(i, "s", size)]
+    return [n, s, ...[n, i, s].flatMap(j => [step(j, "e", size), step(j, "w", size)])]
+}
