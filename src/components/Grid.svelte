@@ -1,28 +1,78 @@
 <script lang="ts">
-  import { cells } from "../stores/cells";
+  import { cells, type direction } from "../stores/cells";
   import { gridSize } from "../stores/global";
+  import { cursor, moveCursor } from "../stores/cursor";
+  import { letters, setLetter } from "../stores/letters";
+
+  const keys: Record<string, direction> = {
+    ArrowUp: 'n',
+    ArrowDown: 's',
+    ArrowRight: 'e',
+    ArrowLeft: 'w',
+  }
+
+  const onkeydown = (event: KeyboardEvent) => {
+    // Leave shortcuts like cmd+r to the browser
+    if (event.metaKey || event.ctrlKey || event.altKey) return
+
+    const direction = keys[event.key]
+    if (direction) {
+      // Stop the arrow keys from scrolling the page
+      event.preventDefault()
+      moveCursor(direction)
+    } else if (/^[a-zA-Z]$/.test(event.key)) {
+      setLetter($cursor, event.key)
+    } else if (event.key === 'Backspace' || event.key === 'Delete') {
+      setLetter($cursor, "")
+    }
+  }
 </script>
+
+<svelte:window {onkeydown} />
 
 <div class="grid" style:--size={$gridSize}>
   {#each $cells as cell, i (i)}
-    <div class="cell" class:alive={cell.value}></div>
+    <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
+    <div
+      class="cell"
+      class:alive={cell.value}
+      class:cursor={i === $cursor}
+      onclick={() => cursor.set(i)}
+    >{$letters[i]}</div>
   {/each}
 </div>
 
 <style>
   .grid {
     display: grid;
-    grid-template-columns: repeat(var(--size), 1fr);
+    /* minmax(0, 1fr) stops a cell's letter from stretching its track, and the
+       explicit rows keep every row the same height as the columns are wide */
+    grid-template-columns: repeat(var(--size), minmax(0, 1fr));
+    grid-template-rows: repeat(var(--size), minmax(0, 1fr));
     width: min(80vmin, 100%);
     aspect-ratio: 1;
-    border: 1px solid black;
+    border: 1px solid var(--grid-border);
+    /* Lets letters size themselves against the grid's width */
+    container-type: inline-size;
   }
 
   .cell {
-    background: white;
+    display: grid;
+    place-items: center;
+    font-size: calc(100cqi / var(--size) * 0.6);
+    line-height: 1;
+    user-select: none;
+    overflow: hidden;
+    background: var(--cell-empty);
+    color: var(--cell-alive);
   }
 
   .alive {
-    background: black;
+    background: var(--cell-alive);
+    color: var(--cell-empty);
+  }
+
+  .cursor {
+    box-shadow: inset 0 0 0 2px var(--cell-cursor);
   }
 </style>

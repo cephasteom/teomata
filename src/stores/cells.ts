@@ -15,13 +15,25 @@ const randomCell = (): Cell => ({
     direction: randomDirection()
 })
 
-export const cells = writable<Cell[]>(Array.from(
+const randomGrid = (): Cell[] => Array.from(
     { length: Math.pow(get(gridSize), 2) },
     () => (Math.random() > .95 ? randomCell() : {})
-))
+)
+
+export const cells = writable<Cell[]>(randomGrid())
 
 // Runs the cells through each rule in order
 export const updateCells = () => {
     const size = get(gridSize)
     cells.update(cells => get(rules).reduce((cells, rule) => rule(cells, size), cells))
+}
+
+// Empties every cell on the grid
+export const clearCells = () => {
+    cells.set(Array.from({ length: Math.pow(get(gridSize), 2) }, () => ({})))
+}
+
+// Reseeds the grid with a fresh random state
+export const randomizeCells = () => {
+    cells.set(randomGrid())
 }

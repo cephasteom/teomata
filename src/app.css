@@ -1,9 +1,15 @@
 :root {
-
+  --grid-border: black;
+  --cell-empty: white;
+  --cell-alive: black;
+  --cell-cursor: #e63946;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    
+    --grid-border: white;
+    --cell-empty: black;
+    --cell-alive: white;
+    --cell-cursor: #ff6b6b;
   }
 }
