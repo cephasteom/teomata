@@ -45,13 +45,11 @@
       {/if}
     </div>
   {/each}
-  {#if $selection.size > 1}
-    <div
-      class="selection"
-      style:grid-column="{$bounds.x1 + 1} / {$bounds.x2 + 2}"
-      style:grid-row="{$bounds.y1 + 1} / {$bounds.y2 + 2}"
-    ></div>
-  {/if}
+  <div
+    class="selection"
+    style:grid-column="{$bounds.x1 + 1} / {$bounds.x2 + 2}"
+    style:grid-row="{$bounds.y1 + 1} / {$bounds.y2 + 2}"
+  ></div>
 </div>
 
 <style>
@@ -67,10 +65,13 @@
     --gutter: 2rem;
     width: min(100dvw - 2 * var(--gutter), 100dvh - 2 * var(--gutter));
     aspect-ratio: 1;
-    border: 0.5px solid var(--grid-line);
+    --line: 0.5px;
+    border: var(--line) solid var(--grid-line);
     /* The background shows through the gaps between cells as gridlines */
-    gap: 0.5px;
+    gap: var(--line);
     background: var(--grid-line);
+    /* Keeps the selection's negative z-index above the grid's background */
+    isolation: isolate;
     /* Lets letters size themselves against the grid's width */
     container-type: inline-size;
   }
@@ -91,14 +92,15 @@
     color: var(--cell-empty);
   }
 
-  /* One outline round the whole selection, so neighbouring squares don't
-     double up their borders. Being absolutely positioned it sits over the
-     cells without taking a slot from them in the grid's auto-placement */
+  /* Sits behind the selected cells and reaches one gap past them, so the
+     gridlines in and around the selection change colour without getting any
+     thicker. Being absolutely positioned it doesn't take a slot from the
+     cells in the grid's auto-placement */
   .selection {
     position: absolute;
-    inset: 0;
-    pointer-events: none;
-    box-shadow: inset 0 0 0 1px var(--cell-cursor);
+    inset: calc(-1 * var(--line));
+    z-index: -1;
+    background: var(--cell-cursor);
   }
 
   .cursor {
