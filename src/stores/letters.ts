@@ -14,3 +14,13 @@ export const setLetter = (i: number, letter: string) => {
 export const clearLetters = () => {
     letters.set(Array.from({ length: Math.pow(get(gridSize), 2) }, () => ""))
 }
+
+// What each letter's rule does. Letters missing here have no rule yet.
+// Keys are lowercase because rules ignore the letter's case.
+export const explanations: Record<string, string> = {
+    n: "Cells passing over this square turn to face north.",
+    s: "Cells passing over this square turn to face south.",
+    e: "Cells passing over this square turn to face east.",
+    w: "Cells passing over this square turn to face west.",
+    r: "Cells passing over this square turn around and head back the way they came.",
+}

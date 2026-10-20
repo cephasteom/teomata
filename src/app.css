@@ -15,3 +15,7 @@
     --cell-cursor: #ff6b6b;
   }
 }
+
+body {
+  margin: 1rem;
+}

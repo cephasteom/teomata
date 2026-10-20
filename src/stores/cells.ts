@@ -2,14 +2,13 @@ import { writable, get } from "svelte/store"
 import { gridSize } from "./global"
 import { rules } from "./rules"
 import { letters } from "./letters"
+import { randomDirection } from "../lib/utils"
 
 export type direction = 'n' | 's' | 'e' | 'w' 
 export interface Cell {
     value?: number
     direction?: direction
 }
-
-const randomDirection = () : direction => ['n', 's', 'e', 'w'][Math.floor(Math.random() * 4)] as direction
 
 const randomCell = (): Cell => ({
     value: 1, 
