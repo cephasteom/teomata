@@ -7,17 +7,45 @@ export const letters = writable<string[]>(
     Array.from({ length: Math.pow(get(gridSize), 2) }, () => "")
 )
 
+// The arguments typed in for each square's letter, as text. A square's
+// arguments are cleared when its letter changes
+export const args = writable<string[][]>(
+    Array.from({ length: Math.pow(get(gridSize), 2) }, () => [])
+)
+
 // Puts the same letter, or "" to clear them, on every one of the squares
+// Typing the letter a square already has keeps its arguments
 export const setLetters = (squares: Iterable<number>, letter: string) => {
+    const list = [...squares]
+    const current = get(letters)
+    const changed = list.filter(i => current[i].toLowerCase() !== letter.toLowerCase())
     letters.update(letters => {
         const next = [...letters]
-        for (const i of squares) next[i] = letter
+        for (const i of list) next[i] = letter
+        return next
+    })
+    args.update(args => {
+        const next = [...args]
+        for (const i of changed) next[i] = []
+        return next
+    })
+}
+
+// Sets the same argument for the letter on every one of the squares
+export const setArg = (squares: Iterable<number>, k: number, text: string) => {
+    args.update(args => {
+        const next = [...args]
+        for (const square of squares) {
+            next[square] = [...next[square]]
+            next[square][k] = text
+        }
         return next
     })
 }
 
 export const clearLetters = () => {
     letters.set(Array.from({ length: Math.pow(get(gridSize), 2) }, () => ""))
+    args.set(Array.from({ length: Math.pow(get(gridSize), 2) }, () => []))
 }
 
 // What each letter's rule does. Letters missing here have no rule yet.
@@ -28,7 +56,8 @@ export const explanations: Record<string, string> = {
     e: "Cells passing over this square turn to face east.",
     w: "Cells passing over this square turn to face west.",
     r: "Cells passing over this square turn around and head back the way they came.",
-    b: "Sends out a new cell heading east once every bar.",
+    d: "Cells passing over this square die.",
+    b: "Sends out a new cell every few bars. Press enter to set how often and which way it heads.",
 }
 
 // The Font Awesome icon each letter is drawn as. Letters missing here have no
@@ -40,6 +69,7 @@ const icons: Record<string, string> = {
     w: "fa-arrow-left",
     r: "fa-rotate",
     b: "fa-burst",
+    d: "fa-skull",
 }
 
 export const iconFor = (letter: string) => {

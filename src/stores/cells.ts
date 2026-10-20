@@ -1,7 +1,7 @@
 import { writable, get } from "svelte/store"
 import { gridSize } from "./global"
 import { rules } from "./rules"
-import { letters } from "./letters"
+import { letters, args } from "./letters"
 import { randomDirection } from "../lib/utils"
 
 export type direction = 'n' | 's' | 'e' | 'w' 
@@ -27,7 +27,8 @@ export const cells = writable<Cell[]>(randomGrid())
 export const updateCells = (tick: number) => {
     const size = get(gridSize)
     const squares = get(letters)
-    cells.update(cells => get(rules).reduce((cells, rule) => rule(cells, size, squares, tick), cells))
+    const given = get(args)
+    cells.update(cells => get(rules).reduce((cells, rule) => rule(cells, size, squares, given, tick), cells))
 }
 
 // Empties every cell on the grid
