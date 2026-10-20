@@ -1,13 +1,27 @@
-import { writable } from "svelte/store"
+import { writable, get } from "svelte/store"
+import { gridSize } from "./global"
+import { rules } from "./rules"
 
-interface Cell {
+export type direction = 'n' | 's' | 'e' | 'w' 
+export interface Cell {
     value?: number
-    direction?: 'n' | 's' | 'e' | 'w'
+    direction?: direction
 }
 
-const size = 16
+const randomDirection = () : direction => ['n', 's', 'e', 'w'][Math.floor(Math.random() * 4)] as direction
 
-const cells = writable<Cell[]>(Array.from(
-    { length: size * size },
-    () => ({})
+const randomCell = (): Cell => ({
+    value: 1, 
+    direction: randomDirection()
+})
+
+export const cells = writable<Cell[]>(Array.from(
+    { length: Math.pow(get(gridSize), 2) },
+    () => (Math.random() > .95 ? randomCell() : {})
 ))
+
+// Runs the cells through each rule in order
+export const updateCells = () => {
+    const size = get(gridSize)
+    cells.update(cells => get(rules).reduce((cells, rule) => rule(cells, size), cells))
+}
