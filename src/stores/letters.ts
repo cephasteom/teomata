@@ -7,8 +7,13 @@ export const letters = writable<string[]>(
     Array.from({ length: Math.pow(get(gridSize), 2) }, () => "")
 )
 
-export const setLetter = (i: number, letter: string) => {
-    letters.update(letters => letters.with(i, letter))
+// Puts the same letter, or "" to clear them, on every one of the squares
+export const setLetters = (squares: Iterable<number>, letter: string) => {
+    letters.update(letters => {
+        const next = [...letters]
+        for (const i of squares) next[i] = letter
+        return next
+    })
 }
 
 export const clearLetters = () => {

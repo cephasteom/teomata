@@ -1,8 +1,8 @@
 <script lang="ts">
   import { cells, type direction } from "../stores/cells";
   import { gridSize } from "../stores/global";
-  import { cursor, moveCursor } from "../stores/cursor";
-  import { letters, setLetter, iconFor } from "../stores/letters";
+  import { cursor, bounds, selection, placeCursor, moveCursor } from "../stores/cursor";
+  import { letters, setLetters, iconFor } from "../stores/letters";
 
   const keys: Record<string, direction> = {
     ArrowUp: 'n',
@@ -19,11 +19,12 @@
     if (direction) {
       // Stop the arrow keys from scrolling the page
       event.preventDefault()
-      moveCursor(direction)
+      // Shift stretches the selection out to the cursor's new square
+      moveCursor(direction, event.shiftKey)
     } else if (/^[a-zA-Z]$/.test(event.key)) {
-      setLetter($cursor, event.key)
+      setLetters($selection, event.key)
     } else if (event.key === 'Backspace' || event.key === 'Delete') {
-      setLetter($cursor, "")
+      setLetters($selection, "")
     }
   }
 </script>
@@ -37,17 +38,25 @@
       class="cell"
       class:alive={cell.value}
       class:cursor={i === $cursor}
-      onclick={() => cursor.set(i)}
+      onclick={(event) => placeCursor(i, event.shiftKey)}
     >
       {#if $letters[i]}
         <i class={['fa-solid', iconFor($letters[i])]} title={$letters[i]}></i>
       {/if}
     </div>
   {/each}
+  {#if $selection.size > 1}
+    <div
+      class="selection"
+      style:grid-column="{$bounds.x1 + 1} / {$bounds.x2 + 2}"
+      style:grid-row="{$bounds.y1 + 1} / {$bounds.y2 + 2}"
+    ></div>
+  {/if}
 </div>
 
 <style>
   .grid {
+    position: relative;
     display: grid;
     /* minmax(0, 1fr) stops a cell's letter from stretching its track, and the
        explicit rows keep every row the same height as the columns are wide */
@@ -80,6 +89,16 @@
   .alive {
     background: var(--cell-alive);
     color: var(--cell-empty);
+  }
+
+  /* One outline round the whole selection, so neighbouring squares don't
+     double up their borders. Being absolutely positioned it sits over the
+     cells without taking a slot from them in the grid's auto-placement */
+  .selection {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    box-shadow: inset 0 0 0 1px var(--cell-cursor);
   }
 
   .cursor {
