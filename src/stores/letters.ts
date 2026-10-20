@@ -28,6 +28,7 @@ export const explanations: Record<string, string> = {
     e: "Cells passing over this square turn to face east.",
     w: "Cells passing over this square turn to face west.",
     r: "Cells passing over this square turn around and head back the way they came.",
+    b: "Sends out a new cell heading east once every bar.",
 }
 
 // The Font Awesome icon each letter is drawn as. Letters missing here have no
@@ -38,6 +39,7 @@ const icons: Record<string, string> = {
     e: "fa-arrow-right",
     w: "fa-arrow-left",
     r: "fa-rotate",
+    b: "fa-burst",
 }
 
 export const iconFor = (letter: string) => {

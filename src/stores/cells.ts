@@ -23,10 +23,11 @@ const randomGrid = (): Cell[] => Array.from(
 export const cells = writable<Cell[]>(randomGrid())
 
 // Runs the cells through each rule in order
-export const updateCells = () => {
+// Tick is the number of ticks since the transport started
+export const updateCells = (tick: number) => {
     const size = get(gridSize)
     const squares = get(letters)
-    cells.update(cells => get(rules).reduce((cells, rule) => rule(cells, size, squares), cells))
+    cells.update(cells => get(rules).reduce((cells, rule) => rule(cells, size, squares, tick), cells))
 }
 
 // Empties every cell on the grid
