@@ -21,7 +21,8 @@ State lives in Svelte stores under `src/stores/`, and the components and the sch
 
 - `stores/global.ts`: app-wide settings (`isPlaying`, `gridSize`).
 - `stores/cells.ts`: the grid. It is a **flat** `Cell[]` of length `gridSize²`, randomly seeded at module load (about 10% of cells get `value: 1` and a random cardinal `direction`). An empty cell is `{}`. `updateCells()` applies the rule chain.
-- `stores/rules.ts`: the rule chain. A `Rule` is a pure `(cells, size) => Cell[]` function over the whole grid, and the `rules` store holds the ordered list that `updateCells()` reduces over each tick. `move` (step each cell in its direction, wrapping around the edges; cells that would hit each other bounce off, and cells landing on the same square overwrite each other) is the first rule.
+- `stores/letters.ts`: one letter per square (`""` for none), typed at the cursor. Letters belong to the square, not the cell, so cells move over them.
+- `stores/rules.ts`: the rule chain. A `Rule` is a pure `(cells, size, letters) => Cell[]` function over the whole grid, and the `rules` store holds the ordered list that `updateCells()` reduces over each tick. `move` (step each cell in its direction, wrapping around the edges; cells that would hit each other bounce off, and cells landing on the same square overwrite each other) is the first rule. `redirect` runs after it and turns any moving cell that lands on an `n`, `s`, `e` or `w` square (case-insensitive) to face that way.
 
 `src/scheduler.ts` owns timing. At import time it creates a Tone.js `Loop` on a `"16n"` interval, and `toggle()` starts or stops the Tone transport and flips `isPlaying`. Each loop tick calls `updateCells()` via `getDraw().schedule` so the visual update lands on the audible tick. `toggle()` calls Tone's `start()` first because the audio context needs a user gesture.
 

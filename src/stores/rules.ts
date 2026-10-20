@@ -3,7 +3,8 @@ import type { Cell, direction } from "./cells"
 
 // A rule is a pure function from one grid state to the next. Rules get the
 // whole grid because some, like movement, send a cell to a different square.
-export type Rule = (cells: Cell[], size: number) => Cell[]
+// Letters are the per-square letters, which some rules read.
+export type Rule = (cells: Cell[], size: number, letters: string[]) => Cell[]
 
 const offsets: Record<direction, [number, number]> = {
     n: [0, -1],
@@ -40,5 +41,15 @@ export const move: Rule = (cells, size) => {
     return next
 }
 
+const isDirection = (letter: string): letter is direction => letter in offsets
+
+// Turns cells landing on an n, s, e or w square to face that way
+// The letter's case is ignored
+export const redirect: Rule = (cells, _size, letters) =>
+    cells.map((cell, i) => {
+        const letter = letters[i]?.toLowerCase() ?? ""
+        return cell.direction && isDirection(letter) ? { ...cell, direction: letter } : cell
+    })
+
 // Applied in order each tick
-export const rules = writable<Rule[]>([move])
+export const rules = writable<Rule[]>([move, redirect])

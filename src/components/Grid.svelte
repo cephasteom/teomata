@@ -52,6 +52,9 @@
     width: min(80vmin, 100%);
     aspect-ratio: 1;
     border: 1px solid var(--grid-border);
+    /* The background shows through the gaps between cells as gridlines */
+    gap: 1px;
+    background: var(--grid-line);
     /* Lets letters size themselves against the grid's width */
     container-type: inline-size;
   }
