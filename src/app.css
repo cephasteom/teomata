@@ -1,21 +1,27 @@
 :root {
-  --grid-border: black;
-  --grid-line: #ccc;
-  --cell-empty: white;
-  --cell-alive: black;
-  --cell-cursor: #e63946;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --grid-border: white;
-    --grid-line: #444;
-    --cell-empty: black;
-    --cell-alive: white;
-    --cell-cursor: #ff6b6b;
-  }
+  --page-bg: black;
+  --page-text: white;
+  --grid-line: rgb(255 255 255 / 0.5);
+  --cell-empty: black;
+  --cell-alive: white;
+  --cell-cursor: #ff6b6b;
+  color-scheme: dark;
 }
 
 body {
-  margin: 1rem;
+  background: var(--page-bg);
+  color: var(--page-text);
+}
+
+button {
+  background: none;
+  color: var(--page-text);
+  border: 1px solid var(--page-text);
+  padding: 0.25rem 0.75rem;
+  cursor: pointer;
+}
+
+button:hover {
+  background: var(--page-text);
+  color: var(--page-bg);
 }

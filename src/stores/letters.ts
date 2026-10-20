@@ -24,3 +24,18 @@ export const explanations: Record<string, string> = {
     w: "Cells passing over this square turn to face west.",
     r: "Cells passing over this square turn around and head back the way they came.",
 }
+
+// The Font Awesome icon each letter is drawn as. Letters missing here have no
+// rule yet, so they fall back to Font Awesome's icon of the letter itself.
+const icons: Record<string, string> = {
+    n: "fa-arrow-up",
+    s: "fa-arrow-down",
+    e: "fa-arrow-right",
+    w: "fa-arrow-left",
+    r: "fa-rotate",
+}
+
+export const iconFor = (letter: string) => {
+    const key = letter.toLowerCase()
+    return icons[key] ?? `fa-${key}`
+}
