@@ -6,7 +6,7 @@
     cursor, bounds, selection, placeCursor, moveCursor, selectAll, selectionCanMove, moveSelection,
   } from "../stores/cursor";
   import {
-    operations, setOperations, moveOperations, copyOperations, pasteOperations, iconFor,
+    operations, setOperations, moveOperations, copyOperations, pasteOperations,
   } from "../stores/operations";
   import {
     editing, argCells, labelCells, openAreas, openArgs, closeArgs, placeArgCursor, moveArgCursor, typeArg, eraseArg,
@@ -130,12 +130,7 @@
       {:else if label}
         <span class="label">{label}</span>
       {:else if $operations[i]}
-        {@const icon = iconFor($operations[i])}
-        {#if icon}
-          <i class={['fa-solid', icon]} title={$operations[i]}></i>
-        {:else}
-          <span class="letter">{$operations[i]}</span>
-        {/if}
+        <span class="letter">{$operations[i]}</span>
       {/if}
     </div>
   {/each}
@@ -221,8 +216,8 @@
     visibility: hidden;
   }
 
-  /* Arguments, their labels and letters without an icon look like the
-     controls' number squares and the instructions */
+  /* Arguments, their labels and operations look like the controls' number
+     squares and the instructions */
   .arg,
   .label,
   .letter {

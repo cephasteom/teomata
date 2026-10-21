@@ -108,18 +108,3 @@ export const clearOperations = () => {
     operations.set(Array.from({ length: Math.pow(get(gridSize), 2) }, () => ""))
     args.set(Array.from({ length: Math.pow(get(gridSize), 2) }, () => []))
 }
-
-// The Font Awesome icon each operation is drawn as. Operations missing here have no
-// rule yet, so they're drawn as the letter itself, keeping the case it was typed in.
-const icons: Record<string, string> = {
-    n: "fa-arrow-up",
-    s: "fa-arrow-down",
-    e: "fa-arrow-right",
-    w: "fa-arrow-left",
-    r: "fa-rotate",
-    b: "fa-burst",
-    d: "fa-skull",
-    g: "fa-seedling",
-}
-
-export const iconFor = (operation: string): string | undefined => icons[operation.toLowerCase()]

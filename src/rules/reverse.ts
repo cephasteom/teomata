@@ -7,7 +7,7 @@ const createReverse = (): CellRule => cell =>
 
 export const reverse: Operation = {
     name: "reverse",
-    about: "Turns a moving cell around to head the opposite way.",
+    about: "Reverse direction of moving cell.",
     params: [],
     rule: createReverse,
 }

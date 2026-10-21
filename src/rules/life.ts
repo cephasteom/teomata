@@ -12,7 +12,7 @@ const createLife = (): CellRule => (cell, _tick, neighbours) => {
 
 export const life: Operation = {
     name: "game of life",
-    about: "A cell here survives with 2 or 3 live neighbours, and an empty square gets a new cell with exactly 3.",
+    about: "Apply game of life rules to cell.",
     params: [],
     rule: createLife,
 }

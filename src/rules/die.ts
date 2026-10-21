@@ -5,7 +5,7 @@ const createDie = (): CellRule => () => ({})
 
 export const die: Operation = {
     name: "die",
-    about: "Removes any cell on the square.",
+    about: "Kill moving cell.",
     params: [],
     rule: createDie,
 }

@@ -7,25 +7,25 @@ const turn = (to: direction): CellRule => cell =>
 
 export const north: Operation = {
     name: "north",
-    about: "Turns a moving cell to head north.",
+    about: "Turn moving cell north.",
     params: [],
     rule: () => turn("n"),
 }
 export const south: Operation = {
     name: "south",
-    about: "Turns a moving cell to head south.",
+    about: "Turn moving cell south.",
     params: [],
     rule: () => turn("s"),
 }
 export const east: Operation = {
     name: "east",
-    about: "Turns a moving cell to head east.",
+    about: "Turn moving cell east.",
     params: [],
     rule: () => turn("e"),
 }
 export const west: Operation = {
     name: "west",
-    about: "Turns a moving cell to head west.",
+    about: "Turn moving cell west.",
     params: [],
     rule: () => turn("w"),
 }

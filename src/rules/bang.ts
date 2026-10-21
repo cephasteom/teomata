@@ -12,9 +12,9 @@ const createBang = (freq = 1, to: direction = "e"): CellRule => (cell, tick) =>
     tick % (freq * get(q)) < 1 ? { value: 1, direction: to } : cell
 
 const bars: Param = {
-    name: "freq",
-    label: "f",
-    about: "Frequency of bangs. 1 is once per cycle and .5 is twice a bar.",
+    name: "n",
+    label: "n",
+    about: "1 is once per cycle, .5 is twice per cycle, etc.",
     fallback: "1",
     accepts: text => text !== "" && Number.isFinite(Number(text)) && Number(text) > 0,
 }
@@ -22,14 +22,14 @@ const bars: Param = {
 const heading: Param = {
     name: "direction",
     label: "dir",
-    about: "Which way the new cell heads: n, s, e or w.",
+    about: "n, s, e or w.",
     fallback: "e",
     accepts: text => isDirection(text.toLowerCase()),
 }
 
 export const bang: Operation = {
     name: "bang",
-    about: "Puts a new cell on the square every freq bars, heading in the direction.",
+    about: "Output a bang every n cycles, in a given direction.",
     params: [bars, heading],
     rule: (freq, to) => createBang(Number(freq), to.toLowerCase() as direction),
 }
