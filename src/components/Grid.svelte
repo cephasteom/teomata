@@ -87,7 +87,7 @@
       if (direction) event.preventDefault()
       if (event.key === 'Enter' || event.key === 'Escape') closeArgs()
       else if (direction) moveArgCursor(direction)
-      else if (/^[a-zA-Z0-9.#-]$/.test(event.key)) typeArg(event.key)
+      else if (/^[a-zA-Z0-9.#~-]$/.test(event.key)) typeArg(event.key)
       else if (event.key === 'Backspace' || event.key === 'Delete') eraseArg()
     } else if (event.key === 'Enter') {
       openArgs($cursor, $selection)
