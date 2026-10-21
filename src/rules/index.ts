@@ -1,25 +1,25 @@
-import type { Operation, GridRule, CellRule } from "./types"
+import type { Operation, GridRule } from "./types"
 import { move } from "./move"
-import { turn } from "./turn"
+import { north, south, east, west } from "./turn"
 import { reverse } from "./reverse"
 import { die } from "./die"
 import { bang } from "./bang"
 import { life } from "./life"
 import { neighbours } from "../lib/utils"
 
-// An operation without params
-const fixed = (rule: CellRule): Operation => ({ params: [], rule: () => rule })
-
 const operations: Record<string, Operation> = {
-    n: fixed(turn("n")),
-    s: fixed(turn("s")),
-    e: fixed(turn("e")),
-    w: fixed(turn("w")),
-    r: fixed(reverse),
-    d: fixed(die),
+    n: north,
+    s: south,
+    e: east,
+    w: west,
+    r: reverse,
+    d: die,
     b: bang,
-    g: fixed(life),
+    g: life,
 }
+
+// Every operation by its letter, for the instructions
+export const instructions = Object.entries(operations).map(([letter, { name, params }]) => ({ letter, name, params }))
 
 // The params an operation takes, which is none for operations without a rule
 export const paramsFor = (letter: string) => operations[letter.toLowerCase()]?.params ?? []

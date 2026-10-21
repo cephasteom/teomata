@@ -28,6 +28,7 @@ const heading: Param = {
 }
 
 export const bang: Operation = {
+    name: "bang",
     params: [bars, heading],
     rule: (freq, to) => createBang(Number(freq), to.toLowerCase() as direction),
 }

@@ -1,6 +1,8 @@
 import { opposite } from "../lib/utils"
-import type { CellRule } from "./types"
+import type { CellRule, Operation } from "./types"
 
 // Turns a moving cell around
-export const reverse: CellRule = cell =>
+const createReverse = (): CellRule => cell =>
     cell.direction ? { ...cell, direction: opposite[cell.direction] } : cell
+
+export const reverse: Operation = { name: "reverse", params: [], rule: createReverse }

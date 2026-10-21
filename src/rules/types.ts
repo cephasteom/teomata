@@ -15,6 +15,8 @@ export interface Param {
 
 // An operation's params, and how to build its rule from their arguments
 export interface Operation {
+    // Shown beside the operation's letter in the instructions
+    name: string
     params: Param[]
     rule: (...args: string[]) => CellRule
 }
