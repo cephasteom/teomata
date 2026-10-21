@@ -1,5 +1,6 @@
 import { isValue } from "../lib/utils"
-import type { CellRule, Operation, Param } from "./types"
+import { createArray } from "./array"
+import type { Operation, Param } from "./types"
 
 // Semitones above C for each note name, and for each triad's notes above its root
 const notes: Record<string, number> = { c: 0, d: 2, e: 4, f: 5, g: 7, a: 9, b: 11 }
@@ -28,13 +29,6 @@ const chordNotes = (root: string, triad: string, inversion: number) => {
     return chord
 }
 
-// Gives a moving cell with any value but 0 the chord's notes as an array,
-// keeping its direction
-const createChord = (chord: number[]): CellRule => cell =>
-    cell.direction && cell.value !== undefined && cell.value !== 0
-        ? { ...cell, value: chord }
-        : cell
-
 const root: Param = {
     name: "root",
     about: "A note from a to g, with an optional # or b, such as c#.",
@@ -58,7 +52,7 @@ const inversion: Param = {
 
 export const chord: Operation = {
     name: "chord",
-    about: "Output an array of a chord's notes when a non zero value arrives.",
+    about: "Output a single note on receiving an integer index, output the whole chord on receiving a bang or non-integer.",
     params: [root, triad, inversion],
-    rule: (root, triad, inversion) => createChord(chordNotes(root, triad, Number(inversion))),
+    rule: (root, triad, inversion) => createArray(chordNotes(root, triad, Number(inversion))),
 }
