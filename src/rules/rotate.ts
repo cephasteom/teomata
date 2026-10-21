@@ -22,7 +22,7 @@ const createRotate = (to: string): CellRule => cell => {
 
 const heading: Param = {
     name: "direction",
-    about: "Rotate cells n, s, e, or w, or use x and y to distribute on each axis.",
+    about: "Rotates cells n, s, e, or w, or flips and evenly distributes them along an axis.",
     fallback: "x",
     accepts: text => isDirection(text.toLowerCase()) || /^[xy]$/i.test(text),
 }

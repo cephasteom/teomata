@@ -7,7 +7,7 @@ import type { GridRule, Operation, Param } from "./types"
 // one square further, as a cell with the original's direction
 // Gives the square for each number with its new cell, wrapping around the
 // edges, and nothing for single values and empty cells
-const spread = ({ value, direction }: Cell, i: number, to: direction, size: number): [number, Cell][] => {
+const spreadLine = ({ value, direction }: Cell, i: number, to: direction, size: number): [number, Cell][] => {
     if (!Array.isArray(value)) return []
     let j = i
     return value.map((n, k) => {
@@ -23,26 +23,26 @@ const heading: Param = {
     accepts: text => isDirection(text.toLowerCase()),
 }
 
-// The spreading needs the whole grid, so it is done by explodeArrays in the
+// The spreading needs the whole grid, so it is done by spreadArrays in the
 // rules chain, and the rule for the square itself leaves the cell alone
-export const explode: Operation = {
-    name: "explode",
+export const spread: Operation = {
+    name: "spread",
     about: "Spread an array's values out in a line in a given direction.",
     params: [heading],
     rule: () => cell => cell,
 }
 
-// Explodes the array value of the cell on every square with a {, spreading
+// Spreads the array value of the cell on every square with a ., putting
 // its numbers out in a line from the square. The cells are read before any
 // spreads, and each number overwrites whatever cell is on its square
 // An erased or invalid direction falls back to the param's default
-export const explodeArrays: GridRule = (cells, size, letters, args) => {
+export const spreadArrays: GridRule = (cells, size, letters, args) => {
     const next = [...cells]
     cells.forEach((cell, i) => {
-        if (letters[i] !== "{") return
+        if (letters[i] !== ".") return
         const given = args[i]?.[0]
         const to = (given !== undefined && heading.accepts(given) ? given : heading.fallback).toLowerCase() as direction
-        spread(cell, i, to, size).forEach(([j, exploded]) => next[j] = exploded)
+        spreadLine(cell, i, to, size).forEach(([j, spread]) => next[j] = spread)
     })
     return next
 }

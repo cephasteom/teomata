@@ -96,7 +96,7 @@
       event.preventDefault()
       // Shift stretches the selection out to the cursor's new square
       moveCursor(direction, event.shiftKey)
-    } else if (/^[a-zA-Z+\-*/%<>=!{]$/.test(event.key)) {
+    } else if (/^[a-zA-Z+\-*/%<>=!.]$/.test(event.key)) {
       // Stop / opening the browser's quick find
       event.preventDefault()
       const before = { operations: $operations, args: $args }
