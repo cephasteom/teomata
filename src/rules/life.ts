@@ -1,9 +1,10 @@
 import type { Value } from "../stores/cells"
+import { toNumber } from "../lib/utils"
 import type { CellRule, Operation } from "./types"
 
-// An array value counts as the average of its numbers
+// An array value counts as the average of its numbers, and a bang as a 1
 const average = (value: Value) =>
-    Array.isArray(value) ? value.reduce((sum, n) => sum + n, 0) / (value.length || 1) : value
+    Array.isArray(value) ? value.reduce((sum, n) => sum + n, 0) / (value.length || 1) : toNumber(value)
 
 // Applies the Game of Life rules to the square
 // A cell on the square survives with two or three live neighbours, and an

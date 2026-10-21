@@ -1,4 +1,4 @@
-import type { direction } from "../stores/cells"
+import type { Bang, direction } from "../stores/cells"
 
 const offsets: Record<direction, [number, number]> = {
     n: [0, -1],
@@ -16,6 +16,11 @@ export const isDirection = (letter: string): letter is direction => letter in of
 export const MAX_VALUE = 127
 
 export const isValue = (text: string) => /^-?\d+$/.test(text)
+
+export const BANG: Bang = 'b'
+
+// A bang counts as a 1 wherever a number is needed
+export const toNumber = (value: number | Bang) => value === BANG ? 1 : value
 
 export const randomValue = () => Math.floor(Math.random() * (MAX_VALUE + 1))
 

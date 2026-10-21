@@ -5,8 +5,10 @@ import { appliedOperations } from "./operations"
 import { randomDirection, randomValue } from "../lib/utils"
 
 export type direction = 'n' | 's' | 'e' | 'w' 
-// A number, usually a whole MIDI value from 0 to 127, or an array of them
-export type Value = number | number[]
+// A bang, which for now counts as a 1 wherever a number is needed
+export type Bang = 'b'
+// A number, usually a whole MIDI value from 0 to 127, a bang, or an array of numbers
+export type Value = number | Bang | number[]
 export interface Cell {
     // A cell without a value is empty
     value?: Value

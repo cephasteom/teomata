@@ -1,15 +1,15 @@
 import { get } from "svelte/store"
 import type { direction } from "../stores/cells"
 import { q } from "../stores/global"
-import { isDirection } from "../lib/utils"
+import { BANG, isDirection } from "../lib/utils"
 import type { Operation, CellRule, Param } from "./types"
 
-// Puts a new cell heading in the given direction on the square every freq bars
+// Puts a new cell with a bang heading in the given direction on the square every freq bars
 // The next move carries it onto the neighbouring square like any other cell
 // freq is in bars, so 1 is once a bar and .5 is twice a bar
 // Fires on the first tick at or after each trigger, and at most once a tick
 const createBang = (freq = 1, to: direction = "e"): CellRule => (cell, tick) =>
-    tick % (freq * get(q)) < 1 ? { value: 1, direction: to } : cell
+    tick % (freq * get(q)) < 1 ? { value: BANG, direction: to } : cell
 
 const bars: Param = {
     name: "n",
@@ -27,7 +27,7 @@ const heading: Param = {
 
 export const bang: Operation = {
     name: "bang",
-    about: "Output a 1 every n cycles, in a given direction.",
+    about: "Output a bang every n cycles, in a given direction.",
     params: [bars, heading],
     rule: (freq, to) => createBang(Number(freq), to.toLowerCase() as direction),
 }

@@ -1,6 +1,5 @@
 import type { Operation, GridRule, CellRule } from "./types"
 import { move } from "./move"
-import { zero } from "./zero"
 import { north, south, east, west } from "./turn"
 import { reverse } from "./reverse"
 import { die } from "./die"
@@ -100,5 +99,4 @@ export const rules = [
     move,
     explodeArrays,
     applyRules,
-    zero,
 ]
