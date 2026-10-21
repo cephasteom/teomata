@@ -6,7 +6,7 @@ import { reverse } from "./reverse"
 import { die } from "./die"
 import { bang } from "./bang"
 import { life } from "./life"
-import { integer } from "./integer"
+import { value } from "./value"
 import { array } from "./array"
 import { chord } from "./chord"
 import { explode, explodeArrays } from "./explode"
@@ -22,7 +22,7 @@ const operations: Record<string, Operation> = {
     d: die,
     b: bang,
     g: life,
-    i: integer,
+    v: value,
     a: array,
     c: chord,
     "+": add,
