@@ -85,7 +85,7 @@
 
 <svelte:window {onkeydown} />
 
-<div class="grid" class:editing={$editing !== null} style:--size={$gridSize}>
+<div class="grid" class:editing={$editing !== null}>
   {#each $cells as cell, i (i)}
     {@const arg = $argCells.get(i)}
     <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->

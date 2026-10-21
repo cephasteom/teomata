@@ -11,12 +11,23 @@
   --grid-width: min(100dvw - 2 * var(--gutter), 100dvh - 2 * var(--gutter));
   /* Gridline thickness, shared by the grid and the controls */
   --line: 0.5px;
+  /* One of the grid's squares: its width less the border and gaps, shared
+     out. --size, the squares per side, is set on the root by App */
+  --square: calc((var(--grid-width) - (var(--size) + 1) * var(--line)) / var(--size));
+  /* Icons scale with the squares on small screens, up to a fixed size, and
+     are the same size in the grid, the controls and the sidebar */
+  --icon-max: 1.25rem;
+  --icon-size: min(var(--square) * 0.45, var(--icon-max));
   color-scheme: dark;
 }
 
 body {
   background: var(--page-bg);
   color: var(--page-text);
+}
+
+.fa-solid {
+  font-size: var(--icon-size);
 }
 
 button {

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { toggle } from "../scheduler";
-  import { isPlaying, gridSize } from "../stores/global";
+  import { isPlaying } from "../stores/global";
   import { clearCells, randomizeCells } from "../stores/cells";
   import { clearOperations } from "../stores/operations";
 
@@ -14,7 +14,7 @@
 </script>
 
 <!-- A column of grid squares, one per button, sitting a square's width to the grid's left -->
-<div class="controls" style:--size={$gridSize} role="toolbar" aria-label="Controls" aria-orientation="vertical"
+<div class="controls" role="toolbar" aria-label="Controls" aria-orientation="vertical"
   {onfocusin} onfocusout={() => focused = null}
 >
   <button onclick={toggle} title={$isPlaying ? 'Stop' : 'Play'} aria-label={$isPlaying ? 'Stop' : 'Play'}>
@@ -33,8 +33,6 @@
 
 <style>
   .controls {
-    /* One of the grid's squares: its width less the border and gaps, shared out */
-    --square: calc((var(--grid-width) - (var(--size) + 1) * var(--line)) / var(--size));
     position: absolute;
     top: 0;
     right: calc(100% + var(--square));
@@ -64,7 +62,6 @@
     place-items: center;
     border: none;
     padding: 0;
-    font-size: calc(var(--square) * 0.45);
     line-height: 1;
     background: var(--cell-empty);
     color: var(--cell-alive);

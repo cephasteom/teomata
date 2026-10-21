@@ -2,7 +2,12 @@
   import Controls from "./components/Controls.svelte";
   import Grid from "./components/Grid.svelte";
   import Sidebar from "./components/Sidebar.svelte";
-  import { showControls } from "./stores/global";
+  import { gridSize, showControls } from "./stores/global";
+
+  // On the root, so the grid, the controls and the sidebar's icons can all size against it
+  $effect(() => {
+    document.documentElement.style.setProperty('--size', String($gridSize))
+  })
 </script>
 
 <Sidebar />
