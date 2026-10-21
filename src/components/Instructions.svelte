@@ -13,17 +13,17 @@
 
 <!-- The operations by letter, sitting a square's width to the grid's right -->
 <dl class="instructions default-size" aria-label="Operations">
-  {#each shown as { letter, name, about, params } (letter)}
+  {#each shown as { letter, name, about, params, rest } (letter)}
     <div class="operation">
       <dt>{letter}</dt>
       <dd>
-        {name}{#if params.length}({#each params as param, k (param.name)}{#if k}, {/if}{param.name}{/each}){/if}
+        {name}{#if params.length || rest}({#each params as param, k (param.name)}{#if k}, {/if}{param.name}{/each}{#if rest}{#if params.length}, {/if}...{rest.name}{/if}){/if}
       </dd>
       <!-- The active operation explains itself and its params underneath -->
       {#if matching.length}
         <dd class="about">
           <p>{about}</p>
-          {#each params as param (param.name)}
+          {#each rest ? [...params, rest] : params as param (param.name)}
             <p><span class="param">{param.name}</span>: {param.about}</p>
           {/each}
         </dd>

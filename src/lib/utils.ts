@@ -11,7 +11,7 @@ export const opposite: Record<direction, direction> = { n: 's', s: 'n', e: 'w', 
 
 export const isDirection = (letter: string): letter is direction => letter in offsets
 
-// Cells hold a whole number, which can go past MIDI's 0 to 127, or below 0
+// Cells hold a number, usually whole, which can go past MIDI's 0 to 127, or below 0
 // Random cells start inside that range
 export const MAX_VALUE = 127
 

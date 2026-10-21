@@ -18,5 +18,7 @@ export interface Operation {
     // Shown under the operation in the instructions when it is the only one shown
     about: string
     params: Param[]
+    // A param that repeats after the others, filling the rest of the row
+    rest?: Param
     rule: (...args: string[]) => CellRule
 }

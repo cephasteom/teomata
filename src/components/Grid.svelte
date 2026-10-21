@@ -101,7 +101,7 @@
       event.preventDefault()
       setOperations($selection, event.key)
       // A typed operation opens its arguments, when it has any
-      if (paramsFor(event.key).length) openArgs($cursor, $selection)
+      if (paramsFor(event.key, $gridSize).length) openArgs($cursor, $selection)
     } else if (event.key === 'Backspace' || event.key === 'Delete') {
       setOperations($selection, "")
     }

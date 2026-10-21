@@ -13,15 +13,15 @@ export const editing = writable<number | null>(null)
 // off the end, so they always fit to its right
 export const shownSquare = derived([editing, operations, gridSize], ([$editing, $operations, $size]) => {
     if ($editing === null) return null
-    const count = paramsFor($operations[$editing]).length
+    const count = paramsFor($operations[$editing], $size).length
     return $editing - Math.max(0, $editing % $size + count - ($size - 1))
 })
 
 // The squares the open operation's arguments show in, in order, running left
 // to right from the square after the shown operation
-export const argSquares = derived([editing, shownSquare, operations], ([$editing, $shown, $operations]) => {
+export const argSquares = derived([editing, shownSquare, operations, gridSize], ([$editing, $shown, $operations, $size]) => {
     if ($editing === null || $shown === null) return []
-    return paramsFor($operations[$editing]).map((_, k) => $shown + k + 1)
+    return paramsFor($operations[$editing], $size).map((_, k) => $shown + k + 1)
 })
 
 type Area = { x1: number, x2: number, y1: number, y2: number }
@@ -36,10 +36,10 @@ export const openArea = derived([shownSquare, argSquares, gridSize], ([$shown, $
 })
 
 // What each argument square shows, keyed by square
-export const argCells = derived([editing, argSquares, operations, args], ([$editing, $squares, $operations, $args]) => {
+export const argCells = derived([editing, argSquares, operations, args, gridSize], ([$editing, $squares, $operations, $args, $size]) => {
     const shown = new Map<number, { text: string, valid: boolean }>()
     if ($editing === null) return shown
-    const params = paramsFor($operations[$editing])
+    const params = paramsFor($operations[$editing], $size)
     $squares.forEach((square, k) => {
         const text = $args[$editing][k] ?? params[k].fallback
         shown.set(square, { text, valid: params[k].accepts(text) })
@@ -69,9 +69,10 @@ export const openArgs = (square: number, selected: Iterable<number> = []) => {
     targets = [square, ...[...selected].filter(i =>
         i !== square && all[i].toLowerCase() === operation.toLowerCase()
     )]
+    const size = get(gridSize)
     args.update(args => {
         const next = [...args]
-        for (const i of targets) next[i] = argsFor(operation, args[i])
+        for (const i of targets) next[i] = argsFor(operation, size, args[i])
         return next
     })
     selectedFrom = get(anchor)
