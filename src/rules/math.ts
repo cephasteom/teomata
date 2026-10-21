@@ -63,6 +63,28 @@ const alone: Record<string, Apply> = {
 
 const operators = { ...withN, ...alone }
 
+// Keeps a count from 0, giving each moving cell with any value but 0 that
+// arrives the count one on from last time, up or down by the given step.
+// Once the count would pass n it goes back to 0, and with no n it never does
+const createCount = (by: 1 | -1) => (end?: number): CellRule => {
+    let count = 0
+    return cell => {
+        if (!cell.direction || cell.value === undefined || cell.value === 0) return cell
+        const next = count + by
+        count = end !== undefined && (by > 0 ? next > end : next < end) ? 0 : next
+        return { ...cell, value: count }
+    }
+}
+
+// The counting operators, which remember their count rather than working on
+// the value, so each square's rule keeps its own
+const counters: Record<string, (end?: number) => CellRule> = {
+    "++": createCount(1),
+    "--": createCount(-1),
+}
+
+const isOperator = (text: string) => text in operators || text in counters
+
 // Works out a moving cell's new value from its old one, keeping its direction
 // An array value has the sum done to each of its numbers, and a bang counts
 // as a 1. The results aren't rounded, or kept to MIDI's range, but a number
@@ -83,14 +105,15 @@ const operator: Param = {
     about: "+, -, *, /, %, ^ (also pow), & and |, atan2, min, max and hypot take the value and n. "
         + "~, abs, sign, floor, ceil, round, trunc, fround, sqrt, cbrt, exp, expm1, log, log1p, log2, log10, "
         + "sin, cos, tan, asin, acos, atan, sinh, cosh, tanh, asinh, acosh, atanh and clz32 "
-        + "take the value alone. Ignores case.",
+        + "take the value alone. ++ and -- count up or down by 1 from 0 for each value but 0 that arrives, "
+        + "giving the count, and go back to 0 once they would pass n. Ignores case.",
     fallback: "+",
-    accepts: text => text.toLowerCase() in operators,
+    accepts: text => isOperator(text.toLowerCase()),
 }
 
 const n: Param = {
     name: "n",
-    about: "Any number, for the operators that take one. Left empty, they leave the value alone.",
+    about: "Any number, for the operators that take one. Left empty, they leave the value alone, and ++ and -- count on forever.",
     fallback: "",
     accepts: text => text === "" || isNumber(text),
 }
@@ -101,5 +124,9 @@ export const math: Operation = {
     params: [operator, n],
     // n only shows for the operators that take it
     shown: ([operator = ""]) => operator.toLowerCase() in alone ? 1 : 2,
-    rule: (operator, n) => createMath(operators[operator.toLowerCase()], isNumber(n) ? Number(n) : undefined),
+    rule: (operator, n) => {
+        const name = operator.toLowerCase()
+        const given = isNumber(n) ? Number(n) : undefined
+        return name in counters ? counters[name](given) : createMath(operators[name], given)
+    },
 }

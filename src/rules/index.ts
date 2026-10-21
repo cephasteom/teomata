@@ -4,10 +4,9 @@ import { rotate } from "./rotate"
 import { die } from "./die"
 import { bang } from "./bang"
 import { value } from "./value"
-import { increment } from "./increment"
 import { array } from "./array"
 import { chord } from "./chord"
-import { spread, spreadArrays } from "./spread"
+import { explode, explodeArrays } from "./explode"
 import { math } from "./math"
 import { logic } from "./logic"
 import { isLetter } from "../lib/utils"
@@ -17,12 +16,11 @@ const operations: Record<string, Operation> = {
     d: die,
     b: bang,
     v: value,
-    i: increment,
     a: array,
     c: chord,
     m: math,
     l: logic,
-    ".": spread,
+    x: explode,
 }
 
 // Every operation by its letter, for the instructions. The symbols come
@@ -85,6 +83,6 @@ const applyRules: GridRule = (cells, size, letters, args, tick) => {
 // Called in scheduler.ts
 export const rules = [
     move,
-    spreadArrays,
+    explodeArrays,
     applyRules,
 ]
