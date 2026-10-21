@@ -15,7 +15,7 @@ const isNumber = (text: string) => text !== "" && Number.isFinite(Number(text))
 const arithmetic = (name: string, about: string, fallback: string, apply: (value: number, by: number) => number, accepts = isNumber): Operation => ({
     name,
     about,
-    params: [{ name: "n", label: "n", about: "Any number.", fallback, accepts }],
+    params: [{ name: "n", about: "Any number.", fallback, accepts }],
     rule: by => createArithmetic(value => apply(value, Number(by))),
 })
 

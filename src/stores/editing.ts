@@ -8,37 +8,31 @@ import { argsFor, paramsFor } from "../rules"
 // The square whose operation has its arguments open for editing, or null
 export const editing = writable<number | null>(null)
 
-// The squares the open operation's arguments show in, in order. They run out
-// from the operation's square, downwards, or upwards when the column runs out
-// of room, so the first argument is always next to the operation
-export const argSquares = derived([editing, operations, gridSize], ([$editing, $operations, $size]) => {
-    if ($editing === null) return []
+// The square the open operation shows in while its arguments are open. It is
+// its own square, or moved left along the row when its arguments would run
+// off the end, so they always fit to its right
+export const shownSquare = derived([editing, operations, gridSize], ([$editing, $operations, $size]) => {
+    if ($editing === null) return null
     const count = paramsFor($operations[$editing]).length
-    const way = Math.floor($editing / $size) + count < $size ? $size : -$size
-    return Array.from({ length: count }, (_, k) => $editing + way * (k + 1))
+    return $editing - Math.max(0, $editing % $size + count - ($size - 1))
 })
 
-// The squares the arguments' labels show in, one beside each argument. They
-// sit to the left, like the controls' labels, or to the right when the
-// operation is in the first column, so they stay on the grid
-export const labelSquares = derived([editing, argSquares, gridSize], ([$editing, $squares, $size]) => {
-    if ($editing === null) return []
-    const side = $editing % $size === 0 ? 1 : -1
-    return $squares.map(square => square + side)
+// The squares the open operation's arguments show in, in order, running left
+// to right from the square after the shown operation
+export const argSquares = derived([editing, shownSquare, operations], ([$editing, $shown, $operations]) => {
+    if ($editing === null || $shown === null) return []
+    return paramsFor($operations[$editing]).map((_, k) => $shown + k + 1)
 })
 
 type Area = { x1: number, x2: number, y1: number, y2: number }
 
-// The open columns of squares as inclusive rectangles: the operation's with its
-// arguments', and the labels' beside them. Empty when no arguments are open
-export const openAreas = derived([editing, argSquares, labelSquares, gridSize], ([$editing, $squares, $labels, $size]) => {
-    if ($editing === null) return []
-    const column = (squares: number[]): Area => {
-        const rows = squares.map(square => Math.floor(square / $size))
-        const x = squares[0] % $size
-        return { x1: x, x2: x, y1: Math.min(...rows), y2: Math.max(...rows) }
-    }
-    return $labels.length ? [column([$editing, ...$squares]), column($labels)] : [column([$editing])]
+// The open row of squares, the operation's with its arguments', as an
+// inclusive rectangle. Null when no arguments are open
+export const openArea = derived([shownSquare, argSquares, gridSize], ([$shown, $squares, $size]): Area | null => {
+    if ($shown === null) return null
+    const columns = [$shown, ...$squares].map(square => square % $size)
+    const y = Math.floor($shown / $size)
+    return { x1: Math.min(...columns), x2: Math.max(...columns), y1: y, y2: y }
 })
 
 // What each argument square shows, keyed by square
@@ -50,15 +44,6 @@ export const argCells = derived([editing, argSquares, operations, args], ([$edit
         const text = $args[$editing][k] ?? params[k].fallback
         shown.set(square, { text, valid: params[k].accepts(text) })
     })
-    return shown
-})
-
-// What each label square shows, keyed by square
-export const labelCells = derived([editing, labelSquares, operations], ([$editing, $labels, $operations]) => {
-    const shown = new Map<number, string>()
-    if ($editing === null) return shown
-    const params = paramsFor($operations[$editing])
-    $labels.forEach((square, k) => shown.set(square, params[k].label))
     return shown
 })
 
@@ -105,27 +90,25 @@ export const closeArgs = () => {
 }
 
 // Puts the cursor on one of the arguments, or closes the arguments when the
-// square is one of the hidden ones. A label puts it on its argument, and the
-// operation's own square leaves the cursor where it is
+// square is one of the hidden ones. The square the operation shows in leaves
+// the cursor where it is
 export const placeArgCursor = (square: number) => {
-    const label = get(labelSquares).indexOf(square)
-    if (label >= 0) square = get(argSquares)[label]
     if (get(argSquares).includes(square)) {
         placeCursor(square)
         fresh = true
-    } else if (square !== get(editing)) {
+    } else if (square !== get(shownSquare)) {
         closeArgs()
         placeCursor(square)
     }
 }
 
-// Steps the cursor along the arguments. They all sit in one column, so only
-// north and south go anywhere, and the cursor wraps around at either end
+// Steps the cursor along the arguments. They all sit in one row, so only
+// east and west go anywhere, and the cursor wraps around at either end
 export const moveArgCursor = (direction: direction) => {
-    if (get(editing) === null || (direction !== "n" && direction !== "s")) return
-    const open = [...get(argSquares)].sort((a, b) => a - b)
+    if (get(editing) === null || (direction !== "e" && direction !== "w")) return
+    const open = get(argSquares)
     if (!open.length) return
-    const at = open.indexOf(get(cursor)) + (direction === "s" ? 1 : -1)
+    const at = open.indexOf(get(cursor)) + (direction === "e" ? 1 : -1)
     placeArgCursor(open[(at + open.length) % open.length])
 }
 

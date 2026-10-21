@@ -13,7 +13,6 @@ const createBang = (freq = 1, to: direction = "e"): CellRule => (cell, tick) =>
 
 const bars: Param = {
     name: "n",
-    label: "n",
     about: "1 is once per cycle, .5 is twice per cycle, etc.",
     fallback: "1",
     accepts: text => text !== "" && Number.isFinite(Number(text)) && Number(text) > 0,
@@ -21,7 +20,6 @@ const bars: Param = {
 
 const heading: Param = {
     name: "direction",
-    label: "dir",
     about: "n, s, e or w.",
     fallback: "e",
     accepts: text => isDirection(text.toLowerCase()),

@@ -9,8 +9,9 @@
     operations, setOperations, moveOperations, copyOperations, pasteOperations,
   } from "../stores/operations";
   import {
-    editing, argCells, labelCells, openAreas, openArgs, closeArgs, placeArgCursor, moveArgCursor, typeArg, eraseArg,
+    editing, shownSquare, argCells, openArea, openArgs, closeArgs, placeArgCursor, moveArgCursor, typeArg, eraseArg,
   } from "../stores/editing";
+  import { paramsFor } from "../rules";
 
   const keys: Record<string, direction> = {
     ArrowUp: 'n',
@@ -99,6 +100,8 @@
       // Stop / opening the browser's quick find
       event.preventDefault()
       setOperations($selection, event.key)
+      // A typed operation opens its arguments, when it has any
+      if (paramsFor(event.key).length) openArgs($cursor, $selection)
     } else if (event.key === 'Backspace' || event.key === 'Delete') {
       setOperations($selection, "")
     }
@@ -115,32 +118,31 @@
 >
   {#each $cells as cell, i (i)}
     {@const arg = $argCells.get(i)}
-    {@const label = $labelCells.get(i)}
     <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
     <div
       class="cell"
-      class:alive={cell.value !== undefined && !arg && !label}
+      class:alive={cell.value !== undefined && !arg}
       class:cursor={i === $cursor}
-      class:hidden={$editing !== null && i !== $editing && !arg && !label}
+      class:hidden={$editing !== null && i !== $shownSquare && !arg}
       onclick={(event) => $editing !== null ? placeArgCursor(i) : placeCursor(i, event.shiftKey)}
     >
       {#if arg}
         <span class="arg" class:invalid={!arg.valid} style:--length={Math.max(1, arg.text.length)}>{arg.text}</span>
-      {:else if label}
-        <span class="label">{label}</span>
+      {:else if $editing !== null && i === $shownSquare}
+        <span class="letter">{$operations[$editing]}</span>
       {:else if $operations[i]}
         <!-- A cell passing over its square inverts the letter -->
         <span class="letter">{$operations[i]}</span>
       {/if}
     </div>
   {/each}
-  {#each $openAreas as area}
+  {#if $openArea}
     <div
       class="backdrop"
-      style:grid-column="{area.x1 + 1} / {area.x2 + 2}"
-      style:grid-row="{area.y1 + 1} / {area.y2 + 2}"
+      style:grid-column="{$openArea.x1 + 1} / {$openArea.x2 + 2}"
+      style:grid-row="{$openArea.y1 + 1} / {$openArea.y2 + 2}"
     ></div>
-  {/each}
+  {/if}
   <div
     class="selection"
     style:grid-column="{$bounds.x1 + 1} / {$bounds.x2 + 2}"
@@ -199,9 +201,9 @@
     background: var(--cell-cursor);
   }
 
-  /* While an operation's arguments are open, only its square, theirs and their
-     labels' show. The rest go, gridlines and all, and the backdrops put the
-     gridlines back behind just the open squares. It comes before the selection, so the
+  /* While an operation's arguments are open, only its square and theirs show.
+     The rest go, gridlines and all, and the backdrop puts the gridlines back
+     behind just the open squares. It comes before the selection, so the
      selection still colours the lines around the cursor */
   .editing {
     background: none;
@@ -216,10 +218,9 @@
     visibility: hidden;
   }
 
-  /* Arguments, their labels and operations look like the controls' number
-     squares and the instructions */
+  /* Arguments and operations look like the controls' number squares and the
+     instructions */
   .arg,
-  .label,
   .letter {
     font-family: ui-monospace, monospace;
     font-size: var(--text-size);

@@ -7,7 +7,6 @@ const createInteger = (value = 1): CellRule => cell =>
 
 const value: Param = {
     name: "value",
-    label: "val",
     about: "Any whole number.",
     fallback: "1",
     accepts: isValue,
