@@ -1,5 +1,5 @@
-import type { direction } from "../stores/cells"
 import { isDirection, opposite } from "../lib/utils"
+import type { direction } from "../stores/cells"
 import type { CellRule, Operation, Param } from "./types"
 
 // The axis each direction travels along
@@ -22,7 +22,7 @@ const createRotate = (to: string): CellRule => cell => {
 
 const heading: Param = {
     name: "direction",
-    about: "n, s, e or w to face that way. x or y to reverse along that axis, or turn either way along it at random when crossing it.",
+    about: "Rotate cells n, s, e, or w, or use x and y to distribute on each axis.",
     fallback: "x",
     accepts: text => isDirection(text.toLowerCase()) || /^[xy]$/i.test(text),
 }
