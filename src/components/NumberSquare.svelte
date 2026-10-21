@@ -29,15 +29,16 @@
     typed = $value
   }
 
-  // Enter commits the value and Escape drops what was typed, both leaving the square
+  // Enter commits the value and stays in the square, Escape drops what was typed and leaves it
   const onkeydown = (event: KeyboardEvent) => {
     const input = event.target as HTMLInputElement
+    if (event.key === 'Enter') commit()
     if (event.key === 'Escape') {
       // Straight on the input, so leaving it doesn't fire a change with what was typed
       input.value = String($value)
       typed = $value
+      input.blur()
     }
-    if (event.key === 'Enter' || event.key === 'Escape') input.blur()
   }
 </script>
 
