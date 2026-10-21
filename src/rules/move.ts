@@ -1,6 +1,6 @@
 import type { Cell } from "../stores/cells"
 import { opposite, step } from "../lib/utils"
-import type { GridRule } from "./rule"
+import type { GridRule } from "./types"
 
 // Moves every cell one step in its direction
 // Cells wrap around the boundary of the grid

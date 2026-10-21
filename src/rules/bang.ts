@@ -1,7 +1,7 @@
 import type { direction } from "../stores/cells"
 import { ticksPerBar } from "../stores/global"
 import { isDirection } from "../lib/utils"
-import type { Operation, CellRule, Param } from "./rule"
+import type { Operation, CellRule, Param } from "./types"
 
 // Puts a new cell heading in the given direction on the square every freq bars
 // The next move carries it onto the neighbouring square like any other cell

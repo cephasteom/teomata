@@ -1,4 +1,4 @@
-import type { CellRule } from "./rule"
+import type { CellRule } from "./types"
 
 // Applies the Game of Life rules to the square
 // A cell on the square survives with two or three live neighbours, and an

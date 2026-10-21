@@ -1,5 +1,5 @@
 import { opposite } from "../lib/utils"
-import type { CellRule } from "./rule"
+import type { CellRule } from "./types"
 
 // Turns a moving cell around
 export const reverse: CellRule = cell =>

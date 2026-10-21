@@ -1,6 +1,6 @@
 import { writable, get } from "svelte/store"
 import { gridSize } from "./global"
-import { rules } from "./rules"
+import { rules } from "../rules"
 import { operations, args } from "./operations"
 import { randomDirection } from "../lib/utils"
 
@@ -26,9 +26,9 @@ export const cells = writable<Cell[]>(randomGrid())
 // Tick is the number of ticks since the transport started
 export const updateCells = (tick: number) => {
     const size = get(gridSize)
-    const squares = get(operations)
+    const letters = get(operations) // symbols representing operations
     const given = get(args)
-    cells.update(cells => get(rules).reduce((cells, rule) => rule(cells, size, squares, given, tick), cells))
+    cells.update(cells => rules.reduce((cells, rule) => rule(cells, size, letters, given, tick), cells))
 }
 
 // Empties every cell on the grid

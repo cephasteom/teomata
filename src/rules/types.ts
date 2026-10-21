@@ -16,6 +16,3 @@ export interface Operation {
     params: Param[]
     rule: (...args: string[]) => CellRule
 }
-
-// An operation without params
-export const fixed = (rule: CellRule): Operation => ({ params: [], rule: () => rule })
