@@ -43,3 +43,5 @@ export const resize = <T>(values: T[], from: number, to: number, empty: () => T)
         const [x, y] = [i % to, Math.floor(i / to)]
         return x < from && y < from ? values[y * from + x] : empty()
     })
+
+export const isLetter = (key: string) => /^[a-z]$/.test(key)

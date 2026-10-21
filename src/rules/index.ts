@@ -1,7 +1,6 @@
 import type { Operation, GridRule, CellRule } from "./types"
 import { move } from "./move"
-import { north, south, east, west } from "./turn"
-import { reverse } from "./reverse"
+import { rotate } from "./rotate"
 import { die } from "./die"
 import { bang } from "./bang"
 import { value } from "./value"
@@ -10,13 +9,10 @@ import { array } from "./array"
 import { chord } from "./chord"
 import { explode, explodeArrays } from "./explode"
 import { add, subtract, multiply, divide, modulo, lessThan, greaterThan, equal, notEqual } from "./arithmetic"
+import { isLetter } from "../lib/utils"
 
 const operations: Record<string, Operation> = {
-    n: north,
-    s: south,
-    e: east,
-    w: west,
-    r: reverse,
+    r: rotate,
     d: die,
     b: bang,
     v: value,
@@ -37,7 +33,6 @@ const operations: Record<string, Operation> = {
 
 // Every operation by its letter, for the instructions. The arithmetic comes
 // first, in the table's order, then the letters alphabetically
-const isLetter = (key: string) => /^[a-z]$/.test(key)
 export const instructions = Object.entries(operations)
     .sort(([a], [b]) => Number(isLetter(a)) - Number(isLetter(b)) || (isLetter(a) ? a.localeCompare(b) : 0))
     .map(([letter, { name, about, params, rest }]) => ({ letter, name, about, params, rest }))
