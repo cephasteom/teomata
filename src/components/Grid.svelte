@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { cells, type direction } from "../stores/cells";
+  import { cells, type direction, type Value } from "../stores/cells";
   import { gridSize } from "../stores/global";
   import {
     gridFocused, cursor, bounds, selection, placeCursor, moveCursor, selectAll, selectionCanMove, moveSelection,
@@ -37,7 +37,7 @@
 
   // Values too long for their square are cut short and end in ..
   const MAX_SHOWN = 4
-  const shown = (value: number) => {
+  const shown = (value: Value) => {
     const text = String(value)
     return text.length > MAX_SHOWN ? `${text.slice(0, MAX_SHOWN - 2)}..` : text
   }

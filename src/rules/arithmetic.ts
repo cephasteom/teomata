@@ -1,10 +1,12 @@
 import type { CellRule, Operation } from "./types"
 
 // Works out a moving cell's new value from its old one, keeping its direction
-// The result rounds down to a whole number, and isn't kept to MIDI's range
+// An array value has the sum done to each of its numbers. Each result rounds
+// down to a whole number, and isn't kept to MIDI's range
 const createArithmetic = (apply: (value: number) => number): CellRule => cell => {
     if (!cell.direction || cell.value === undefined) return cell
-    return { ...cell, value: Math.floor(apply(cell.value)) }
+    const each = (value: number) => Math.floor(apply(value))
+    return { ...cell, value: Array.isArray(cell.value) ? cell.value.map(each) : each(cell.value) }
 }
 
 const isNumber = (text: string) => text !== "" && Number.isFinite(Number(text))
