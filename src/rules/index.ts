@@ -8,6 +8,7 @@ import { bang } from "./bang"
 import { life } from "./life"
 import { integer } from "./integer"
 import { array } from "./array"
+import { chord } from "./chord"
 import { explode, explodeArrays } from "./explode"
 import { add, subtract, multiply, divide, modulo, lessThan, greaterThan, equal, notEqual } from "./arithmetic"
 import { neighbours } from "../lib/utils"
@@ -23,6 +24,7 @@ const operations: Record<string, Operation> = {
     g: life,
     i: integer,
     a: array,
+    c: chord,
     "+": add,
     "-": subtract,
     "*": multiply,
