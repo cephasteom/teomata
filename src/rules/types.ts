@@ -20,5 +20,8 @@ export interface Operation {
     params: Param[]
     // A param that repeats after the others, filling the rest of the row
     rest?: Param
+    // How many of the params show while the arguments are open, given what
+    // they are now. All of them show when it's left out
+    shown?: (args: string[]) => number
     rule: (...args: string[]) => CellRule
 }

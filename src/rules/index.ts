@@ -8,7 +8,8 @@ import { increment } from "./increment"
 import { array } from "./array"
 import { chord } from "./chord"
 import { spread, spreadArrays } from "./spread"
-import { add, subtract, multiply, divide, modulo, lessThan, greaterThan, equal, notEqual } from "./arithmetic"
+import { math } from "./math"
+import { lessThan, greaterThan, equal, notEqual } from "./compare"
 import { isLetter } from "../lib/utils"
 
 const operations: Record<string, Operation> = {
@@ -19,11 +20,7 @@ const operations: Record<string, Operation> = {
     i: increment,
     a: array,
     c: chord,
-    "+": add,
-    "-": subtract,
-    "*": multiply,
-    "/": divide,
-    "%": modulo,
+    m: math,
     "<": lessThan,
     ">": greaterThan,
     "=": equal,
@@ -31,7 +28,7 @@ const operations: Record<string, Operation> = {
     ".": spread,
 }
 
-// Every operation by its letter, for the instructions. The arithmetic comes
+// Every operation by its letter, for the instructions. The symbols come
 // first, in the table's order, then the letters alphabetically
 export const instructions = Object.entries(operations)
     .sort(([a], [b]) => Number(isLetter(a)) - Number(isLetter(b)) || (isLetter(a) ? a.localeCompare(b) : 0))
@@ -39,12 +36,14 @@ export const instructions = Object.entries(operations)
 
 // The params an operation takes on a grid of the given size, which is none for
 // operations without a rule. A rest param repeats after the others to fill
-// the rest of the row beside the operation
-export const paramsFor = (letter: string, size: number) => {
+// the rest of the row beside the operation. Given the arguments, only the
+// params the operation shows for them are kept
+export const paramsFor = (letter: string, size: number, given?: string[]) => {
     const operation = operations[letter.toLowerCase()]
     if (!operation) return []
-    const { params, rest } = operation
-    return rest ? [...params, ...Array(Math.max(0, size - 1 - params.length)).fill(rest)] : params
+    const { params, rest, shown } = operation
+    const all = rest ? [...params, ...Array(Math.max(0, size - 1 - params.length)).fill(rest)] : params
+    return given && shown ? all.slice(0, shown(given)) : all
 }
 
 // The given arguments for an operation, with defaults standing in for any

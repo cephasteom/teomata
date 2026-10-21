@@ -87,7 +87,11 @@
       if (direction) event.preventDefault()
       if (event.key === 'Enter' || event.key === 'Escape') closeArgs()
       else if (direction) moveArgCursor(direction)
-      else if (/^[a-zA-Z0-9.#~-]$/.test(event.key)) typeArg(event.key)
+      else if (/^[a-zA-Z0-9.#~+\-*/%^]$/.test(event.key)) {
+        // Stop / opening the browser's quick find
+        event.preventDefault()
+        typeArg(event.key)
+      }
       else if (event.key === 'Backspace' || event.key === 'Delete') eraseArg()
     } else if (event.key === 'Enter') {
       openArgs($cursor, $selection)
@@ -96,8 +100,7 @@
       event.preventDefault()
       // Shift stretches the selection out to the cursor's new square
       moveCursor(direction, event.shiftKey)
-    } else if (/^[a-zA-Z+\-*/%<>=!.]$/.test(event.key)) {
-      // Stop / opening the browser's quick find
+    } else if (/^[a-zA-Z<>=!.]$/.test(event.key)) {
       event.preventDefault()
       const before = { operations: $operations, args: $args }
       setOperations($selection, event.key)
