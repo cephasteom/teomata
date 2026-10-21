@@ -11,6 +11,14 @@ export const opposite: Record<direction, direction> = { n: 's', s: 'n', e: 'w', 
 
 export const isDirection = (letter: string): letter is direction => letter in offsets
 
+// Cells hold a whole number, which can go past MIDI's 0 to 127, or below 0
+// Random cells start inside that range
+export const MAX_VALUE = 127
+
+export const isValue = (text: string) => /^-?\d+$/.test(text)
+
+export const randomValue = () => Math.floor(Math.random() * (MAX_VALUE + 1))
+
 export const randomDirection = (): direction => ['n', 's', 'e', 'w'][Math.floor(Math.random() * 4)] as direction
 
 // Index of the square one step from i in the given direction

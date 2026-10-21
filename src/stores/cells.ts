@@ -2,16 +2,17 @@ import { writable, get } from "svelte/store"
 import { gridSize } from "./global"
 import { rules } from "../rules"
 import { operations, args } from "./operations"
-import { randomDirection } from "../lib/utils"
+import { randomDirection, randomValue } from "../lib/utils"
 
 export type direction = 'n' | 's' | 'e' | 'w' 
 export interface Cell {
+    // A whole number, usually a MIDI value from 0 to 127. A cell without one is empty
     value?: number
     direction?: direction
 }
 
 const randomCell = (): Cell => ({
-    value: 1, 
+    value: randomValue(),
     direction: randomDirection()
 })
 

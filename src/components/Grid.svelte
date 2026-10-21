@@ -3,7 +3,7 @@
   import { cells, type direction } from "../stores/cells";
   import { gridSize } from "../stores/global";
   import {
-    cursor, bounds, selection, placeCursor, moveCursor, selectAll, selectionCanMove, moveSelection,
+    gridFocused, cursor, bounds, selection, placeCursor, moveCursor, selectAll, selectionCanMove, moveSelection,
   } from "../stores/cursor";
   import {
     operations, setOperations, moveOperations, copyOperations, pasteOperations,
@@ -35,10 +35,14 @@
     },
   }
 
-  let grid: HTMLDivElement
+  // Values too long for their square are cut short and end in ..
+  const MAX_SHOWN = 4
+  const shown = (value: number) => {
+    const text = String(value)
+    return text.length > MAX_SHOWN ? `${text.slice(0, MAX_SHOWN - 2)}..` : text
+  }
 
-  // The cursor and selection only show while the grid has focus
-  let focused = $state(false)
+  let grid: HTMLDivElement
 
   // The page starts on the grid, and tabbing from there carries on round to the controls
   onMount(() => grid.focus())
@@ -98,7 +102,9 @@
       event.preventDefault()
       // Shift stretches the selection out to the cursor's new square
       moveCursor(direction, event.shiftKey)
-    } else if (/^[a-zA-Z]$/.test(event.key)) {
+    } else if (/^[a-zA-Z+\-*/%]$/.test(event.key)) {
+      // Stop / opening the browser's quick find
+      event.preventDefault()
       setOperations($selection, event.key)
     } else if (event.key === 'Backspace' || event.key === 'Delete') {
       setOperations($selection, "")
@@ -110,9 +116,9 @@
 
 <!-- Tabbing comes here after the controls -->
 <!-- svelte-ignore a11y_no_noninteractive_tabindex, a11y_no_noninteractive_element_interactions -->
-<div class="grid" class:editing={$editing !== null} class:focused bind:this={grid}
+<div class="grid" class:editing={$editing !== null} class:focused={$gridFocused} bind:this={grid}
   role="application" aria-label="Grid" tabindex="0"
-  {onkeydown} onfocus={() => focused = true} onblur={() => focused = false}
+  {onkeydown} onfocus={() => $gridFocused = true} onblur={() => $gridFocused = false}
 >
   {#each $cells as cell, i (i)}
     {@const arg = $argCells.get(i)}
@@ -120,7 +126,7 @@
     <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
     <div
       class="cell"
-      class:alive={cell.value && !arg && !label}
+      class:alive={cell.value !== undefined && !arg && !label}
       class:cursor={i === $cursor}
       class:hidden={$editing !== null && i !== $editing && !arg && !label}
       onclick={(event) => $editing !== null ? placeArgCursor(i) : placeCursor(i, event.shiftKey)}
@@ -129,6 +135,10 @@
         <span class="arg" class:invalid={!arg.valid} style:--length={Math.max(1, arg.text.length)}>{arg.text}</span>
       {:else if label}
         <span class="label">{label}</span>
+      {:else if cell.value !== undefined}
+        <!-- A cell's value shows over the operation on its square -->
+        {@const text = shown(cell.value)}
+        <span class="value" style:--length={text.length} title={String(cell.value)}>{text}</span>
       {:else if $operations[i]}
         <span class="letter">{$operations[i]}</span>
       {/if}
@@ -220,13 +230,15 @@
      squares and the instructions */
   .arg,
   .label,
-  .letter {
+  .letter,
+  .value {
     font-family: ui-monospace, monospace;
     font-size: var(--text-size);
   }
 
-  /* Long arguments shrink to fit their square */
-  .arg {
+  /* Long arguments and values shrink to fit their square */
+  .arg,
+  .value {
     font-size: calc(var(--text-size) * min(1, 3 / var(--length)));
   }
 

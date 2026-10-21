@@ -5,6 +5,8 @@ import { reverse } from "./reverse"
 import { die } from "./die"
 import { bang } from "./bang"
 import { life } from "./life"
+import { integer } from "./integer"
+import { add, subtract, multiply, divide, modulo } from "./arithmetic"
 import { neighbours } from "../lib/utils"
 
 const operations: Record<string, Operation> = {
@@ -16,6 +18,12 @@ const operations: Record<string, Operation> = {
     d: die,
     b: bang,
     g: life,
+    i: integer,
+    "+": add,
+    "-": subtract,
+    "*": multiply,
+    "/": divide,
+    "%": modulo,
 }
 
 // Every operation by its letter, for the instructions

@@ -29,7 +29,7 @@ const heading: Param = {
 
 export const bang: Operation = {
     name: "bang",
-    about: "Output a bang every n cycles, in a given direction.",
+    about: "Output a 1 every n cycles, in a given direction.",
     params: [bars, heading],
     rule: (freq, to) => createBang(Number(freq), to.toLowerCase() as direction),
 }

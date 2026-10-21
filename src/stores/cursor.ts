@@ -3,6 +3,9 @@ import { gridSize } from "./global"
 import type { direction } from "./cells"
 import { step } from "../lib/utils"
 
+// Whether the grid has focus. The cursor and selection only show while it does
+export const gridFocused = writable<boolean>(false)
+
 // Index into the flat cells array of the square the cursor is on
 export const cursor = writable<number>(0)
 

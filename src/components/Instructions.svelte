@@ -1,12 +1,12 @@
 <script lang="ts">
   import { instructions } from "../rules";
-  import { cursor } from "../stores/cursor";
+  import { gridFocused, cursor } from "../stores/cursor";
   import { editing } from "../stores/editing";
   import { operations } from "../stores/operations";
 
   // The operation under the cursor, or the one whose arguments are open, shows
-  // on its own. Anywhere else, every operation shows
-  let focused = $derived($operations[$editing ?? $cursor]?.toLowerCase() ?? "");
+  // on its own. Anywhere else, or while the grid doesn't have focus, every operation shows
+  let focused = $derived($gridFocused ? $operations[$editing ?? $cursor]?.toLowerCase() ?? "" : "");
   let matching = $derived(instructions.filter(({ letter }) => letter === focused));
   let shown = $derived(matching.length ? matching : instructions);
 </script>
