@@ -21,7 +21,6 @@ const operations: Record<string, Operation> = {
     g: fixed(life),
 }
 
-
 // The params an operation takes, which is none for operations without a rule
 export const paramsFor = (letter: string) => operations[letter.toLowerCase()]?.params ?? []
 
