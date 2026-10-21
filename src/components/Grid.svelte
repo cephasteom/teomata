@@ -125,12 +125,8 @@
        explicit rows keep every row the same height as the columns are wide */
     grid-template-columns: repeat(var(--size), minmax(0, 1fr));
     grid-template-rows: repeat(var(--size), minmax(0, 1fr));
-    /* The largest square that fits the viewport with a 2rem gutter all
-       round. Viewport units track the window, so it resizes along with it */
-    --gutter: 2rem;
-    width: min(100dvw - 2 * var(--gutter), 100dvh - 2 * var(--gutter));
+    width: var(--grid-width);
     aspect-ratio: 1;
-    --line: 0.5px;
     border: var(--line) solid var(--grid-line);
     /* The background shows through the gaps between cells as gridlines */
     gap: var(--line);

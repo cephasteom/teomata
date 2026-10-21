@@ -1,9 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { toggle } from "../scheduler";
-  import { isPlaying } from "../stores/global";
-  import { clearCells, randomizeCells } from "../stores/cells";
-  import { clearOperations } from "../stores/operations";
+  import { showControls } from "../stores/global";
 
   // How close to the left edge the pointer has to be to reveal the sidebar
   const EDGE = 48
@@ -34,8 +32,7 @@
   }
 
   const onkeydown = (event: KeyboardEvent) => {
-    if (event.key === 'Tab') reveal()
-    else if (event.key === 'Escape') hide()
+    if (event.key === 'Escape') hide()
     else if (event.key === ' ' && !(event.metaKey || event.ctrlKey || event.altKey)) {
       // Stops the page scrolling
       event.preventDefault()
@@ -45,7 +42,8 @@
   }
 
   // A focused button clicks itself when space comes back up, which would make
-  // space press Clear or Random, or undo the toggle on the Play button
+  // space press Clear or Random, undo the toggle on the Play button, or flip
+  // the controls on or off
   const onkeyup = (event: KeyboardEvent) => {
     if (event.key === ' ') event.preventDefault()
   }
@@ -72,21 +70,17 @@
 <svelte:document onfullscreenchange={onfullscreen} />
 
 <!-- Focus or pointer movement inside counts as activity, so the idle timer starts over -->
-<aside bind:this={sidebar} class:show={open} onfocusin={reveal} aria-label="Controls">
+<!-- Inert while hidden, so tabbing around the controls can't land in it -->
+<aside bind:this={sidebar} class:show={open} inert={!open} onfocusin={reveal} aria-label="Sidebar">
   <ul>
     <li>
-      <button onclick={toggle} title={$isPlaying ? 'Stop' : 'Play'} aria-label={$isPlaying ? 'Stop' : 'Play'}>
-        <i class={['fa-solid', $isPlaying ? 'fa-stop' : 'fa-play']}></i>
-      </button>
-    </li>
-    <li>
-      <button onclick={() => { clearCells(); clearOperations() }} title="Clear" aria-label="Clear">
-        <i class="fa-solid fa-eraser"></i>
-      </button>
-    </li>
-    <li>
-      <button onclick={randomizeCells} title="Random" aria-label="Random">
-        <i class="fa-solid fa-shuffle"></i>
+      <button
+        onclick={() => showControls.update((show) => !show)}
+        title={$showControls ? 'Hide controls' : 'Show controls'}
+        aria-label="Show controls"
+        aria-pressed={$showControls}
+      >
+        <i class={['fa-solid', $showControls ? 'fa-eye' : 'fa-eye-slash']}></i>
       </button>
     </li>
   </ul>
@@ -131,12 +125,23 @@
     border-bottom: 0.25px solid rgba(255, 255, 255, 0.25);
   }
 
+  /* The square's lines go red along with its focus, like the grid's cursor */
+  li:has(:focus-visible) {
+    border-color: var(--cell-cursor);
+  }
+
   /* The whole square is the button, so its own border and padding go */
   button {
     width: 100%;
     height: 100%;
     border: none;
     padding: 0;
+  }
+
+  /* Focus looks like the grid's cursor */
+  button:focus-visible {
+    outline: none;
+    box-shadow: inset 0 0 0 2px var(--cell-cursor);
   }
 
   @media (prefers-reduced-motion: reduce) {
