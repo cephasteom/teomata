@@ -110,7 +110,7 @@ export const clearOperations = () => {
 }
 
 // The Font Awesome icon each operation is drawn as. Operations missing here have no
-// rule yet, so they fall back to Font Awesome's icon of the letter itself.
+// rule yet, so they're drawn as the letter itself, keeping the case it was typed in.
 const icons: Record<string, string> = {
     n: "fa-arrow-up",
     s: "fa-arrow-down",
@@ -122,7 +122,4 @@ const icons: Record<string, string> = {
     g: "fa-seedling",
 }
 
-export const iconFor = (operation: string) => {
-    const key = operation.toLowerCase()
-    return icons[key] ?? `fa-${key}`
-}
+export const iconFor = (operation: string): string | undefined => icons[operation.toLowerCase()]

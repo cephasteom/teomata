@@ -130,7 +130,12 @@
       {:else if label}
         <span class="label">{label}</span>
       {:else if $operations[i]}
-        <i class={['fa-solid', iconFor($operations[i])]} title={$operations[i]}></i>
+        {@const icon = iconFor($operations[i])}
+        {#if icon}
+          <i class={['fa-solid', icon]} title={$operations[i]}></i>
+        {:else}
+          <span class="letter">{$operations[i]}</span>
+        {/if}
       {/if}
     </div>
   {/each}
@@ -216,9 +221,11 @@
     visibility: hidden;
   }
 
-  /* Arguments and their labels look like the controls' number squares */
+  /* Arguments, their labels and letters without an icon look like the
+     controls' number squares and the instructions */
   .arg,
-  .label {
+  .label,
+  .letter {
     font-family: ui-monospace, monospace;
     font-size: var(--text-size);
   }
