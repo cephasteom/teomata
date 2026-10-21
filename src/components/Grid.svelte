@@ -6,7 +6,7 @@
     gridFocused, cursor, bounds, selection, placeCursor, moveCursor, selectAll, selectionCanMove, moveSelection,
   } from "../stores/cursor";
   import {
-    operations, setOperations, moveOperations, copyOperations, pasteOperations,
+    operations, args, setOperations, moveOperations, copyOperations, pasteOperations,
   } from "../stores/operations";
   import {
     editing, shownSquare, argCells, openArea, openArgs, closeArgs, placeArgCursor, moveArgCursor, typeArg, eraseArg,
@@ -99,9 +99,11 @@
     } else if (/^[a-zA-Z+\-*/%<>=!{]$/.test(event.key)) {
       // Stop / opening the browser's quick find
       event.preventDefault()
+      const before = { operations: $operations, args: $args }
       setOperations($selection, event.key)
-      // A typed operation opens its arguments, when it has any
-      if (paramsFor(event.key, $gridSize).length) openArgs($cursor, $selection)
+      // A typed operation opens its arguments, when it has any, and only
+      // starts running once they close
+      if (paramsFor(event.key, $gridSize).length) openArgs($cursor, $selection, before)
     } else if (event.key === 'Backspace' || event.key === 'Delete') {
       setOperations($selection, "")
     }

@@ -1,7 +1,7 @@
 import { writable, derived, get } from "svelte/store"
 import type { direction } from "./cells"
 import { gridSize } from "./global"
-import { operations, args, setArg } from "./operations"
+import { operations, args, setArg, holdOperations, releaseOperations } from "./operations"
 import { cursor, anchor, placeCursor } from "./cursor"
 import { argsFor, paramsFor } from "../rules"
 
@@ -61,14 +61,22 @@ let selectedFrom = 0
 // Opens a square's arguments for editing. Arguments typed in also go to the
 // other selected squares with the same operation, ignoring case. Every one of
 // them is filled in with defaults where its arguments are unset. The cursor
-// goes to the first argument, or stays on the operation when it has none
-export const openArgs = (square: number, selected: Iterable<number> = []) => {
+// goes to the first argument, or stays on the operation when it has none.
+// The rules keep running on the squares as they were before, which is what
+// they have now unless an operation was just typed onto them, until the
+// arguments close
+export const openArgs = (
+    square: number,
+    selected: Iterable<number> = [],
+    before = { operations: get(operations), args: get(args) },
+) => {
     const all = get(operations)
     const operation = all[square]
     if (!operation) return
     targets = [square, ...[...selected].filter(i =>
         i !== square && all[i].toLowerCase() === operation.toLowerCase()
     )]
+    holdOperations(targets, before)
     const size = get(gridSize)
     args.update(args => {
         const next = [...args]
@@ -81,10 +89,12 @@ export const openArgs = (square: number, selected: Iterable<number> = []) => {
     fresh = true
 }
 
-// Puts the cursor back on the operation's square, with the selection it had
+// Puts the cursor back on the operation's square, with the selection it had,
+// and lets the rules run on what was edited
 export const closeArgs = () => {
     const square = get(editing)
     editing.set(null)
+    releaseOperations()
     if (square === null) return
     placeCursor(square)
     anchor.set(selectedFrom)

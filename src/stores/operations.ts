@@ -15,6 +15,32 @@ export const args = writable<string[][]>(
     Array.from({ length: Math.pow(get(gridSize), 2) }, () => [])
 )
 
+// What squares had before their arguments opened, keyed by square. The rules
+// run on these until the arguments close, so an edit only takes effect once
+// it is done
+let held = new Map<number, { operation: string, args: string[] }>()
+
+// Holds the squares at what they had in the given operations and arguments
+export const holdOperations = (squares: Iterable<number>, before: { operations: string[], args: string[][] }) => {
+    held = new Map([...squares].map(i => [i, { operation: before.operations[i], args: before.args[i] }]))
+}
+
+// Lets the rules see what the held squares have now
+export const releaseOperations = () => {
+    held = new Map()
+}
+
+// The operations and arguments the rules run on: what each square has, or
+// what it had for the squares being edited
+export const appliedOperations = () => {
+    const [$operations, $args] = [[...get(operations)], [...get(args)]]
+    for (const [i, { operation, args }] of held) {
+        $operations[i] = operation
+        $args[i] = args
+    }
+    return { operations: $operations, args: $args }
+}
+
 // Puts the same operation, or "" to clear them, on every one of the squares
 // Typing the operation a square already has keeps its arguments
 export const setOperations = (squares: Iterable<number>, operation: string) => {
@@ -105,6 +131,7 @@ export const pasteOperations = (x: number, y: number): Rectangle | null => {
 }
 
 export const clearOperations = () => {
+    releaseOperations()
     operations.set(Array.from({ length: Math.pow(get(gridSize), 2) }, () => ""))
     args.set(Array.from({ length: Math.pow(get(gridSize), 2) }, () => []))
 }
