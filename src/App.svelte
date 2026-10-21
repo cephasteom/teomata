@@ -2,6 +2,7 @@
   import Controls from "./components/Controls.svelte";
   import Grid from "./components/Grid.svelte";
   import Instructions from "./components/Instructions.svelte";
+  import Values from "./components/Values.svelte";
   import { DEFAULT_SIZE, gridSize } from "./stores/global";
 
   // On the root, so the grid and the controls can both size against it
@@ -13,11 +14,12 @@
 </script>
 
 <main>
-  <!-- The controls and instructions hang off the grid's edges, so the grid stays centred -->
+  <!-- The controls, instructions and values hang off the grid's edges, so the grid stays centred -->
   <div class="board">
     <Controls />
     <Grid />
     <Instructions />
+    <Values />
   </div>
 </main>
 

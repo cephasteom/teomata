@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { cells, type direction, type Value } from "../stores/cells";
+  import { cells, type direction } from "../stores/cells";
   import { gridSize } from "../stores/global";
   import {
     gridFocused, cursor, bounds, selection, placeCursor, moveCursor, selectAll, selectionCanMove, moveSelection,
@@ -33,13 +33,6 @@
       placeCursor(pasted.y1 * $gridSize + pasted.x1)
       placeCursor(pasted.y2 * $gridSize + pasted.x2, true)
     },
-  }
-
-  // Values too long for their square are cut short and end in ..
-  const MAX_SHOWN = 4
-  const shown = (value: Value) => {
-    const text = String(value)
-    return text.length > MAX_SHOWN ? `${text.slice(0, MAX_SHOWN - 2)}..` : text
   }
 
   let grid: HTMLDivElement
@@ -135,11 +128,8 @@
         <span class="arg" class:invalid={!arg.valid} style:--length={Math.max(1, arg.text.length)}>{arg.text}</span>
       {:else if label}
         <span class="label">{label}</span>
-      {:else if cell.value !== undefined}
-        <!-- A cell's value shows over the operation on its square -->
-        {@const text = shown(cell.value)}
-        <span class="value" style:--length={text.length} title={String(cell.value)}>{text}</span>
       {:else if $operations[i]}
+        <!-- A cell passing over its square inverts the letter -->
         <span class="letter">{$operations[i]}</span>
       {/if}
     </div>
@@ -230,15 +220,13 @@
      squares and the instructions */
   .arg,
   .label,
-  .letter,
-  .value {
+  .letter {
     font-family: ui-monospace, monospace;
     font-size: var(--text-size);
   }
 
-  /* Long arguments and values shrink to fit their square */
-  .arg,
-  .value {
+  /* Long arguments shrink to fit their square */
+  .arg {
     font-size: calc(var(--text-size) * min(1, 3 / var(--length)));
   }
 
