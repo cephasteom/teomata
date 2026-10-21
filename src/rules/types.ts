@@ -17,6 +17,8 @@ export interface Param {
 export interface Operation {
     // Shown beside the operation's letter in the instructions
     name: string
+    // Shown under the operation in the instructions when it is the only one shown
+    about: string
     params: Param[]
     rule: (...args: string[]) => CellRule
 }

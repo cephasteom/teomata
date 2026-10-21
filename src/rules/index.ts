@@ -19,7 +19,7 @@ const operations: Record<string, Operation> = {
 }
 
 // Every operation by its letter, for the instructions
-export const instructions = Object.entries(operations).map(([letter, { name, params }]) => ({ letter, name, params }))
+export const instructions = Object.entries(operations).map(([letter, { name, about, params }]) => ({ letter, name, about, params }))
 
 // The params an operation takes, which is none for operations without a rule
 export const paramsFor = (letter: string) => operations[letter.toLowerCase()]?.params ?? []

@@ -29,6 +29,7 @@ const heading: Param = {
 
 export const bang: Operation = {
     name: "bang",
+    about: "Puts a new cell on the square every freq bars, heading in the direction.",
     params: [bars, heading],
     rule: (freq, to) => createBang(Number(freq), to.toLowerCase() as direction),
 }

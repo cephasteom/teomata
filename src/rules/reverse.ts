@@ -5,4 +5,9 @@ import type { CellRule, Operation } from "./types"
 const createReverse = (): CellRule => cell =>
     cell.direction ? { ...cell, direction: opposite[cell.direction] } : cell
 
-export const reverse: Operation = { name: "reverse", params: [], rule: createReverse }
+export const reverse: Operation = {
+    name: "reverse",
+    about: "Turns a moving cell around to head the opposite way.",
+    params: [],
+    rule: createReverse,
+}
