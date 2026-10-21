@@ -8,6 +8,7 @@ import { bang } from "./bang"
 import { life } from "./life"
 import { integer } from "./integer"
 import { array } from "./array"
+import { explode, explodeArrays } from "./explode"
 import { add, subtract, multiply, divide, modulo, lessThan, greaterThan, equal, notEqual } from "./arithmetic"
 import { neighbours } from "../lib/utils"
 
@@ -31,6 +32,7 @@ const operations: Record<string, Operation> = {
     ">": greaterThan,
     "=": equal,
     "!": notEqual,
+    "{": explode,
 }
 
 // Every operation by its letter, for the instructions. The arithmetic comes
@@ -70,6 +72,7 @@ const applyRules: GridRule = (cells, size, letters, args, tick) =>
 // Called in scheduler.ts
 export const rules = [
     move,
+    explodeArrays,
     applyRules,
     zero,
 ]
