@@ -1,8 +1,12 @@
 <script lang="ts">
   import { cells, type direction } from "../stores/cells";
   import { gridSize } from "../stores/global";
-  import { cursor, bounds, selection, placeCursor, moveCursor } from "../stores/cursor";
-  import { operations, setOperations, iconFor } from "../stores/operations";
+  import {
+    cursor, bounds, selection, placeCursor, moveCursor, selectAll, selectionCanMove, moveSelection,
+  } from "../stores/cursor";
+  import {
+    operations, setOperations, moveOperations, copyOperations, pasteOperations, iconFor,
+  } from "../stores/operations";
   import {
     editing, argCells, openBounds, openArgs, closeArgs, placeArgCursor, moveArgCursor, typeArg, eraseArg,
   } from "../stores/editing";
@@ -14,11 +18,45 @@
     ArrowLeft: 'w',
   }
 
+  const shortcuts: Record<string, () => void> = {
+    a: selectAll,
+    c: () => copyOperations($bounds),
+    x: () => {
+      copyOperations($bounds)
+      setOperations($selection, "")
+    },
+    // Pastes from the selection's top left corner and selects what was pasted
+    v: () => {
+      const pasted = pasteOperations($bounds.x1, $bounds.y1)
+      if (!pasted) return
+      placeCursor(pasted.y1 * $gridSize + pasted.x1)
+      placeCursor(pasted.y2 * $gridSize + pasted.x2, true)
+    },
+  }
+
   const onkeydown = (event: KeyboardEvent) => {
+    // Select all, copy, cut and paste work on squares instead of the page's text
+    const shortcut = shortcuts[event.key.toLowerCase()]
+    if ((event.metaKey || event.ctrlKey) && !event.altKey && shortcut) {
+      event.preventDefault()
+      if ($editing === null) shortcut()
+      return
+    }
+
+    // Alt with an arrow carries the selected operations along with the selection
+    const direction = keys[event.key]
+    if (event.altKey && direction && !(event.metaKey || event.ctrlKey)) {
+      event.preventDefault()
+      if ($editing === null && selectionCanMove(direction)) {
+        moveOperations($selection, direction)
+        moveSelection(direction)
+      }
+      return
+    }
+
     // Leave shortcuts like cmd+r to the browser
     if (event.metaKey || event.ctrlKey || event.altKey) return
 
-    const direction = keys[event.key]
     // A sidebar button keeps focus after it's clicked, and Enter would click
     // it again on top of opening or closing the arguments
     if (event.key === 'Enter') event.preventDefault()

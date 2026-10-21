@@ -37,3 +37,26 @@ export const placeCursor = (i: number, extend = false) => {
 export const moveCursor = (direction: direction, extend = false) => {
     placeCursor(step(get(cursor), direction, get(gridSize)), extend)
 }
+
+// Selects every square. The selection is a rectangle between the anchor and
+// the cursor, so they go in opposite corners, with the cursor bottom right
+export const selectAll = () => {
+    const size = get(gridSize)
+    anchor.set(0)
+    cursor.set(size * size - 1)
+}
+
+// Whether the selection has room to step one square without reaching past the
+// edge, since a rectangle can't be split across the wrap
+export const selectionCanMove = (direction: direction) => {
+    const { x1, x2, y1, y2 } = get(bounds)
+    const last = get(gridSize) - 1
+    return { n: y1 > 0, s: y2 < last, e: x2 < last, w: x1 > 0 }[direction]
+}
+
+// Steps the whole selection one square, keeping its shape
+export const moveSelection = (direction: direction) => {
+    const size = get(gridSize)
+    cursor.update(i => step(i, direction, size))
+    anchor.update(i => step(i, direction, size))
+}

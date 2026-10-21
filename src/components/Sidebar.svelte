@@ -72,40 +72,75 @@
 <svelte:document onfullscreenchange={onfullscreen} />
 
 <!-- Focus or pointer movement inside counts as activity, so the idle timer starts over -->
-<nav bind:this={sidebar} class:open onfocusin={reveal} aria-label="Controls">
-  <button onclick={toggle} title={$isPlaying ? 'Stop' : 'Play'} aria-label={$isPlaying ? 'Stop' : 'Play'}>
-    <i class={['fa-solid', $isPlaying ? 'fa-stop' : 'fa-play']}></i>
-  </button>
-  <button onclick={() => { clearCells(); clearOperations() }} title="Clear" aria-label="Clear">
-    <i class="fa-solid fa-eraser"></i>
-  </button>
-  <button onclick={randomizeCells} title="Random" aria-label="Random">
-    <i class="fa-solid fa-shuffle"></i>
-  </button>
-</nav>
+<aside bind:this={sidebar} class:show={open} onfocusin={reveal} aria-label="Controls">
+  <ul>
+    <li>
+      <button onclick={toggle} title={$isPlaying ? 'Stop' : 'Play'} aria-label={$isPlaying ? 'Stop' : 'Play'}>
+        <i class={['fa-solid', $isPlaying ? 'fa-stop' : 'fa-play']}></i>
+      </button>
+    </li>
+    <li>
+      <button onclick={() => { clearCells(); clearOperations() }} title="Clear" aria-label="Clear">
+        <i class="fa-solid fa-eraser"></i>
+      </button>
+    </li>
+    <li>
+      <button onclick={randomizeCells} title="Random" aria-label="Random">
+        <i class="fa-solid fa-shuffle"></i>
+      </button>
+    </li>
+  </ul>
+</aside>
 
 <style>
-  nav {
-    position: fixed;
-    inset: 0 auto 0 0;
-    z-index: 1;
+  aside {
+    color: white;
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 50px;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: 0.5rem;
-    padding: 1rem;
-    background: var(--page-bg);
-    border-right: 1px solid var(--grid-line);
+    z-index: 100;
     transform: translateX(-100%);
-    transition: transform 0.3s ease;
+    transition: transform 0.5s ease-in-out;
+
+    &.show {
+      transform: translateX(0);
+    }
   }
 
-  nav.open {
-    transform: none;
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  li {
+    height: 50px;
+    border: 0.25px solid rgba(255, 255, 255, 0.25);
+    border-bottom: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  li:last-of-type {
+    border-bottom: 0.25px solid rgba(255, 255, 255, 0.25);
+  }
+
+  /* The whole square is the button, so its own border and padding go */
+  button {
+    width: 100%;
+    height: 100%;
+    border: none;
+    padding: 0;
   }
 
   @media (prefers-reduced-motion: reduce) {
-    nav {
+    aside {
       transition: none;
     }
   }
