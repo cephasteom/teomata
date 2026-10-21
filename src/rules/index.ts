@@ -1,4 +1,4 @@
-import type { Operation, GridRule } from "./types"
+import type { Operation, GridRule, CellRule } from "./types"
 import { move } from "./move"
 import { zero } from "./zero"
 import { north, south, east, west } from "./turn"
@@ -7,6 +7,7 @@ import { die } from "./die"
 import { bang } from "./bang"
 import { life } from "./life"
 import { value } from "./value"
+import { increment } from "./increment"
 import { array } from "./array"
 import { chord } from "./chord"
 import { explode, explodeArrays } from "./explode"
@@ -23,6 +24,7 @@ const operations: Record<string, Operation> = {
     b: bang,
     g: life,
     v: value,
+    i: increment,
     a: array,
     c: chord,
     "+": add,
@@ -61,14 +63,36 @@ export const argsFor = (letter: string, size: number, given: string[] = []) =>
         given[k] !== undefined && param.accepts(given[k]) ? given[k] : param.fallback
     )
 
+// The rule built for each square, with the operation and arguments it was
+// built from. A square's rule is kept from tick to tick, so it can remember
+// things, until its operation or arguments change. Every rule is built afresh
+// when the transport starts or the grid resizes
+let built = new Map<number, { key: string, rule: CellRule }>()
+let builtSize = 0
+
+const ruleFor = (i: number, letter: string, size: number, given?: string[]) => {
+    const args = argsFor(letter, size, given)
+    const key = [letter.toLowerCase(), ...args].join("\n")
+    const kept = built.get(i)
+    if (kept?.key === key) return kept.rule
+    const rule = operations[letter.toLowerCase()].rule(...args)
+    built.set(i, { key, rule })
+    return rule
+}
+
 // Applies the rule for every square with an operation
 // The operation's case is ignored, and invalid arguments fall back to defaults
-const applyRules: GridRule = (cells, size, letters, args, tick) =>
-    cells.map((cell, i) => {
-        const operation = letters[i] && operations[letters[i].toLowerCase()]
-        if (!operation) return cell
-        return operation.rule(...argsFor(letters[i], size, args[i]))(cell, tick, neighbours(i, size).map(j => cells[j]))
+const applyRules: GridRule = (cells, size, letters, args, tick) => {
+    if (tick === 0 || size !== builtSize) built = new Map()
+    builtSize = size
+    return cells.map((cell, i) => {
+        if (!letters[i] || !operations[letters[i].toLowerCase()]) {
+            built.delete(i)
+            return cell
+        }
+        return ruleFor(i, letters[i], size, args[i])(cell, tick, neighbours(i, size).map(j => cells[j]))
     })
+}
 
 // Chain or rules to apply on each division of the cycle
 // Called in scheduler.ts
