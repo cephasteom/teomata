@@ -19,6 +19,9 @@ const withN: Record<string, Apply> = {
     "/": binary((value, n) => value / n),
     "%": binary((value, n) => value % n),
     "^": binary(Math.pow),
+    // JS's bitwise operators, which work on whole numbers, dropping any fraction
+    "&": binary((value, n) => value & n),
+    "|": binary((value, n) => value | n),
     pow: binary(Math.pow),
     atan2: binary(Math.atan2),
     min: binary(Math.min),
@@ -27,6 +30,7 @@ const withN: Record<string, Apply> = {
 }
 
 const alone: Record<string, Apply> = {
+    "~": unary(value => ~value),
     abs: unary(Math.abs),
     sign: unary(Math.sign),
     floor: unary(Math.floor),
@@ -76,8 +80,8 @@ const isNumber = (text: string) => text !== "" && Number.isFinite(Number(text))
 
 const operator: Param = {
     name: "operator",
-    about: "+, -, *, /, %, ^ (also pow), atan2, min, max and hypot take the value and n. "
-        + "abs, sign, floor, ceil, round, trunc, fround, sqrt, cbrt, exp, expm1, log, log1p, log2, log10, "
+    about: "+, -, *, /, %, ^ (also pow), & and |, atan2, min, max and hypot take the value and n. "
+        + "~, abs, sign, floor, ceil, round, trunc, fround, sqrt, cbrt, exp, expm1, log, log1p, log2, log10, "
         + "sin, cos, tan, asin, acos, atan, sinh, cosh, tanh, asinh, acosh, atanh and clz32 "
         + "take the value alone. Ignores case.",
     fallback: "+",

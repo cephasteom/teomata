@@ -9,7 +9,7 @@ import { array } from "./array"
 import { chord } from "./chord"
 import { spread, spreadArrays } from "./spread"
 import { math } from "./math"
-import { lessThan, greaterThan, equal, notEqual } from "./compare"
+import { logic } from "./logic"
 import { isLetter } from "../lib/utils"
 
 const operations: Record<string, Operation> = {
@@ -21,10 +21,7 @@ const operations: Record<string, Operation> = {
     a: array,
     c: chord,
     m: math,
-    "<": lessThan,
-    ">": greaterThan,
-    "=": equal,
-    "!": notEqual,
+    l: logic,
     ".": spread,
 }
 
