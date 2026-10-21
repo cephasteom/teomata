@@ -35,6 +35,9 @@
   }
 
   const onkeydown = (event: KeyboardEvent) => {
+    // Keys typed into a field, like the controls' CPS, are for the field
+    if (event.target instanceof HTMLInputElement) return
+
     // Select all, copy, cut and paste work on squares instead of the page's text
     const shortcut = shortcuts[event.key.toLowerCase()]
     if ((event.metaKey || event.ctrlKey) && !event.altKey && shortcut) {

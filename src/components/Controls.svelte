@@ -1,19 +1,22 @@
 <script lang="ts">
   import { toggle } from "../scheduler";
-  import { isPlaying } from "../stores/global";
+  import { MAX_CPS, MAX_Q, MIN_CPS, MIN_Q, cps, isPlaying, q } from "../stores/global";
+  import NumberSquare from "./NumberSquare.svelte";
   import { clearCells, randomizeCells } from "../stores/cells";
   import { clearOperations } from "../stores/operations";
 
-  // The row of the button with keyboard focus, which the focus square sits behind
+  // The row of the control with keyboard focus, which the focus square sits behind
   let focused = $state<number | null>(null)
 
+  // Counts only the controls, as the number squares' labels sit among them
   const onfocusin = (event: FocusEvent) => {
-    const button = event.target as HTMLElement
-    focused = button.matches(':focus-visible') ? [...button.parentElement!.children].indexOf(button) : null
+    const control = event.target as HTMLElement
+    const controls = [...control.parentElement!.querySelectorAll(':scope > button, :scope > input')]
+    focused = control.matches(':focus-visible') ? controls.indexOf(control) : null
   }
 </script>
 
-<!-- A column of grid squares, one per button, sitting a square's width to the grid's left -->
+<!-- A column of grid squares, one per control, sitting a square's width to the grid's left -->
 <div class="controls" role="toolbar" aria-label="Controls" aria-orientation="vertical"
   {onfocusin} onfocusout={() => focused = null}
 >
@@ -26,6 +29,8 @@
   <button onclick={randomizeCells} title="Random" aria-label="Random">
     <i class="fa-solid fa-shuffle"></i>
   </button>
+  <NumberSquare id="cps" label="cps" value={cps} min={MIN_CPS} max={MAX_CPS} step={0.05} places={2} row={4} />
+  <NumberSquare id="q" label="q" value={q} min={MIN_Q} max={MAX_Q} step={1} places={0} row={5} />
   {#if focused !== null}
     <div class="focus" style:grid-row="{focused + 1} / {focused + 2}"></div>
   {/if}
@@ -37,12 +42,15 @@
     top: 0;
     right: calc(100% + var(--square));
     display: grid;
-    grid-template-rows: repeat(3, var(--square));
+    grid-template-rows: repeat(5, var(--square));
     width: calc(var(--square) + 2 * var(--line));
     /* Gridlines the same way as the grid: the background shows through the gaps */
     border: var(--line) solid var(--grid-line);
     gap: var(--line);
     background: var(--grid-line);
+    /* The label and the value's text. Three letters at the icons' size fill
+       the square, so a little under that leaves them a similar margin */
+    --text-size: calc(var(--icon-size) * 0.8);
     /* Keeps the focus square's negative z-index above the background */
     isolation: isolate;
   }

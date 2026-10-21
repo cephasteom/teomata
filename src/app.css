@@ -16,7 +16,7 @@
   --square: calc((var(--grid-width) - (var(--size) + 1) * var(--line)) / var(--size));
   /* Icons scale with the squares on small screens, up to a fixed size, and
      are the same size in the grid, the controls and the sidebar */
-  --icon-max: 1.25rem;
+  --icon-max: 1rem;
   --icon-size: min(var(--square) * 0.45, var(--icon-max));
   color-scheme: dark;
 }

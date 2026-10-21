@@ -1,5 +1,6 @@
+import { get } from "svelte/store"
 import type { direction } from "../stores/cells"
-import { ticksPerBar } from "../stores/global"
+import { q } from "../stores/global"
 import { isDirection } from "../lib/utils"
 import type { Operation, CellRule, Param } from "./types"
 
@@ -8,7 +9,7 @@ import type { Operation, CellRule, Param } from "./types"
 // freq is in bars, so 1 is once a bar and .5 is twice a bar
 // Fires on the first tick at or after each trigger, and at most once a tick
 const createBang = (freq = 1, to: direction = "e"): CellRule => (cell, tick) =>
-    tick % (freq * ticksPerBar) < 1 ? { value: 1, direction: to } : cell
+    tick % (freq * get(q)) < 1 ? { value: 1, direction: to } : cell
 
 const bars: Param = {
     name: "bars",

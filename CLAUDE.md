@@ -19,7 +19,7 @@ There is no test runner or linter set up yet. `npm run check` is the only verifi
 
 State lives in Svelte stores under `src/stores/`, and the components and the scheduler share them:
 
-- `stores/global.ts`: app-wide settings (`isPlaying`, `gridSize`) and the `ticksPerBar` constant.
+- `stores/global.ts`: app-wide settings (`isPlaying`, `gridSize`, `showControls`) and the timing: `cps` (cycles, or bars, per second, default 0.5) and `q` (ticks per cycle, default 8), each with min and max constants.
 - `stores/cells.ts`: the grid. It is a **flat** `Cell[]` of length `gridSize²`, randomly seeded at module load (about 5% of cells get `value: 1` and a random cardinal `direction`). An empty cell is `{}`. `updateCells()` reduces the grid over the rule chain from `src/rules/`; `clearCells()` and `randomizeCells()` empty or reseed it.
 - `stores/operations.ts`: one operation per square (`""` for none), typed at the cursor. Operations belong to the square, not the cell, so cells move over them. `args` holds each square's operation arguments as text (`string[]` per square), cleared when the square's operation changes.
 - `stores/editing.ts`: the argument editor. Enter on a square with an operation opens it (`editing`); every other square hides apart from one square per param, to the right of the operation or to the left if the row runs out (`argSquares`). Typing replaces the argument under the cursor and then appends, left/right move between the open squares, and Enter or Escape closes it, restoring the selection. With several squares selected, the editor opens on the cursor's square and each edited argument is also written to every selected square with the same operation.
@@ -35,6 +35,6 @@ Each rule lives in its own file (`move.ts`, `turn.ts`, `reverse.ts`, `die.ts`, `
 
 Shared direction helpers (`step` for a wrapping one-square move, `neighbours` for the eight squares around one, `opposite`, `isDirection`, `randomDirection`) live in `src/lib/utils.ts`.
 
-`src/scheduler.ts` owns timing. At import time it creates a Tone.js `Loop` firing `ticksPerBar` times a bar (`"8n"`) and counts ticks since the transport started (reset on stop), and `toggle()` starts or stops the Tone transport and flips `isPlaying`. Each loop tick calls `updateCells(tick)` via `getDraw().schedule` so the visual update lands on the audible tick. `toggle()` calls Tone's `start()` first because the audio context needs a user gesture.
+`src/scheduler.ts` owns timing. At import time it creates a Tone.js `Loop` firing `q` times a bar (`"${q}n"`, updated when `q` changes), keeps the transport's tempo at `cps` (`cps × 4 × 60` BPM), and works out each tick from the transport's position, so it starts from 0 when the transport starts and stays on the bar's divisions when `q` changes. `toggle()` starts or stops the Tone transport and flips `isPlaying`. Each loop tick calls `updateCells(tick)` via `getDraw().schedule` so the visual update lands on the audible tick. `toggle()` calls Tone's `start()` first because the audio context needs a user gesture.
 
 Stores are read outside components with `get(store)` from `svelte/store`. Components use the `$store` auto-subscription syntax together with Svelte 5 event attributes (`onclick={...}`).
