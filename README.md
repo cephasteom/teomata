@@ -20,7 +20,6 @@ A Tone.js loop drives the automaton, ticking eight times a bar, so each step lan
 | `r` | Reverse a moving cell |
 | `d` | Remove the cell |
 | `b` | Bang: emit a new cell every `bars` bars heading in `direction` |
-| `g` | Apply the Game of Life rules to the square |
 
 Some operations take arguments. Press Enter on a square to edit them; missing or invalid arguments fall back to defaults.
 

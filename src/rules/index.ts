@@ -4,14 +4,12 @@ import { north, south, east, west } from "./turn"
 import { reverse } from "./reverse"
 import { die } from "./die"
 import { bang } from "./bang"
-import { life } from "./life"
 import { value } from "./value"
 import { increment } from "./increment"
 import { array } from "./array"
 import { chord } from "./chord"
 import { explode, explodeArrays } from "./explode"
 import { add, subtract, multiply, divide, modulo, lessThan, greaterThan, equal, notEqual } from "./arithmetic"
-import { neighbours } from "../lib/utils"
 
 const operations: Record<string, Operation> = {
     n: north,
@@ -21,7 +19,6 @@ const operations: Record<string, Operation> = {
     r: reverse,
     d: die,
     b: bang,
-    g: life,
     v: value,
     i: increment,
     a: array,
@@ -89,7 +86,7 @@ const applyRules: GridRule = (cells, size, letters, args, tick) => {
             built.delete(i)
             return cell
         }
-        return ruleFor(i, letters[i], size, args[i])(cell, tick, neighbours(i, size).map(j => cells[j]))
+        return ruleFor(i, letters[i], size, args[i])(cell, tick)
     })
 }
 

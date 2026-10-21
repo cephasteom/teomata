@@ -2,7 +2,7 @@ import type { Cell } from "../stores/cells"
 
 export type GridRule = (cells: Cell[], size: number, operations: string[], args: string[][], tick: number) => Cell[]
 
-export type CellRule = (cell: Cell, tick: number, neighbours: Cell[]) => Cell
+export type CellRule = (cell: Cell, tick: number) => Cell
 
 export interface Param {
     name: string
