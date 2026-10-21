@@ -1,12 +1,13 @@
 import type { Operation, GridRule } from "./types"
 import { move } from "./move"
+import { zero } from "./zero"
 import { north, south, east, west } from "./turn"
 import { reverse } from "./reverse"
 import { die } from "./die"
 import { bang } from "./bang"
 import { life } from "./life"
 import { integer } from "./integer"
-import { add, subtract, multiply, divide, modulo } from "./arithmetic"
+import { add, subtract, multiply, divide, modulo, lessThan, greaterThan, equal, notEqual } from "./arithmetic"
 import { neighbours } from "../lib/utils"
 
 const operations: Record<string, Operation> = {
@@ -24,10 +25,18 @@ const operations: Record<string, Operation> = {
     "*": multiply,
     "/": divide,
     "%": modulo,
+    "<": lessThan,
+    ">": greaterThan,
+    "=": equal,
+    "!": notEqual,
 }
 
-// Every operation by its letter, for the instructions
-export const instructions = Object.entries(operations).map(([letter, { name, about, params }]) => ({ letter, name, about, params }))
+// Every operation by its letter, for the instructions. The arithmetic comes
+// first, in the table's order, then the letters alphabetically
+const isLetter = (key: string) => /^[a-z]$/.test(key)
+export const instructions = Object.entries(operations)
+    .sort(([a], [b]) => Number(isLetter(a)) - Number(isLetter(b)) || (isLetter(a) ? a.localeCompare(b) : 0))
+    .map(([letter, { name, about, params }]) => ({ letter, name, about, params }))
 
 // The params an operation takes, which is none for operations without a rule
 export const paramsFor = (letter: string) => operations[letter.toLowerCase()]?.params ?? []
@@ -51,6 +60,7 @@ const applyRules: GridRule = (cells, size, letters, args, tick) =>
 // Chain or rules to apply on each division of the cycle
 // Called in scheduler.ts
 export const rules = [
-    move, 
-    applyRules
+    move,
+    applyRules,
+    zero,
 ]

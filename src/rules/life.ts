@@ -16,7 +16,7 @@ const createLife = (): CellRule => (cell, _tick, neighbours) => {
 }
 
 export const life: Operation = {
-    name: "game of life",
+    name: "gol",
     about: "Apply game of life rules to cell.",
     params: [],
     rule: createLife,

@@ -27,3 +27,9 @@ export const divide = arithmetic("divide", "Divide a value by n, rounding down."
 // That leaves alone any value from 0 to 127
 export const modulo = arithmetic("modulo", "Set a value to its remainder after dividing by n.", "128", (value, by) => value % by,
     text => isNumber(text) && Number(text) !== 0)
+
+// Comparisons set a value to 1 when true and 0 when false
+export const lessThan = arithmetic("lt", "Set a value to 1 if it is less than n, or 0 if not.", "0", (value, by) => Number(value < by))
+export const greaterThan = arithmetic("gt", "Set a value to 1 if it is greater than n, or 0 if not.", "0", (value, by) => Number(value > by))
+export const equal = arithmetic("eq", "Set a value to 1 if it equals n, or 0 if not.", "0", (value, by) => Number(value === by))
+export const notEqual = arithmetic("neq", "Set a value to 1 if it doesn't equal n, or 0 if it does.", "0", (value, by) => Number(value !== by))
