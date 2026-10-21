@@ -17,11 +17,11 @@ const arithmetic = (name: string, about: string, fallback: string, apply: (value
     rule: by => createArithmetic(value => apply(value, Number(by))),
 })
 
-export const add = arithmetic("add", "Add n to the value of moving cell.", "0", (value, by) => value + by)
-export const subtract = arithmetic("subtract", "Subtract n from the value of moving cell.", "0", (value, by) => value - by)
-export const multiply = arithmetic("multiply", "Multiply the value of moving cell by n.", "1", (value, by) => value * by)
-export const divide = arithmetic("divide", "Divide the value of moving cell by n, rounding down.", "1", (value, by) => value / by,
+export const add = arithmetic("add", "Add n to a value.", "0", (value, by) => value + by)
+export const subtract = arithmetic("subtract", "Subtract n from a value.", "0", (value, by) => value - by)
+export const multiply = arithmetic("multiply", "Multiply a value by n.", "1", (value, by) => value * by)
+export const divide = arithmetic("divide", "Divide a value by n, rounding down.", "1", (value, by) => value / by,
     text => isNumber(text) && Number(text) !== 0)
 // That leaves alone any value from 0 to 127
-export const modulo = arithmetic("modulo", "Set the value of moving cell to its remainder after dividing by n.", "128", (value, by) => value % by,
+export const modulo = arithmetic("modulo", "Set a value to its remainder after dividing by n.", "128", (value, by) => value % by,
     text => isNumber(text) && Number(text) !== 0)

@@ -15,7 +15,7 @@ const value: Param = {
 
 export const integer: Operation = {
     name: "integer",
-    about: "Set the value of moving cell.",
+    about: "Change a value to a fixed integer.",
     params: [value],
     rule: value => createInteger(Number(value)),
 }

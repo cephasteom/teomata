@@ -75,7 +75,8 @@ let selectedFrom = 0
 
 // Opens a square's arguments for editing. Arguments typed in also go to the
 // other selected squares with the same operation, ignoring case. Every one of
-// them is filled in with defaults where its arguments are unset
+// them is filled in with defaults where its arguments are unset. The cursor
+// goes to the first argument, or stays on the operation when it has none
 export const openArgs = (square: number, selected: Iterable<number> = []) => {
     const all = get(operations)
     const operation = all[square]
@@ -90,7 +91,7 @@ export const openArgs = (square: number, selected: Iterable<number> = []) => {
     })
     selectedFrom = get(anchor)
     editing.set(square)
-    placeCursor(square)
+    placeCursor(get(argSquares)[0] ?? square)
     fresh = true
 }
 
@@ -103,28 +104,29 @@ export const closeArgs = () => {
     anchor.set(selectedFrom)
 }
 
-// Puts the cursor on one of the open squares, or closes the arguments when the
-// square is one of the hidden ones. A label puts it on its argument
+// Puts the cursor on one of the arguments, or closes the arguments when the
+// square is one of the hidden ones. A label puts it on its argument, and the
+// operation's own square leaves the cursor where it is
 export const placeArgCursor = (square: number) => {
     const label = get(labelSquares).indexOf(square)
     if (label >= 0) square = get(argSquares)[label]
-    if (square === get(editing) || get(argSquares).includes(square)) {
+    if (get(argSquares).includes(square)) {
         placeCursor(square)
         fresh = true
-    } else {
+    } else if (square !== get(editing)) {
         closeArgs()
         placeCursor(square)
     }
 }
 
-// Steps the cursor along the open squares. They all sit in one column, so only
-// north and south go anywhere, and the cursor stops at either end
+// Steps the cursor along the arguments. They all sit in one column, so only
+// north and south go anywhere, and the cursor wraps around at either end
 export const moveArgCursor = (direction: direction) => {
-    const square = get(editing)
-    if (square === null || (direction !== "n" && direction !== "s")) return
-    const open = [square, ...get(argSquares)].sort((a, b) => a - b)
+    if (get(editing) === null || (direction !== "n" && direction !== "s")) return
+    const open = [...get(argSquares)].sort((a, b) => a - b)
+    if (!open.length) return
     const at = open.indexOf(get(cursor)) + (direction === "s" ? 1 : -1)
-    if (at >= 0 && at < open.length) placeArgCursor(open[at])
+    placeArgCursor(open[(at + open.length) % open.length])
 }
 
 // Index of the argument under the cursor, or -1 when it is on the operation

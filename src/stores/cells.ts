@@ -21,7 +21,12 @@ const randomGrid = (): Cell[] => Array.from(
     () => (Math.random() > .95 ? randomCell() : {})
 )
 
-export const cells = writable<Cell[]>(randomGrid())
+const emptyGrid = (): Cell[] => Array.from(
+    { length: Math.pow(get(gridSize), 2) },
+    () => ({})
+)
+
+export const cells = writable<Cell[]>(emptyGrid())
 
 // Runs the cells through each rule in order
 // Tick is the number of ticks since the transport started
