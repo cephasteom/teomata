@@ -1,27 +1,27 @@
 import { writable, get } from "svelte/store"
 import { gridSize } from "./global"
 
-// One letter per square, or "" for none. Letters belong to the square rather
+// One operation per square, or "" for none. Operations belong to the square rather
 // than the cell on it, so they stay put while cells move over them.
-export const letters = writable<string[]>(
+export const operations = writable<string[]>(
     Array.from({ length: Math.pow(get(gridSize), 2) }, () => "")
 )
 
-// The arguments typed in for each square's letter, as text. A square's
-// arguments are cleared when its letter changes
+// The arguments typed in for each square's operation, as text. A square's
+// arguments are cleared when its operation changes
 export const args = writable<string[][]>(
     Array.from({ length: Math.pow(get(gridSize), 2) }, () => [])
 )
 
-// Puts the same letter, or "" to clear them, on every one of the squares
-// Typing the letter a square already has keeps its arguments
-export const setLetters = (squares: Iterable<number>, letter: string) => {
+// Puts the same operation, or "" to clear them, on every one of the squares
+// Typing the operation a square already has keeps its arguments
+export const setOperations = (squares: Iterable<number>, operation: string) => {
     const list = [...squares]
-    const current = get(letters)
-    const changed = list.filter(i => current[i].toLowerCase() !== letter.toLowerCase())
-    letters.update(letters => {
-        const next = [...letters]
-        for (const i of list) next[i] = letter
+    const current = get(operations)
+    const changed = list.filter(i => current[i].toLowerCase() !== operation.toLowerCase())
+    operations.update(operations => {
+        const next = [...operations]
+        for (const i of list) next[i] = operation
         return next
     })
     args.update(args => {
@@ -31,7 +31,7 @@ export const setLetters = (squares: Iterable<number>, letter: string) => {
     })
 }
 
-// Sets the same argument for the letter on every one of the squares
+// Sets the same argument for the operation on every one of the squares
 export const setArg = (squares: Iterable<number>, k: number, text: string) => {
     args.update(args => {
         const next = [...args]
@@ -43,12 +43,12 @@ export const setArg = (squares: Iterable<number>, k: number, text: string) => {
     })
 }
 
-export const clearLetters = () => {
-    letters.set(Array.from({ length: Math.pow(get(gridSize), 2) }, () => ""))
+export const clearOperations = () => {
+    operations.set(Array.from({ length: Math.pow(get(gridSize), 2) }, () => ""))
     args.set(Array.from({ length: Math.pow(get(gridSize), 2) }, () => []))
 }
 
-// The Font Awesome icon each letter is drawn as. Letters missing here have no
+// The Font Awesome icon each operation is drawn as. Operations missing here have no
 // rule yet, so they fall back to Font Awesome's icon of the letter itself.
 const icons: Record<string, string> = {
     n: "fa-arrow-up",
@@ -61,7 +61,7 @@ const icons: Record<string, string> = {
     g: "fa-seedling",
 }
 
-export const iconFor = (letter: string) => {
-    const key = letter.toLowerCase()
+export const iconFor = (operation: string) => {
+    const key = operation.toLowerCase()
     return icons[key] ?? `fa-${key}`
 }

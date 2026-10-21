@@ -3,7 +3,7 @@
   import { toggle } from "../scheduler";
   import { isPlaying } from "../stores/global";
   import { clearCells, randomizeCells } from "../stores/cells";
-  import { clearLetters } from "../stores/letters";
+  import { clearOperations } from "../stores/operations";
 
   // How close to the left edge the pointer has to be to reveal the sidebar
   const EDGE = 48
@@ -76,7 +76,7 @@
   <button onclick={toggle} title={$isPlaying ? 'Stop' : 'Play'} aria-label={$isPlaying ? 'Stop' : 'Play'}>
     <i class={['fa-solid', $isPlaying ? 'fa-stop' : 'fa-play']}></i>
   </button>
-  <button onclick={() => { clearCells(); clearLetters() }} title="Clear" aria-label="Clear">
+  <button onclick={() => { clearCells(); clearOperations() }} title="Clear" aria-label="Clear">
     <i class="fa-solid fa-eraser"></i>
   </button>
   <button onclick={randomizeCells} title="Random" aria-label="Random">

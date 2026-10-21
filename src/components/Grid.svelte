@@ -2,7 +2,7 @@
   import { cells, type direction } from "../stores/cells";
   import { gridSize } from "../stores/global";
   import { cursor, bounds, selection, placeCursor, moveCursor } from "../stores/cursor";
-  import { letters, setLetters, iconFor } from "../stores/letters";
+  import { operations, setOperations, iconFor } from "../stores/operations";
   import {
     editing, argCells, openBounds, openArgs, closeArgs, placeArgCursor, moveArgCursor, typeArg, eraseArg,
   } from "../stores/editing";
@@ -38,9 +38,9 @@
       // Shift stretches the selection out to the cursor's new square
       moveCursor(direction, event.shiftKey)
     } else if (/^[a-zA-Z]$/.test(event.key)) {
-      setLetters($selection, event.key)
+      setOperations($selection, event.key)
     } else if (event.key === 'Backspace' || event.key === 'Delete') {
-      setLetters($selection, "")
+      setOperations($selection, "")
     }
   }
 </script>
@@ -60,8 +60,8 @@
     >
       {#if arg}
         <span class="arg" class:invalid={!arg.valid} style:--length={Math.max(1, arg.text.length)}>{arg.text}</span>
-      {:else if $letters[i]}
-        <i class={['fa-solid', iconFor($letters[i])]} title={$letters[i]}></i>
+      {:else if $operations[i]}
+        <i class={['fa-solid', iconFor($operations[i])]} title={$operations[i]}></i>
       {/if}
     </div>
   {/each}
@@ -83,7 +83,7 @@
   .grid {
     position: relative;
     display: grid;
-    /* minmax(0, 1fr) stops a cell's letter from stretching its track, and the
+    /* minmax(0, 1fr) stops a cell's operation from stretching its track, and the
        explicit rows keep every row the same height as the columns are wide */
     grid-template-columns: repeat(var(--size), minmax(0, 1fr));
     grid-template-rows: repeat(var(--size), minmax(0, 1fr));
@@ -99,7 +99,7 @@
     background: var(--grid-line);
     /* Keeps the selection's negative z-index above the grid's background */
     isolation: isolate;
-    /* Lets letters size themselves against the grid's width */
+    /* Lets operations size themselves against the grid's width */
     container-type: inline-size;
   }
 
@@ -134,7 +134,7 @@
     background: var(--cell-cursor);
   }
 
-  /* While a letter's arguments are open, only its square and theirs show.
+  /* While an operation's arguments are open, only its square and theirs show.
      The rest go, gridlines and all, and the backdrop puts the gridlines back
      behind just the open squares. It comes before the selection, so the
      selection still colours the lines around the cursor */

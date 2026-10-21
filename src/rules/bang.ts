@@ -1,7 +1,7 @@
 import type { direction } from "../stores/cells"
 import { ticksPerBar } from "../stores/global"
 import { isDirection } from "../lib/utils"
-import type { Letter, CellRule, Param } from "./rule"
+import type { Operation, CellRule, Param } from "./rule"
 
 // Puts a new cell heading in the given direction on the square every freq bars
 // The next move carries it onto the neighbouring square like any other cell
@@ -24,7 +24,7 @@ const heading: Param = {
     accepts: text => isDirection(text.toLowerCase()),
 }
 
-export const bang: Letter = {
+export const bang: Operation = {
     params: [bars, heading],
     rule: (freq, to) => createBang(Number(freq), to.toLowerCase() as direction),
 }

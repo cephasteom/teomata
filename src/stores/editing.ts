@@ -1,24 +1,24 @@
 import { writable, derived, get } from "svelte/store"
 import type { direction } from "./cells"
 import { gridSize } from "./global"
-import { letters, args, setArg } from "./letters"
+import { operations, args, setArg } from "./operations"
 import { cursor, anchor, placeCursor } from "./cursor"
 import { argsFor, paramsFor } from "../rules"
 
-// The square whose letter has its arguments open for editing, or null
+// The square whose operation has its arguments open for editing, or null
 export const editing = writable<number | null>(null)
 
-// The squares the open letter's arguments show in, in order. They run out
-// from the letter's square, rightwards, or leftwards when the row runs out of
-// room, so the first argument is always next to the letter
-export const argSquares = derived([editing, letters, gridSize], ([$editing, $letters, $size]) => {
+// The squares the open operation's arguments show in, in order. They run out
+// from the operation's square, rightwards, or leftwards when the row runs out of
+// room, so the first argument is always next to the operation
+export const argSquares = derived([editing, operations, gridSize], ([$editing, $operations, $size]) => {
     if ($editing === null) return []
-    const count = paramsFor($letters[$editing]).length
+    const count = paramsFor($operations[$editing]).length
     const way = $editing % $size + count < $size ? 1 : -1
     return Array.from({ length: count }, (_, k) => $editing + way * (k + 1))
 })
 
-// The open strip of squares, the letter's and its arguments', as inclusive
+// The open strip of squares, the operation's and its arguments', as inclusive
 // columns and a row, or null when no arguments are open
 export const openBounds = derived([editing, argSquares, gridSize], ([$editing, $squares, $size]) => {
     if ($editing === null) return null
@@ -27,10 +27,10 @@ export const openBounds = derived([editing, argSquares, gridSize], ([$editing, $
 })
 
 // What each argument square shows, keyed by square
-export const argCells = derived([editing, argSquares, letters, args], ([$editing, $squares, $letters, $args]) => {
+export const argCells = derived([editing, argSquares, operations, args], ([$editing, $squares, $operations, $args]) => {
     const shown = new Map<number, { text: string, valid: boolean }>()
     if ($editing === null) return shown
-    const params = paramsFor($letters[$editing])
+    const params = paramsFor($operations[$editing])
     $squares.forEach((square, k) => {
         const text = $args[$editing][k] ?? params[k].fallback
         shown.set(square, { text, valid: params[k].accepts(text) })
@@ -43,25 +43,25 @@ export const argCells = derived([editing, argSquares, letters, args], ([$editing
 let fresh = true
 
 // The squares an edited argument goes to: the open square and every selected
-// square with the same letter
+// square with the same operation
 let targets: number[] = []
 
 // Where the selection was anchored when the arguments opened
 let selectedFrom = 0
 
 // Opens a square's arguments for editing. Arguments typed in also go to the
-// other selected squares with the same letter, ignoring case. Every one of
+// other selected squares with the same operation, ignoring case. Every one of
 // them is filled in with defaults where its arguments are unset
 export const openArgs = (square: number, selected: Iterable<number> = []) => {
-    const all = get(letters)
-    const letter = all[square]
-    if (!letter) return
+    const all = get(operations)
+    const operation = all[square]
+    if (!operation) return
     targets = [square, ...[...selected].filter(i =>
-        i !== square && all[i].toLowerCase() === letter.toLowerCase()
+        i !== square && all[i].toLowerCase() === operation.toLowerCase()
     )]
     args.update(args => {
         const next = [...args]
-        for (const i of targets) next[i] = argsFor(letter, args[i])
+        for (const i of targets) next[i] = argsFor(operation, args[i])
         return next
     })
     selectedFrom = get(anchor)
@@ -70,7 +70,7 @@ export const openArgs = (square: number, selected: Iterable<number> = []) => {
     fresh = true
 }
 
-// Puts the cursor back on the letter's square, with the selection it had
+// Puts the cursor back on the operation's square, with the selection it had
 export const closeArgs = () => {
     const square = get(editing)
     editing.set(null)
@@ -101,7 +101,7 @@ export const moveArgCursor = (direction: direction) => {
     if (at >= 0 && at < open.length) placeArgCursor(open[at])
 }
 
-// Index of the argument under the cursor, or -1 when it is on the letter
+// Index of the argument under the cursor, or -1 when it is on the operation
 export const cursorArg = () => get(argSquares).indexOf(get(cursor))
 
 // Types a key into the argument under the cursor
