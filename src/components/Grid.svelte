@@ -8,7 +8,7 @@
     operations, setOperations, moveOperations, copyOperations, pasteOperations, iconFor,
   } from "../stores/operations";
   import {
-    editing, argCells, openBounds, openArgs, closeArgs, placeArgCursor, moveArgCursor, typeArg, eraseArg,
+    editing, argCells, labelCells, openAreas, openArgs, closeArgs, placeArgCursor, moveArgCursor, typeArg, eraseArg,
   } from "../stores/editing";
 
   const keys: Record<string, direction> = {
@@ -91,28 +91,31 @@
 <div class="grid" class:editing={$editing !== null}>
   {#each $cells as cell, i (i)}
     {@const arg = $argCells.get(i)}
+    {@const label = $labelCells.get(i)}
     <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
     <div
       class="cell"
-      class:alive={cell.value && !arg}
+      class:alive={cell.value && !arg && !label}
       class:cursor={i === $cursor}
-      class:hidden={$editing !== null && i !== $editing && !arg}
+      class:hidden={$editing !== null && i !== $editing && !arg && !label}
       onclick={(event) => $editing !== null ? placeArgCursor(i) : placeCursor(i, event.shiftKey)}
     >
       {#if arg}
         <span class="arg" class:invalid={!arg.valid} style:--length={Math.max(1, arg.text.length)}>{arg.text}</span>
+      {:else if label}
+        <span class="label">{label}</span>
       {:else if $operations[i]}
         <i class={['fa-solid', iconFor($operations[i])]} title={$operations[i]}></i>
       {/if}
     </div>
   {/each}
-  {#if $openBounds}
+  {#each $openAreas as area}
     <div
       class="backdrop"
-      style:grid-column="{$openBounds.x1 + 1} / {$openBounds.x2 + 2}"
-      style:grid-row="{$openBounds.y + 1} / {$openBounds.y + 2}"
+      style:grid-column="{area.x1 + 1} / {area.x2 + 2}"
+      style:grid-row="{area.y1 + 1} / {area.y2 + 2}"
     ></div>
-  {/if}
+  {/each}
   <div
     class="selection"
     style:grid-column="{$bounds.x1 + 1} / {$bounds.x2 + 2}"
@@ -171,9 +174,9 @@
     background: var(--cell-cursor);
   }
 
-  /* While an operation's arguments are open, only its square and theirs show.
-     The rest go, gridlines and all, and the backdrop puts the gridlines back
-     behind just the open squares. It comes before the selection, so the
+  /* While an operation's arguments are open, only its square, theirs and their
+     labels' show. The rest go, gridlines and all, and the backdrops put the
+     gridlines back behind just the open squares. It comes before the selection, so the
      selection still colours the lines around the cursor */
   .editing {
     background: none;
@@ -188,10 +191,16 @@
     visibility: hidden;
   }
 
+  /* Arguments and their labels look like the controls' number squares */
+  .arg,
+  .label {
+    font-family: ui-monospace, monospace;
+    font-size: var(--text-size);
+  }
+
   /* Long arguments shrink to fit their square */
   .arg {
-    font-size: calc(1em * min(1, 3 / var(--length)));
-    font-variant-numeric: tabular-nums;
+    font-size: calc(var(--text-size) * min(1, 3 / var(--length)));
   }
 
   .invalid {

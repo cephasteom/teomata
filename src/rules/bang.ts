@@ -12,14 +12,16 @@ const createBang = (freq = 1, to: direction = "e"): CellRule => (cell, tick) =>
     tick % (freq * get(q)) < 1 ? { value: 1, direction: to } : cell
 
 const bars: Param = {
-    name: "bars",
-    about: "How many bars between bangs. 1 is once a bar and .5 is twice a bar.",
+    name: "freq",
+    label: "f",
+    about: "Frequency of bangs. 1 is once per cycle and .5 is twice a bar.",
     fallback: "1",
     accepts: text => text !== "" && Number.isFinite(Number(text)) && Number(text) > 0,
 }
 
 const heading: Param = {
     name: "direction",
+    label: "dir",
     about: "Which way the new cell heads: n, s, e or w.",
     fallback: "e",
     accepts: text => isDirection(text.toLowerCase()),

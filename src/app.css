@@ -18,6 +18,10 @@
      are the same size in the grid, the controls and the sidebar */
   --icon-max: 1rem;
   --icon-size: min(var(--square) * 0.45, var(--icon-max));
+  /* Text in a square, like the controls' labels and values and the grid's
+     arguments. Three letters at the icons' size fill the square, so a little
+     under that leaves them a similar margin */
+  --text-size: calc(var(--icon-size) * 0.8);
   color-scheme: dark;
 }
 

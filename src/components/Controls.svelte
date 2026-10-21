@@ -48,9 +48,6 @@
     border: var(--line) solid var(--grid-line);
     gap: var(--line);
     background: var(--grid-line);
-    /* The label and the value's text. Three letters at the icons' size fill
-       the square, so a little under that leaves them a similar margin */
-    --text-size: calc(var(--icon-size) * 0.8);
     /* Keeps the focus square's negative z-index above the background */
     isolation: isolate;
   }

@@ -6,6 +6,8 @@ export type CellRule = (cell: Cell, tick: number, neighbours: Cell[]) => Cell
 
 export interface Param {
     name: string
+    // Short enough to fit in the square beside the argument
+    label: string
     about: string
     fallback: string
     accepts: (text: string) => boolean
