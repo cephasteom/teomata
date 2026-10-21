@@ -9,6 +9,14 @@
   // The row of the control with keyboard focus, which the focus square sits behind
   let focused = $state<number | null>(null)
 
+  // Tabbing back from the first control wraps round to the grid
+  const onplaykeydown = (event: KeyboardEvent) => {
+    if (event.key === 'Tab' && event.shiftKey) {
+      event.preventDefault()
+      document.querySelector<HTMLElement>('[aria-label="Grid"]')?.focus()
+    }
+  }
+
   // Counts only the controls, as the number squares' labels sit among them
   const onfocusin = (event: FocusEvent) => {
     const control = event.target as HTMLElement
@@ -21,7 +29,7 @@
 <div class="controls default-size" role="toolbar" aria-label="Controls" aria-orientation="vertical"
   {onfocusin} onfocusout={() => focused = null}
 >
-  <button onclick={toggle} title={$isPlaying ? 'Stop' : 'Play'} aria-label={$isPlaying ? 'Stop' : 'Play'}>
+  <button onclick={toggle} onkeydown={onplaykeydown} title={$isPlaying ? 'Stop' : 'Play'} aria-label={$isPlaying ? 'Stop' : 'Play'}>
     <i class={['fa-solid', $isPlaying ? 'fa-stop' : 'fa-play']}></i>
   </button>
   <button onclick={() => { clearCells(); clearOperations() }} title="Clear" aria-label="Clear">

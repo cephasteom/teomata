@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from "svelte";
   import { cells, type direction } from "../stores/cells";
   import { gridSize } from "../stores/global";
   import {
@@ -34,9 +35,32 @@
     },
   }
 
+  let grid: HTMLDivElement
+
+  // The cursor and selection only show while the grid has focus
+  let focused = $state(false)
+
+  // The page starts on the grid, and tabbing from there carries on round to the controls
+  onMount(() => grid.focus())
+
+  // An arrow pressed anywhere else brings focus back to the grid, with the
+  // cursor where it was left. Keys typed into a field, like the controls' CPS, are for the field
+  const onwindowkeydown = (event: KeyboardEvent) => {
+    if (event.target === grid || event.target instanceof HTMLInputElement) return
+    if (keys[event.key] && !(event.metaKey || event.ctrlKey || event.altKey)) {
+      // Stop the arrow keys from scrolling the page
+      event.preventDefault()
+      grid.focus()
+    }
+  }
+
   const onkeydown = (event: KeyboardEvent) => {
-    // Keys typed into a field, like the controls' CPS, are for the field
-    if (event.target instanceof HTMLInputElement) return
+    // Tabbing on from the grid wraps round to the first control
+    if (event.key === 'Tab' && !event.shiftKey) {
+      event.preventDefault()
+      document.querySelector<HTMLElement>('[aria-label="Controls"] button')?.focus()
+      return
+    }
 
     // Select all, copy, cut and paste work on squares instead of the page's text
     const shortcut = shortcuts[event.key.toLowerCase()]
@@ -60,10 +84,6 @@
     // Leave shortcuts like cmd+r to the browser
     if (event.metaKey || event.ctrlKey || event.altKey) return
 
-    // A control's button keeps focus after it's clicked, and Enter would click
-    // it again on top of opening or closing the arguments
-    if (event.key === 'Enter') event.preventDefault()
-
     if ($editing !== null) {
       // Stop the arrow keys from scrolling the page
       if (direction) event.preventDefault()
@@ -86,9 +106,14 @@
   }
 </script>
 
-<svelte:window {onkeydown} />
+<svelte:window onkeydown={onwindowkeydown} />
 
-<div class="grid" class:editing={$editing !== null}>
+<!-- Tabbing comes here after the controls -->
+<!-- svelte-ignore a11y_no_noninteractive_tabindex, a11y_no_noninteractive_element_interactions -->
+<div class="grid" class:editing={$editing !== null} class:focused bind:this={grid}
+  role="application" aria-label="Grid" tabindex="0"
+  {onkeydown} onfocus={() => focused = true} onblur={() => focused = false}
+>
   {#each $cells as cell, i (i)}
     {@const arg = $argCells.get(i)}
     {@const label = $labelCells.get(i)}
@@ -207,7 +232,16 @@
     color: var(--cell-cursor);
   }
 
-  .cursor {
+  /* The cursor and selection stand in for the focus outline */
+  .grid:focus {
+    outline: none;
+  }
+
+  .grid:not(.focused) .selection {
+    display: none;
+  }
+
+  .focused .cursor {
     box-shadow: inset 0 0 0 2px var(--cell-cursor);
   }
 </style>
