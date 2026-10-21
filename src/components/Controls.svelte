@@ -1,6 +1,7 @@
 <script lang="ts">
   import { toggle } from "../scheduler";
-  import { MAX_CPS, MAX_Q, MIN_CPS, MIN_Q, cps, isPlaying, q } from "../stores/global";
+  import { MAX_CPS, MAX_Q, MAX_SIZE, MIN_CPS, MIN_Q, MIN_SIZE, cps, isPlaying, q } from "../stores/global";
+  import { size } from "../stores/size";
   import NumberSquare from "./NumberSquare.svelte";
   import { clearCells, randomizeCells } from "../stores/cells";
   import { clearOperations } from "../stores/operations";
@@ -17,7 +18,7 @@
 </script>
 
 <!-- A column of grid squares, one per control, sitting a square's width to the grid's left -->
-<div class="controls" role="toolbar" aria-label="Controls" aria-orientation="vertical"
+<div class="controls default-size" role="toolbar" aria-label="Controls" aria-orientation="vertical"
   {onfocusin} onfocusout={() => focused = null}
 >
   <button onclick={toggle} title={$isPlaying ? 'Stop' : 'Play'} aria-label={$isPlaying ? 'Stop' : 'Play'}>
@@ -31,6 +32,7 @@
   </button>
   <NumberSquare id="cps" label="cps" value={cps} min={MIN_CPS} max={MAX_CPS} step={0.05} places={2} row={4} />
   <NumberSquare id="q" label="q" value={q} min={MIN_Q} max={MAX_Q} step={1} places={0} row={5} />
+  <NumberSquare id="size" label="s" value={size} min={MIN_SIZE} max={MAX_SIZE} step={1} places={0} row={6} />
   {#if focused !== null}
     <div class="focus" style:grid-row="{focused + 1} / {focused + 2}"></div>
   {/if}
@@ -42,7 +44,7 @@
     top: 0;
     right: calc(100% + var(--square));
     display: grid;
-    grid-template-rows: repeat(5, var(--square));
+    grid-template-rows: repeat(6, var(--square));
     width: calc(var(--square) + 2 * var(--line));
     /* Gridlines the same way as the grid: the background shows through the gaps */
     border: var(--line) solid var(--grid-line);

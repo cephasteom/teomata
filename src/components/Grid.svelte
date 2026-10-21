@@ -60,7 +60,7 @@
     // Leave shortcuts like cmd+r to the browser
     if (event.metaKey || event.ctrlKey || event.altKey) return
 
-    // A sidebar button keeps focus after it's clicked, and Enter would click
+    // A control's button keeps focus after it's clicked, and Enter would click
     // it again on top of opening or closing the arguments
     if (event.key === 'Enter') event.preventDefault()
 

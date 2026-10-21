@@ -28,3 +28,12 @@ export const neighbours = (i: number, size: number) => {
     const [n, s] = [step(i, "n", size), step(i, "s", size)]
     return [n, s, ...[n, i, s].flatMap(j => [step(j, "e", size), step(j, "w", size)])]
 }
+
+// Copies a grid's squares onto a grid of a new size, keeping each at the same
+// column and row. Squares past the old edges come in empty, and those past
+// the new edges are cut off
+export const resize = <T>(values: T[], from: number, to: number, empty: () => T) =>
+    Array.from({ length: to * to }, (_, i) => {
+        const [x, y] = [i % to, Math.floor(i / to)]
+        return x < from && y < from ? values[y * from + x] : empty()
+    })
