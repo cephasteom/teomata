@@ -9,6 +9,7 @@ import { counter } from "./counter"
 import { explode, explodeArrays } from "./explode"
 import { math } from "./math"
 import { logic } from "./logic"
+import { print } from "./print"
 import { isLetter } from "../lib/utils"
 
 const operations: Record<string, Operation> = {
@@ -20,6 +21,7 @@ const operations: Record<string, Operation> = {
     h: harmony,
     m: math,
     l: logic,
+    p: print,
     x: explode,
 }
 

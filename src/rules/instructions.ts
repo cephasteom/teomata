@@ -17,11 +17,10 @@ export const about = {
         },
     },
     harmony: {
-        about: "Populate values() with the notes from a chord.",
+        about: "Populate values() with the notes from a chord or scale.",
         params: {
+            type: "A chord (ma, mi, au or di, for major, minor, augmented or diminished) or a scale or mode by its three letter alias, such as dor for dorian.",
             root: "A note from a to g, with an optional # or b, such as c#.",
-            triad: "ma, mi, au or di, for major, minor, augmented or diminished.",
-            inversion: "0, 1 or 2. Other whole numbers wrap around.",
         },
     },
     die: {
@@ -42,6 +41,10 @@ export const about = {
             operator: "Any operator from the JS Math object.",
             n: "Any number, for the operators that take one. Left empty, they leave the value alone.",
         },
+    },
+    print: {
+        about: "Print incoming values to the console.",
+        params: {},
     },
     rotate: {
         about: "Rotate moving cell.",

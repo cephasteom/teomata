@@ -42,9 +42,11 @@
   onMount(() => grid.focus())
 
   // An arrow pressed anywhere else brings focus back to the grid, with the
-  // cursor where it was left. Keys typed into a field, like the controls' CPS, are for the field
+  // cursor where it was left. Keys typed into a field, like the controls' CPS,
+  // are for the field, and in the console they scroll it
   const onwindowkeydown = (event: KeyboardEvent) => {
     if (event.target === grid || event.target instanceof HTMLInputElement) return
+    if (event.target instanceof HTMLElement && event.target.id === 'console') return
     if (keys[event.key] && !(event.metaKey || event.ctrlKey || event.altKey)) {
       // Stop the arrow keys from scrolling the page
       event.preventDefault()

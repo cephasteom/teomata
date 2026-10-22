@@ -5,6 +5,7 @@
   import NumberSquare from "./NumberSquare.svelte";
   import { clearCells, randomizeCells } from "../stores/cells";
   import { clearOperations } from "../stores/operations";
+  import { clearConsole } from "../stores/console";
 
   // The row of the control with keyboard focus, which the focus square sits behind
   let focused = $state<number | null>(null)
@@ -32,7 +33,7 @@
   <button onclick={toggle} onkeydown={onplaykeydown} title={$isPlaying ? 'Stop' : 'Play'} aria-label={$isPlaying ? 'Stop' : 'Play'}>
     <i class={['fa-solid', $isPlaying ? 'fa-stop' : 'fa-play']}></i>
   </button>
-  <button onclick={() => { clearCells(); clearOperations() }} title="Clear" aria-label="Clear">
+  <button onclick={() => { clearCells(); clearOperations(); clearConsole() }} title="Clear" aria-label="Clear">
     <i class="fa-solid fa-eraser"></i>
   </button>
   <button onclick={randomizeCells} title="Random" aria-label="Random">
