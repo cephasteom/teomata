@@ -19,12 +19,15 @@
       <dd>
         {name}{#if params.length || rest}({#each params as param, k (param.name)}{#if k}, {/if}{param.name}{/each}{#if rest}{#if params.length}, {/if}...{rest.name}{/if}){/if}
       </dd>
-      <!-- The active operation explains itself and its params underneath -->
+      <!-- The active operation explains itself and its params underneath. The
+      text is our own and may hold links, which are clicked without taking focus
+      from the grid, as that would hide them -->
       {#if matching.length}
-        <dd class="about">
-          <p>{about}</p>
+        <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+        <dd class="about" onmousedown={(e) => e.preventDefault()}>
+          <p>{@html about}</p>
           {#each rest ? [...params, rest] : params as param (param.name)}
-            <p><span class="param">{param.name}</span>: {param.about}</p>
+            <p><span class="param">{param.name}</span>: {@html param.about}</p>
           {/each}
         </dd>
       {/if}
@@ -68,11 +71,15 @@
     min-width: 32ch;
     line-height: 1.3;
     white-space: normal;
-    opacity: 0.7;
+    opacity: 0.8;
   }
 
   .about p {
     margin: 0;
+  }
+
+  .about :global(a) {
+    color: inherit;
   }
 
   .param {

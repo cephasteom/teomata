@@ -19,7 +19,7 @@ export const about = {
     harmony: {
         about: "Populate values() with the notes from a chord or scale.",
         params: {
-            type: "A chord (ma, mi, au or di, for major, minor, augmented or diminished) or a scale or mode by its three letter alias, such as dor for dorian.",
+            type: "A chord (ma, mi, au or di, for major, minor, augmented or diminished) or a scale or mode by its three letter alias, such as dor for dorian. See the <a href=\"https://raw.githubusercontent.com/cephasteom/teomata/refs/heads/main/src/lib/harmony.ts\" target=\"_blank\" rel=\"noopener\">full list</a>.",
             root: "A note from a to g, with an optional # or b, such as c#.",
         },
     },
