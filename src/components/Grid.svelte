@@ -12,7 +12,6 @@
     editing, shownSquare, argCells, openArea, openArgs, closeArgs, placeArgCursor, moveArgCursor, typeArg, eraseArg,
   } from "../stores/editing";
   import { paramsFor } from "../rules";
-  import { outEdges } from "../rules/out";
 
   const keys: Record<string, direction> = {
     ArrowUp: 'n',
@@ -39,20 +38,16 @@
 
   let grid: HTMLDivElement
 
-  // Each out's line of three squares is bordered as one. The gridlines in and
-  // around it take the border's colour, and each square thickens the sides on
-  // the line's outside
-  const sides: Record<direction, string> = {
-    n: 'inset 0 2px var(--cell-out)',
-    s: 'inset 0 -2px var(--cell-out)',
-    e: 'inset -2px 0 var(--cell-out)',
-    w: 'inset 2px 0 var(--cell-out)',
+  // Some operations are bordered in their own colour, outs in the one their
+  // notes print in. The borders all go while an operation's arguments are open
+  const borders: Record<string, string> = {
+    o: 'var(--cell-out)',
+    b: 'var(--cell-bang)',
   }
-  let edges = $derived(outEdges($operations, $args, $gridSize))
-  const border = (i: number) => {
-    const square = edges.get(i)
-    return square ? [...square].map(side => sides[side]).join(', ') : undefined
-  }
+  let bordered = $derived($editing === null
+    ? $operations.flatMap((letter, i) => borders[letter.toLowerCase()] ? [{ i, color: borders[letter.toLowerCase()] }] : [])
+    : [])
+  let borderColors = $derived(new Map(bordered.map(({ i, color }) => [i, color])))
 
   // The page starts on the grid, and tabbing from there carries on round to the controls
   onMount(() => grid.focus())
@@ -146,8 +141,8 @@
       class="cell"
       class:alive={cell.value !== undefined && !arg}
       class:cursor={i === $cursor}
-      class:out={$editing === null && edges.has(i)}
-      style:--out-border={border(i)}
+      class:bordered={borderColors.has(i)}
+      style:--border={borderColors.get(i)}
       class:hidden={$editing !== null && i !== $shownSquare && !arg}
       onclick={(event) => $editing !== null ? placeArgCursor(i) : placeCursor(i, event.shiftKey)}
     >
@@ -161,20 +156,20 @@
       {/if}
     </div>
   {/each}
-  <!-- Out borders all go while an operation's arguments are open, the
-       squares' own sides with them -->
-  {#if $editing === null}
-    {#each [...edges.keys()] as i (i)}
-      {@const [x, y] = [i % $gridSize, Math.floor(i / $gridSize)]}
-      <!-- Both lines are given, as an absolutely positioned item's end left
-           to auto reaches the grid's edge -->
-      <div
-        class="out-line"
-        style:grid-column="{x + 1} / {x + 2}"
-        style:grid-row="{y + 1} / {y + 2}"
-      ></div>
-    {/each}
-  {/if}
+  {#each bordered as { i, color } (i)}
+    {@const [x, y] = [i % $gridSize, Math.floor(i / $gridSize)]}
+    <!-- Behind each bordered square, in its colour, so the gridlines round it
+         join up with its border instead of showing through. It comes before
+         the selection, which colours the lines over it. Both lines are
+         given, as an absolutely positioned item's end left to auto reaches
+         the grid's edge -->
+    <div
+      class="border-line"
+      style:background={color}
+      style:grid-column="{x + 1} / {x + 2}"
+      style:grid-row="{y + 1} / {y + 2}"
+    ></div>
+  {/each}
   {#if $openArea}
     <div
       class="backdrop"
@@ -231,7 +226,7 @@
      cells in the grid's auto-placement */
   .selection,
   .backdrop,
-  .out-line {
+  .border-line {
     position: absolute;
     inset: calc(-1 * var(--line));
     z-index: -1;
@@ -239,13 +234,6 @@
 
   .selection {
     background: var(--cell-cursor);
-  }
-
-  /* One behind each of an out's squares, so the lines between them join up
-     with the border instead of showing through it. They come before the
-     selection, which colours the lines over them */
-  .out-line {
-    background: var(--cell-out);
   }
 
   /* While an operation's arguments are open, only its square and theirs show.
@@ -283,8 +271,8 @@
   }
 
   /* The cursor's ring comes after, so it shows over the border */
-  .out {
-    box-shadow: var(--out-border);
+  .bordered {
+    box-shadow: inset 0 0 0 2px var(--border);
   }
 
   /* The cursor and selection stand in for the focus outline */

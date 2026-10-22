@@ -30,16 +30,16 @@ export const about = {
     logic: {
         about: "Test incoming values using logical operators. Bangs if true, null if false.",
         params: {
-            operator: "<, >, <=, >=, == (also ===), != (also !==), && (and), || (or) and ^ (xor) take the value and n. ! (not) takes the value alone. "
+            operator: "<, >, <=, >=, ==, !=, &&, || and ^ compares value with n. ! (not) uses value alone. "
                 + "A number is true when it isn't 0.",
-            n: "Any number, for the operators that take one.",
+            n: "Any number.",
         },
     },
     math: {
         about: "Transform incoming values using math operators.",
         params: {
             operator: "Any operator from the JS Math object.",
-            n: "Any number, for the operators that take one. Left empty, they leave the value alone.",
+            n: "Any number.",
         },
     },
     print: {
@@ -47,7 +47,7 @@ export const about = {
         params: {},
     },
     rotate: {
-        about: "Rotate moving cell.",
+        about: "Rotate direction of travel.",
         params: {
             direction: "Rotates cells n, s, e, w, x or y.",
         },
@@ -59,11 +59,10 @@ export const about = {
         },
     },
     out: {
-        about: "Play incoming numbers as MIDI notes. Takes up three squares in a line in its direction: the note's, then amp's and dur's, which set the velocity and length of the notes that follow without playing one.",
+        about: "Play incoming numbers as MIDI notes, or an array as a chord.",
         params: {
             device: "The MIDI output by its number, counting from 0.",
             channel: "A MIDI channel from 1 to 16.",
-            direction: "n, s, e or w, the way amp's and dur's squares go from the note's.",
         },
     },
     explode: {

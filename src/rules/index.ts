@@ -10,7 +10,7 @@ import { explode, explodeArrays } from "./explode"
 import { math } from "./math"
 import { logic } from "./logic"
 import { print } from "./print"
-import { out, sendNotes } from "./out"
+import { out } from "./out"
 import { isLetter } from "../lib/utils"
 
 const operations: Record<string, Operation> = {
@@ -88,6 +88,5 @@ const applyRules: GridRule = (cells, size, letters, args, tick) => {
 export const rules = [
     move,
     explodeArrays,
-    sendNotes,
     applyRules,
 ]
