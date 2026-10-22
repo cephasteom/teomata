@@ -4,7 +4,7 @@
   import Instructions from "./components/Instructions.svelte";
   import Console from "./components/Console.svelte";
   import Devices from "./components/Devices.svelte";
-  import { DEFAULT_SIZE, gridSize } from "./stores/global";
+  import { DEFAULT_SIZE, gridSize, showConsole, showInstructions } from "./stores/global";
 
   // On the root, so the grid and the controls can both size against it
   $effect(() => {
@@ -21,10 +21,14 @@
     <!-- Under the controls, a square's width to the grid's left -->
     <div class="side default-size">
       <Devices />
-      <Console />
+      {#if $showConsole}
+        <Console />
+      {/if}
     </div>
     <Grid />
-    <Instructions />
+    {#if $showInstructions}
+      <Instructions />
+    {/if}
   </div>
 </main>
 
@@ -40,11 +44,11 @@
   }
 
   /* The devices and then the console, a square apart, starting a square
-     below the controls' six squares and reaching down to the grid's bottom
+     below the controls' eight squares and reaching down to the grid's bottom
      edge. Their right edge lines up with the controls' */
   .side {
     position: absolute;
-    top: calc(7 * var(--square) + 7 * var(--line));
+    top: calc(9 * var(--square) + 9 * var(--line));
     bottom: 0;
     right: calc(100% + var(--square));
     display: flex;

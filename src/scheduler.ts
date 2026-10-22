@@ -2,6 +2,7 @@ import { get } from 'svelte/store';
 import { Loop, getDraw, getTransport, start } from 'tone'
 import { cps, isPlaying, q } from './stores/global';
 import { updateCells } from './stores/cells';
+import { clearConsole } from './stores/console';
 
 const loop = new Loop((time) => {
 	// Ticks since the transport last started, which time-based rules read.
@@ -31,6 +32,8 @@ export const toggle = async () => {
     if (get(isPlaying)) {
         getTransport().stop()
     } else {
+        // Each run starts with an empty console
+        clearConsole()
         getTransport().start()
     }
     isPlaying.update(isPlaying => !isPlaying)

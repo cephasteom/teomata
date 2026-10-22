@@ -18,3 +18,7 @@ export const cps = writable<number>(0.5)
 export const MIN_Q = 1
 export const MAX_Q = 64
 export const q = writable<number>(8)
+
+// Whether the console and the instructions show beside the grid
+export const showConsole = writable<boolean>(true)
+export const showInstructions = writable<boolean>(true)

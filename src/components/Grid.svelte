@@ -12,6 +12,7 @@
     editing, shownSquare, argCells, openArea, openArgs, closeArgs, placeArgCursor, moveArgCursor, typeArg, eraseArg,
   } from "../stores/editing";
   import { paramsFor } from "../rules";
+  import { toggle } from "../scheduler";
 
   const keys: Record<string, direction> = {
     ArrowUp: 'n',
@@ -56,6 +57,14 @@
   // cursor where it was left. Keys typed into a field, like the controls' CPS,
   // are for the field, and in the console they scroll it
   const onwindowkeydown = (event: KeyboardEvent) => {
+    // Space plays and stops from anywhere, apart from while an operation's
+    // arguments are open, where it does nothing as they don't take spaces.
+    // It never reaches the page, so it doesn't scroll or type a space
+    if (event.key === ' ' && !(event.metaKey || event.ctrlKey || event.altKey)) {
+      event.preventDefault()
+      if ($editing === null && !event.repeat) toggle()
+      return
+    }
     if (event.target === grid || event.target instanceof HTMLInputElement) return
     if (event.target instanceof HTMLElement && event.target.id === 'console') return
     if (keys[event.key] && !(event.metaKey || event.ctrlKey || event.altKey)) {
@@ -126,7 +135,10 @@
   }
 </script>
 
-<svelte:window onkeydown={onwindowkeydown} />
+<!-- A focused button clicks on space's keyup, which would play or stop a second time -->
+<svelte:window onkeydown={onwindowkeydown}
+  onkeyup={(event) => { if (event.key === ' ' && event.target instanceof HTMLButtonElement) event.preventDefault() }}
+/>
 
 <!-- Tabbing comes here after the controls -->
 <!-- svelte-ignore a11y_no_noninteractive_tabindex, a11y_no_noninteractive_element_interactions -->

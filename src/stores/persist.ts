@@ -1,5 +1,5 @@
 import { get, type Writable } from "svelte/store"
-import { cps, q, gridSize, MIN_CPS, MAX_CPS, MIN_Q, MAX_Q, MIN_SIZE, MAX_SIZE } from "./global"
+import { cps, q, gridSize, showConsole, showInstructions, MIN_CPS, MAX_CPS, MIN_Q, MAX_Q, MIN_SIZE, MAX_SIZE } from "./global"
 import { operations, args } from "./operations"
 import { resizeGrid } from "./size"
 
@@ -43,6 +43,12 @@ const restore = () => {
     const savedSize = load("s")
     if (inRange(savedSize, MIN_SIZE, MAX_SIZE) && Number.isInteger(savedSize)) resizeGrid(savedSize)
 
+    const savedConsole = load("console")
+    if (typeof savedConsole === "boolean") showConsole.set(savedConsole)
+
+    const savedInstructions = load("instructions")
+    if (typeof savedInstructions === "boolean") showInstructions.set(savedInstructions)
+
     const squares = Math.pow(get(gridSize), 2)
 
     const savedOperations = load("operations")
@@ -62,3 +68,5 @@ save("q", q)
 save("s", gridSize)
 save("operations", operations)
 save("args", args)
+save("console", showConsole)
+save("instructions", showInstructions)
