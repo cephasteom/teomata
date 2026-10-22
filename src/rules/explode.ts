@@ -1,9 +1,7 @@
 import type { Cell, direction } from "../stores/cells"
-import { isDirection, step } from "../lib/utils"
+import { axes, isAxis, isDirection, step, type axis } from "../lib/utils"
 import type { GridRule, Operation, Param } from "./types"
-
-// The two ways an axis explodes, taking turns
-const ways: Record<"x" | "y", [direction, direction]> = { x: ["e", "w"], y: ["n", "s"] }
+import { about } from "./instructions"
 
 // Explodes a cell's array value out from square i in the given direction, the
 // first number staying on the square and each one after going one square
@@ -14,7 +12,7 @@ const ways: Record<"x" | "y", [direction, direction]> = { x: ["e", "w"], y: ["n"
 // edges, and nothing for single values and empty cells
 const explodeLine = ({ value, direction }: Cell, i: number, to: string, size: number): [number, Cell][] => {
     if (!Array.isArray(value)) return []
-    const directions = isDirection(to) ? [to] : ways[to as "x" | "y"]
+    const directions = isDirection(to) ? [to] : axes[to as axis]
     const ends = directions.map(() => i)
     return value.map((n, k) => {
         let j = i
@@ -28,16 +26,16 @@ const explodeLine = ({ value, direction }: Cell, i: number, to: string, size: nu
 
 const heading: Param = {
     name: "direction",
-    about: "n, s, e or w, or x or y to explode both ways along an axis.",
+    about: about.explode.params.direction,
     fallback: "n",
-    accepts: text => isDirection(text.toLowerCase()) || /^[xy]$/i.test(text),
+    accepts: text => isDirection(text.toLowerCase()) || isAxis(text.toLowerCase()),
 }
 
 // The exploding needs the whole grid, so it is done by explodeArrays in the
 // rules chain, and the rule for the square itself leaves the cell alone
 export const explode: Operation = {
     name: "explode",
-    about: "Explode an array's values out in a line in a given direction, or both ways along an axis.",
+    about: about.explode.about,
     params: [heading],
     rule: () => cell => cell,
 }

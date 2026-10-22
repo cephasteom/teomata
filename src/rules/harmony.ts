@@ -1,6 +1,7 @@
 import { isValue } from "../lib/utils"
-import { createArray } from "./array"
+import { createValues } from "./values"
 import type { Operation, Param } from "./types"
+import { about } from "./instructions"
 
 // Semitones above C for each note name, and for each triad's notes above its root
 const notes: Record<string, number> = { c: 0, d: 2, e: 4, f: 5, g: 7, a: 9, b: 11 }
@@ -31,28 +32,28 @@ const chordNotes = (root: string, triad: string, inversion: number) => {
 
 const root: Param = {
     name: "root",
-    about: "A note from a to g, with an optional # or b, such as c#.",
+    about: about.harmony.params.root,
     fallback: "c",
     accepts: isRoot,
 }
 
 const triad: Param = {
     name: "triad",
-    about: "ma, mi, au or di, for major, minor, augmented or diminished.",
+    about: about.harmony.params.triad,
     fallback: "ma",
     accepts: text => text.toLowerCase() in triads,
 }
 
 const inversion: Param = {
     name: "inversion",
-    about: "0, 1 or 2. Other whole numbers wrap around.",
+    about: about.harmony.params.inversion,
     fallback: "0",
     accepts: isValue,
 }
 
-export const chord: Operation = {
-    name: "chord",
-    about: "Output a single note on receiving an integer index, output the whole chord on receiving a bang or non-integer.",
+export const harmony: Operation = {
+    name: "harmony",
+    about: about.harmony.about,
     params: [root, triad, inversion],
-    rule: (root, triad, inversion) => createArray(chordNotes(root, triad, Number(inversion))),
+    rule: (root, triad, inversion) => createValues(chordNotes(root, triad, Number(inversion))),
 }

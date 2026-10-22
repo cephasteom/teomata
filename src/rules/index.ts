@@ -3,9 +3,9 @@ import { move } from "./move"
 import { rotate } from "./rotate"
 import { die } from "./die"
 import { bang } from "./bang"
-import { value } from "./value"
-import { array } from "./array"
-import { chord } from "./chord"
+import { values } from "./values"
+import { harmony } from "./harmony"
+import { counter } from "./counter"
 import { explode, explodeArrays } from "./explode"
 import { math } from "./math"
 import { logic } from "./logic"
@@ -15,9 +15,9 @@ const operations: Record<string, Operation> = {
     r: rotate,
     d: die,
     b: bang,
-    v: value,
-    a: array,
-    c: chord,
+    v: values,
+    c: counter,
+    h: harmony,
     m: math,
     l: logic,
     x: explode,

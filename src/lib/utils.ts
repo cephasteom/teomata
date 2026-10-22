@@ -11,6 +11,11 @@ export const opposite: Record<direction, direction> = { n: 's', s: 'n', e: 'w', 
 
 export const isDirection = (letter: string): letter is direction => letter in offsets
 
+// x and y stand for both ways along an axis, east then west or north then south
+export type axis = 'x' | 'y'
+export const axes: Record<axis, [direction, direction]> = { x: ['e', 'w'], y: ['n', 's'] }
+export const isAxis = (letter: string): letter is axis => letter in axes
+
 // Cells hold a number, usually whole, which can go past MIDI's 0 to 127, or below 0
 // Random cells start inside that range
 export const MAX_VALUE = 127

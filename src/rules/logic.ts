@@ -1,5 +1,6 @@
 import { BANG, toNumber } from "../lib/utils"
 import type { CellRule, Operation, Param } from "./types"
+import { about } from "./instructions"
 
 // Tests a number against n, which only ! goes without
 type Test = (value: number, n: number) => boolean
@@ -41,22 +42,21 @@ const isNumber = (text: string) => text !== "" && Number.isFinite(Number(text))
 
 const operator: Param = {
     name: "operator",
-    about: "<, >, <=, >=, == (also ===), != (also !==), && (and), || (or) and ^ (xor) take the value and n. ! (not) takes the value alone. "
-        + "A number is true when it isn't 0.",
+    about: about.logic.params.operator,
     fallback: "==",
     accepts: text => text in operators,
 }
 
 const n: Param = {
     name: "n",
-    about: "Any number, for the operators that take one.",
+    about: about.logic.params.n,
     fallback: "0",
     accepts: isNumber,
 }
 
 export const logic: Operation = {
     name: "logic",
-    about: "Output a bang if a value passes a test with an operator from JS, or nothing if not.",
+    about: about.logic.about,
     params: [operator, n],
     // n only shows for the operators that take it
     shown: ([operator = ""]) => operator in alone ? 1 : 2,
