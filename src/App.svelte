@@ -3,6 +3,7 @@
   import Grid from "./components/Grid.svelte";
   import Instructions from "./components/Instructions.svelte";
   import Console from "./components/Console.svelte";
+  import Devices from "./components/Devices.svelte";
   import { DEFAULT_SIZE, gridSize } from "./stores/global";
 
   // On the root, so the grid and the controls can both size against it
@@ -17,7 +18,11 @@
   <!-- The controls, console and instructions hang off the grid's edges, so the grid stays centred -->
   <div class="board">
     <Controls />
-    <Console />
+    <!-- Under the controls, a square's width to the grid's left -->
+    <div class="side default-size">
+      <Devices />
+      <Console />
+    </div>
     <Grid />
     <Instructions />
   </div>
@@ -32,5 +37,21 @@
 
   .board {
     position: relative;
+  }
+
+  /* The devices and then the console, a square apart, starting a square
+     below the controls' six squares and reaching down to the grid's bottom
+     edge. Their right edge lines up with the controls' */
+  .side {
+    position: absolute;
+    top: calc(7 * var(--square) + 7 * var(--line));
+    bottom: 0;
+    right: calc(100% + var(--square));
+    display: flex;
+    flex-direction: column;
+    gap: var(--square);
+    width: 20ch;
+    font-family: ui-monospace, monospace;
+    font-size: var(--text-size);
   }
 </style>

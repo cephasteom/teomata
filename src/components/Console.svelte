@@ -62,14 +62,14 @@
   };
 </script>
 
-<!-- The printed values, one per line, sitting under the controls a square's
-     width to the grid's left and reaching down to its bottom edge. The
-     scrollbar sits outside them, in the gap before the grid -->
-<div class="console default-size">
+<!-- The printed values, one per line, under the devices and reaching down
+     to the grid's bottom edge. The scrollbar sits outside them, in the gap
+     before the grid -->
+<div class="console">
   <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
   <ol id="console" aria-label="Console" aria-live="off" tabindex="0" bind:this={list} {onscroll}>
-    {#each $lines as { id, text } (id)}
-      <li>{text}</li>
+    {#each $lines as { id, text, color } (id)}
+      <li style:color>{text}</li>
     {/each}
   </ol>
   {#if overflowing}
@@ -86,16 +86,11 @@
 </div>
 
 <style>
+  /* Takes whatever height the devices leave */
   .console {
-    position: absolute;
-    /* The controls' six squares and their gridlines, then a square's gap */
-    top: calc(7 * var(--square) + 7 * var(--line));
-    bottom: 0;
-    /* The values' right edge lines up with the controls' */
-    right: calc(100% + var(--square));
-    width: 20ch;
-    font-family: ui-monospace, monospace;
-    font-size: var(--text-size);
+    position: relative;
+    flex: 1;
+    min-height: 0;
     --bar-width: 3px;
   }
 

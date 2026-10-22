@@ -58,6 +58,14 @@ export const about = {
             value: "Any number, one per square. Empty squares are skipped.",
         },
     },
+    out: {
+        about: "Play incoming numbers as MIDI notes. Takes up three squares in a line in its direction: the note's, then amp's and dur's, which set the velocity and length of the notes that follow without playing one.",
+        params: {
+            device: "The MIDI output by its number, counting from 0.",
+            channel: "A MIDI channel from 1 to 16.",
+            direction: "n, s, e or w, the way amp's and dur's squares go from the note's.",
+        },
+    },
     explode: {
         about: "Explode an array's values out in a line in a given direction, or both ways along an axis.",
         params: {

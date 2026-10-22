@@ -10,6 +10,7 @@ import { explode, explodeArrays } from "./explode"
 import { math } from "./math"
 import { logic } from "./logic"
 import { print } from "./print"
+import { out, sendNotes } from "./out"
 import { isLetter } from "../lib/utils"
 
 const operations: Record<string, Operation> = {
@@ -23,6 +24,7 @@ const operations: Record<string, Operation> = {
     l: logic,
     p: print,
     x: explode,
+    o: out,
 }
 
 // Every operation by its letter, for the instructions. The symbols come
@@ -86,5 +88,6 @@ const applyRules: GridRule = (cells, size, letters, args, tick) => {
 export const rules = [
     move,
     explodeArrays,
+    sendNotes,
     applyRules,
 ]
