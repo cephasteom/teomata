@@ -5,8 +5,10 @@ A formal specification of Teomata's rules.
 ## Types and definitions
 
 Value: bang | number
+A bang into `h` gives a chord, an array of numbers, which operators work on number by number and `n` plays as a chord.
+
 Direction: n | e | s | w | x | y | xy
-Compass points are displayed as arrows (e.g. `←`), `↕` for x, `↔` for y, and `⤡` for xy.
+Compass points are displayed as arrows (e.g. `←`), `↔` for x, `↕` for y, and `⤡` for xy.
 
 cycle - name for a musical bar without having to specify beats/divisions
 
@@ -26,23 +28,23 @@ A generator and an operator may share a letter. The generator emits values on it
 
 Shown as a green outlined square.
 
-* **B** `bang(n, direction)`: output a bang every `n` cycles, in `direction`. Defaults: `n = 1`, `direction = e`. Displayed as e.g. `b↕`
-* **V** `value(value, n, direction)`: output `value` every `n` cycles, in `direction`. Defaults: `n = 1`, `direction = e`. Displayed as the number and the unicode direction
-* **I** `increment(from, to)`: count from `from` to `to`, outputting each step every `n` cycles, in `direction`. Displayed as the next count and direction.
+* **B** `bang(n, direction)`: output a bang every `n` cycles, in `direction`. Defaults: `n = 1`, `direction = e`. Displayed as `B`.
+* **V** `value(value, n, direction)`: output `value` every `n` cycles, in `direction`. Defaults: `value = 0`, `n = 1`, `direction = e`. Displayed as `V`.
+* **I** `increment(from, to, n, direction)`: count from `from` to `to`, outputting each step every `n` cycles, in `direction`. Wraps around at the ends, and counts down when `to` is below `from`. Defaults: `from = 0`, `to = 7`, `n = 1`, `direction = e`. Displayed as `I`.
 
 ## Operators
 
 * **b** `bang()`: convert any incoming value into a bang.
-* **i** `increment(from, to)`: output the next count each time a value is received. Displayed as the next count.
+* **i** `increment(from, to)`: output the next count each time a value is received, counting as **I** does. Defaults: `from = 0`, `to = 7`. Displayed as the next count.
 * **d** `die()`: nullify incoming values.
-* **h** `harmony(root, type, octaves)`: populate `values()` with the notes of a chord or scale. A bang outputs all notes; a number outputs the note at that index. Displayed as root and type, e.g. `Cma`.
-* **m** `math(operator, n)`: transform incoming values using math operators. Bangs are 1. Displayed as the operator.
-* **l** `logic(operator, n)`: transform incoming values using logical operators. Bangs are true. Displayed as the operator.
+* **h** `harmony(root, type, octaves)`: populate `values()` with the notes of a chord or scale. A bang outputs all notes; a number outputs the note at that index, wrapped. The root sits in the octave from middle C, and `octaves` repeats the notes in each octave above. Defaults: `root = c`, `type = ma`, `octaves = 1`. Displayed as root and type, cut to 3 letters, e.g. `Cma` or `F#d`.
+* **m** `math(operator, n)`: transform incoming values using math operators. Bangs are 1. Defaults: `operator = +`, `n` empty (the value is left alone). Displayed as the operator.
+* **l** `logic(operator, n)`: transform incoming values using logical operators. Bangs are true. Passing values become bangs, failing ones are nullified. Defaults: `operator = ==`, `n = 0`. Displayed as the operator.
 * **p** `print()`: print to console.
-* **r** `rotate(direction)`: turn the incoming value in `direction`. Displayed as the unicode direction.
-* **v** `value(value)`: uses `values()`. Any incoming number or bang outputs the value. Displayed as the number.
+* **r** `rotate(direction)`: turn the incoming value in `direction`. Default: `direction = x`. Displayed as the unicode direction.
+* **v** `value(value)`: uses `values()`. Any incoming number or bang outputs the value. Default: `value = 0`. Displayed as the number.
 
 ## Outputs
 
-* **n** `note(device, channel)`: send incoming numbers as MIDI notes. Bangs are ignored; numbers are rounded and wrapped. Displayed as `n`.
-* **c** `cc(device, channel, cc)`: send incoming numbers as CC messages. Bangs are ignored; numbers are rounded and wrapped. Displayed as `cc<number>`, e.g. `cc7`.
+* **n** `note(device, channel)`: send incoming numbers as MIDI notes. Bangs are ignored; numbers are rounded and wrapped to 0 to 127. Defaults: `device = 0`, `channel = 1`. Displayed as `n`.
+* **c** `cc(device, channel, cc)`: send incoming numbers as CC messages. Bangs are ignored; numbers are rounded and wrapped to 0 to 127, and a chord sends its first number. Defaults: `device = 0`, `channel = 1`, `cc = 1`. Displayed as `cc<number>`, e.g. `cc7`.

@@ -60,7 +60,7 @@ let targets: number[] = []
 let selectedFrom = 0
 
 // Opens a square's arguments for editing. Arguments typed in also go to the
-// other selected squares with the same operation, ignoring case. Every one of
+// other selected squares with the same operation. Every one of
 // them is filled in with defaults where its arguments are unset. The cursor
 // goes to the first argument, or stays on the operation when it has none.
 // The rules keep running on the squares as they were before, which is what
@@ -75,7 +75,7 @@ export const openArgs = (
     const operation = all[square]
     if (!operation) return
     targets = [square, ...[...selected].filter(i =>
-        i !== square && all[i].toLowerCase() === operation.toLowerCase()
+        i !== square && all[i] === operation
     )]
     holdOperations(targets, before)
     const size = get(gridSize)

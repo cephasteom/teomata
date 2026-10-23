@@ -2,7 +2,9 @@ import type { Cell } from "../stores/cells"
 
 export type GridRule = (cells: Cell[], size: number, operations: string[], args: string[][], tick: number) => Cell[]
 
-export type CellRule = (cell: Cell, tick: number) => Cell
+// A square's rule, which can say how its square shows on the grid from what
+// it remembers, such as an increment's next count
+export type CellRule = ((cell: Cell, tick: number) => Cell) & { label?: () => string }
 
 export interface Param {
     name: string
@@ -11,10 +13,16 @@ export interface Param {
     accepts: (text: string) => boolean
 }
 
+// Generators (uppercase) put out values on their own schedule, operators
+// (lowercase) change the values that arrive, and outputs (lowercase) send
+// them on as MIDI
+export type Kind = "generator" | "operator" | "output"
+
 // An operation's params, and how to build its rule from their arguments
 export interface Operation {
     // Shown beside the operation's letter in the instructions
     name: string
+    kind: Kind
     // Shown under the operation in the instructions when it is the only one shown
     about: string
     params: Param[]
@@ -23,5 +31,8 @@ export interface Operation {
     // How many of the params show while the arguments are open, given what
     // they are now. All of them show when it's left out
     shown?: (args: string[]) => number
+    // How the square shows on the grid, given its arguments, until its rule
+    // gives a label of its own. The letter shows when it's left out
+    label?: (...args: string[]) => string
     rule: (...args: string[]) => CellRule
 }

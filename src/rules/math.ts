@@ -1,5 +1,6 @@
 import { toNumber } from "../lib/utils"
 import type { CellRule, Operation, Param } from "./types"
+import { isMoving, isNumber } from "./shared"
 import { about } from "./instructions"
 
 // Works out a number from a value and n, which is undefined when its square is empty
@@ -69,35 +70,35 @@ const operators = { ...withN, ...alone }
 // as a 1. The results aren't rounded, or kept to MIDI's range, but a number
 // whose result isn't finite, such as after dividing by 0, is left as it was
 const createMath = (apply: Apply, n?: number): CellRule => cell => {
-    if (!cell.direction || cell.value === undefined) return cell
+    if (!isMoving(cell)) return cell
     const sum = (value: number) => {
         const result = apply(value, n)
         return Number.isFinite(result) ? result : value
     }
-    return { ...cell, value: Array.isArray(cell.value) ? cell.value.map(sum) : sum(toNumber(cell.value)) }
+    return { ...cell, value: Array.isArray(cell.value) ? cell.value.map(sum) : sum(toNumber(cell.value!)) }
 }
-
-const isNumber = (text: string) => text !== "" && Number.isFinite(Number(text))
 
 const operator: Param = {
     name: "operator",
-    about: about.math.params.operator,
+    about: about.m.params.operator,
     fallback: "+",
-    accepts: text => text.toLowerCase() in operators,
+    accepts: text => Object.hasOwn(operators, text.toLowerCase()),
 }
 
 const n: Param = {
     name: "n",
-    about: about.math.params.n,
+    about: about.m.params.n,
     fallback: "",
     accepts: text => text === "" || isNumber(text),
 }
 
 export const math: Operation = {
     name: "math",
-    about: about.math.about,
+    kind: "operator",
+    about: about.m.about,
     params: [operator, n],
     // n only shows for the operators that take it
-    shown: ([operator = ""]) => operator.toLowerCase() in alone ? 1 : 2,
+    shown: ([operator = ""]) => Object.hasOwn(alone, operator.toLowerCase()) ? 1 : 2,
+    label: operator => operator.toLowerCase(),
     rule: (operator, n) => createMath(operators[operator.toLowerCase()], isNumber(n) ? Number(n) : undefined),
 }

@@ -11,7 +11,8 @@
   import {
     editing, shownSquare, argCells, openArea, openArgs, closeArgs, placeArgCursor, moveArgCursor, typeArg, eraseArg,
   } from "../stores/editing";
-  import { paramsFor } from "../rules";
+  import { paramsFor, kindOf, labelFor } from "../rules";
+  import { arrows } from "../lib/utils";
   import { toggle } from "../scheduler";
 
   const keys: Record<string, direction> = {
@@ -39,15 +40,31 @@
 
   let grid: HTMLDivElement
 
-  // Some operations are bordered in their own colour, outs in the one their
-  // notes print in. The borders all go while an operation's arguments are open
-  const borders: Record<string, string> = {
-    o: 'var(--cell-out)',
-    b: 'var(--cell-bang)',
+  // Generators and outputs are bordered in their own colours, outputs in the
+  // one their messages print in. The borders all go while an operation's
+  // arguments are open
+  const borders: Partial<Record<string, string>> = {
+    generator: 'var(--cell-generator)',
+    output: 'var(--cell-output)',
   }
   let bordered = $derived($editing === null
-    ? $operations.flatMap((letter, i) => borders[letter.toLowerCase()] ? [{ i, color: borders[letter.toLowerCase()] }] : [])
+    ? $operations.flatMap((letter, i) => {
+      const color = borders[kindOf(letter) ?? '']
+      return color ? [{ i, color }] : []
+    })
     : [])
+
+  // How each square's operation shows, such as Cma for a harmony or the next
+  // count for an increment. Some come from what the rules remember, so
+  // they are worked out again each time the cells change
+  let labels = $derived.by(() => {
+    void $cells
+    return $operations.map((letter, i) => letter ? labelFor(i, letter, $gridSize, $args[i]) : "")
+  })
+
+  // A label that is a lone arrow, as a rotate's is, shows bigger, as arrows
+  // are small beside letters
+  const arrowLabels = new Set(Object.values(arrows))
   let borderColors = $derived(new Map(bordered.map(({ i, color }) => [i, color])))
 
   // The page starts on the grid, and tabbing from there carries on round to the controls
@@ -161,10 +178,10 @@
       {#if arg}
         <span class="arg" class:invalid={!arg.valid} style:--length={Math.max(1, arg.text.length)}>{arg.text}</span>
       {:else if $editing !== null && i === $shownSquare}
-        <span class="letter">{$operations[$editing]}</span>
+        <span class="letter" style:--length={1}>{$operations[$editing]}</span>
       {:else if $operations[i]}
-        <!-- A cell passing over its square inverts the letter -->
-        <span class="letter">{$operations[i]}</span>
+        <!-- A cell passing over its square inverts the label -->
+        <span class="letter" class:arrow={arrowLabels.has(labels[i])} style:--length={labels[i].length}>{labels[i]}</span>
       {/if}
     </div>
   {/each}
@@ -273,9 +290,20 @@
     font-size: var(--text-size);
   }
 
-  /* Long arguments shrink to fit their square */
-  .arg {
+  /* Long arguments and labels shrink to fit their square */
+  .arg,
+  .letter {
     font-size: calc(var(--text-size) * min(1, 3 / var(--length)));
+  }
+
+  /* Operations show in bold, apart from arrows */
+  .letter {
+    font-weight: bold;
+  }
+
+  .letter.arrow {
+    font-size: calc(var(--text-size) * 2);
+    font-weight: normal;
   }
 
   .invalid {

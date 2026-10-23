@@ -46,7 +46,7 @@ export const appliedOperations = () => {
 export const setOperations = (squares: Iterable<number>, operation: string) => {
     const list = [...squares]
     const current = get(operations)
-    const changed = list.filter(i => current[i].toLowerCase() !== operation.toLowerCase())
+    const changed = list.filter(i => current[i] !== operation)
     operations.update(operations => {
         const next = [...operations]
         for (const i of list) next[i] = operation

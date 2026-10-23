@@ -6,16 +6,16 @@
 
   // The operation under the cursor, or the one whose arguments are open, shows
   // on its own. Anywhere else, or while the grid doesn't have focus, every operation shows
-  let focused = $derived($gridFocused ? $operations[$editing ?? $cursor]?.toLowerCase() ?? "" : "");
+  let focused = $derived($gridFocused ? $operations[$editing ?? $cursor] ?? "" : "");
   let matching = $derived(instructions.filter(({ letter }) => letter === focused));
   let shown = $derived(matching.length ? matching : instructions);
 </script>
 
 <!-- The operations by letter, sitting a square's width to the grid's right -->
 <dl class="instructions default-size" aria-label="Operations">
-  {#each shown as { letter, name, about, params, rest } (letter)}
+  {#each shown as { letter, name, kind, about, params, rest } (letter)}
     <div class="operation">
-      <dt>{letter}</dt>
+      <dt class={kind}>{letter}</dt>
       <dd>
         {name}{#if params.length || rest}({#each params as param, k (param.name)}{#if k}, {/if}{param.name}{/each}{#if rest}{#if params.length}, {/if}...{rest.name}{/if}){/if}
       </dd>
@@ -57,6 +57,15 @@
 
   dt {
     color: var(--cell-cursor);
+  }
+
+  /* Generators and outputs are coloured as their squares are bordered */
+  dt.generator {
+    color: var(--cell-generator);
+  }
+
+  dt.output {
+    color: var(--cell-output);
   }
 
   dd {

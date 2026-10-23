@@ -1,40 +1,29 @@
-import { get } from "svelte/store"
-import type { direction } from "../stores/cells"
-import { q } from "../stores/global"
-import { BANG, axes, isAxis, isDirection } from "../lib/utils"
-import type { Operation, CellRule, Param } from "./types"
+import { BANG, pickDirection, type heading } from "../lib/utils"
+import type { Operation, CellRule } from "./types"
+import { cyclesParam, directionParam, fires, isMoving } from "./shared"
 import { about } from "./instructions"
 
-// Puts a new cell with a bang heading in the given direction on the square every freq bars
-// The next move carries it onto the neighbouring square like any other cell
-// freq is in bars, so 1 is once a bar and .5 is twice a bar
-// For x or y the bangs take turns heading either way along that axis, east
-// then west or north then south
-// Fires on the first tick at or after each trigger, and at most once a tick
-const createBang = (freq = 1, to = "e"): CellRule => {
-    const ways: direction[] = isAxis(to) ? axes[to] : [to as direction]
-    let fired = 0
-    return (cell, tick) =>
-        tick % (freq * get(q)) < 1 ? { value: BANG, direction: ways[fired++ % ways.length] } : cell
+// Puts a new cell with a bang heading in the given direction on the square
+// every n cycles, for the next move to carry onto the neighbouring square.
+// Cells arriving between times pass through
+const createBangGenerator = (cycles: number, to: heading): CellRule => (cell, tick) =>
+    fires(cycles, tick) ? { value: BANG, direction: pickDirection(to) } : cell
+
+export const bangGenerator: Operation = {
+    name: "bang",
+    kind: "generator",
+    about: about.B.about,
+    params: [cyclesParam(about.B.params.n), directionParam(about.B.params.direction)],
+    rule: (cycles, to) => createBangGenerator(Number(cycles), to.toLowerCase() as heading),
 }
 
-const bars: Param = {
-    name: "n",
-    about: about.bang.params.n,
-    fallback: "1",
-    accepts: text => text !== "" && Number.isFinite(Number(text)) && Number(text) > 0,
-}
-
-const heading: Param = {
-    name: "direction",
-    about: about.bang.params.direction,
-    fallback: "e",
-    accepts: text => isDirection(text.toLowerCase()) || isAxis(text.toLowerCase()),
-}
+// Turns any value arriving into a bang
+const createBang = (): CellRule => cell => isMoving(cell) ? { ...cell, value: BANG } : cell
 
 export const bang: Operation = {
     name: "bang",
-    about: about.bang.about,
-    params: [bars, heading],
-    rule: (freq, to) => createBang(Number(freq), to.toLowerCase()),
+    kind: "operator",
+    about: about.b.about,
+    params: [],
+    rule: createBang,
 }

@@ -1,5 +1,6 @@
 import { BANG, toNumber } from "../lib/utils"
 import type { CellRule, Operation, Param } from "./types"
+import { isMoving, isNumber } from "./shared"
 import { about } from "./instructions"
 
 // Tests a number against n, which only ! goes without
@@ -32,33 +33,33 @@ const operators = { ...withN, ...alone }
 // the cell when it doesn't. An array value passes when every one of its
 // numbers does, and a bang counts as a 1
 const createLogic = (test: Test, n: number): CellRule => cell => {
-    if (!cell.direction || cell.value === undefined) return cell
+    if (!isMoving(cell)) return cell
     const passes = (value: number) => test(value, n)
-    const passed = Array.isArray(cell.value) ? cell.value.every(passes) : passes(toNumber(cell.value))
+    const passed = Array.isArray(cell.value) ? cell.value.every(passes) : passes(toNumber(cell.value!))
     return passed ? { ...cell, value: BANG } : {}
 }
 
-const isNumber = (text: string) => text !== "" && Number.isFinite(Number(text))
-
 const operator: Param = {
     name: "operator",
-    about: about.logic.params.operator,
+    about: about.l.params.operator,
     fallback: "==",
-    accepts: text => text in operators,
+    accepts: text => Object.hasOwn(operators, text),
 }
 
 const n: Param = {
     name: "n",
-    about: about.logic.params.n,
+    about: about.l.params.n,
     fallback: "0",
     accepts: isNumber,
 }
 
 export const logic: Operation = {
     name: "logic",
-    about: about.logic.about,
+    kind: "operator",
+    about: about.l.about,
     params: [operator, n],
     // n only shows for the operators that take it
-    shown: ([operator = ""]) => operator in alone ? 1 : 2,
+    shown: ([operator = ""]) => Object.hasOwn(alone, operator) ? 1 : 2,
+    label: operator => operator,
     rule: (operator, n) => createLogic(operators[operator], Number(n)),
 }

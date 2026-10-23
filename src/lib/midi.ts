@@ -26,3 +26,10 @@ WebMidi.enable()
 export const playNote = (device: number, channel: number, notes: number[], amp: number, dur: number) => {
     get(outputs)[device]?.channels[channel]?.playNote(notes, { rawAttack: amp, duration: dur * 1000 })
 }
+
+// Sends a control change, a value from 0 to 127 for a controller from 0 to
+// 127, on the output at that index, from 0, and channel, from 1 to 16. A
+// missing output sends nothing
+export const sendControl = (device: number, channel: number, controller: number, value: number) => {
+    get(outputs)[device]?.channels[channel]?.sendControlChange(controller, value)
+}

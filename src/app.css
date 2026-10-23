@@ -5,10 +5,10 @@
   --cell-empty: black;
   --cell-alive: white;
   --cell-cursor: #ff6b6b;
-  /* The border round an out's square, and the notes it prints */
-  --cell-out: #4dabf7;
-  /* The border round a bang's square, the same lightness as the cursor's red and the out's blue */
-  --cell-bang: #51cf66;
+  /* The border round an output's square, and the messages it prints */
+  --cell-output: #4dabf7;
+  /* The border round a generator's square, the same lightness as the cursor's red and the output's blue */
+  --cell-generator: #51cf66;
   /* The largest square that fits the viewport with a gutter all round as wide
      as one of the squares at the default grid size, the same gap the controls
      and instructions keep from the grid. The gutter depends on the grid's
