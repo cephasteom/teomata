@@ -19,12 +19,12 @@
   <div class="board">
     <Controls />
     <!-- Under the controls, a square's width to the grid's left -->
-    <div class="side default-size">
-      <Devices />
-      {#if $showConsole}
+    {#if $showConsole}
+      <div class="side default-size">
+        <Devices />
         <Console />
-      {/if}
-    </div>
+      </div>
+    {/if}
     <Grid />
     {#if $showInstructions}
       <Instructions />
