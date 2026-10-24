@@ -1,14 +1,14 @@
 import { get, type Writable } from "svelte/store"
 import { gridSize } from "./global"
 import { cells, setCells } from "./cells"
-import { operations, args } from "./operations"
+import { operations, args, muted } from "./operations"
 import { cursor, anchor } from "./cursor"
 import { closeArgs } from "./editing"
 import { resize } from "../lib/utils"
 
 // Changes the squares per side. Growing adds squares to the right and bottom,
 // and shrinking cuts them off, so every square that stays keeps its cell,
-// operation and arguments. The cursor and the selection's anchor stay on
+// operation, arguments and mute. The cursor and the selection's anchor stay on
 // their square, or move in to the nearest edge
 export const resizeGrid = (size: number) => {
     const from = get(gridSize)
@@ -18,6 +18,7 @@ export const resizeGrid = (size: number) => {
     setCells(resize(get(cells), from, size, () => ({})))
     operations.update(operations => resize(operations, from, size, () => ""))
     args.update(args => resize(args, from, size, () => []))
+    muted.update(muted => resize(muted, from, size, () => false))
     const clamp = (i: number) => {
         const [x, y] = [i % from, Math.floor(i / from)].map(n => Math.min(n, size - 1))
         return y * size + x

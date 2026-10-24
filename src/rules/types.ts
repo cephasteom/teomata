@@ -1,6 +1,7 @@
 import type { Cell } from "../stores/cells"
 
-export type GridRule = (cells: Cell[], size: number, operations: string[], args: string[][], tick: number) => Cell[]
+// Muted squares keep their operations, but their rules don't run
+export type GridRule = (cells: Cell[], size: number, operations: string[], args: string[][], muted: boolean[], tick: number) => Cell[]
 
 // A square's rule, which can say how its square shows on the grid from what
 // it remembers, such as an increment's next count

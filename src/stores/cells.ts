@@ -54,8 +54,8 @@ export const setCells = (next: Cell[]) => {
 export const stepCells = (tick: number) => {
     const size = get(gridSize)
     // The operations being edited run as they were until their arguments close
-    const { operations: letters, args: given } = appliedOperations()
-    grid = rules.reduce((cells, rule) => rule(cells, size, letters, given, tick), grid)
+    const { operations: letters, args: given, muted } = appliedOperations()
+    grid = rules.reduce((cells, rule) => rule(cells, size, letters, given, muted, tick), grid)
     return { grid, events: drain(), version }
 }
 

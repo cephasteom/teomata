@@ -27,6 +27,7 @@ export const valueGenerator: Operation = {
     kind: "generator",
     about: about.V.about,
     params: [valueParam(about.V.params.value), cyclesParam(about.V.params.n), directionParam(about.V.params.direction)],
+    label: value => value,
     rule: (value, cycles, to) => createValueGenerator(Number(value), Number(cycles), to.toLowerCase() as heading),
 }
 

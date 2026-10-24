@@ -15,6 +15,27 @@ export const args = writable<string[][]>(
     Array.from({ length: Math.pow(get(gridSize), 2) }, () => [])
 )
 
+// Whether each square's operation is muted. A muted operation stays on its
+// square but does nothing, and keeps what it remembers, until it is unmuted.
+// A square is unmuted when its operation changes
+export const muted = writable<boolean[]>(
+    Array.from({ length: Math.pow(get(gridSize), 2) }, () => false)
+)
+
+// Mutes the operations on the squares, or unmutes them when every one is
+// already muted. Squares without an operation are left alone
+export const toggleMuted = (squares: Iterable<number>) => {
+    const $operations = get(operations)
+    const list = [...squares].filter(i => $operations[i])
+    if (!list.length) return
+    const mute = list.some(i => !get(muted)[i])
+    muted.update(muted => {
+        const next = [...muted]
+        for (const i of list) next[i] = mute
+        return next
+    })
+}
+
 // What squares had before their arguments opened, keyed by square. The rules
 // run on these until the arguments close, so an edit only takes effect once
 // it is done
@@ -38,7 +59,7 @@ export const appliedOperations = () => {
         $operations[i] = operation
         $args[i] = args
     }
-    return { operations: $operations, args: $args }
+    return { operations: $operations, args: $args, muted: get(muted) }
 }
 
 // Puts the same operation, or "" to clear them, on every one of the squares
@@ -57,6 +78,11 @@ export const setOperations = (squares: Iterable<number>, operation: string) => {
         for (const i of changed) next[i] = []
         return next
     })
+    muted.update(muted => {
+        const next = [...muted]
+        for (const i of changed) next[i] = false
+        return next
+    })
 }
 
 // Sets the same argument for the operation on every one of the squares
@@ -71,7 +97,8 @@ export const setArg = (squares: Iterable<number>, k: number, text: string) => {
     })
 }
 
-// Steps the operations on the squares, with their arguments, one square over.
+// Steps the operations on the squares, with their arguments and whether they
+// are muted, one square over.
 // They land on top of whatever was there, and the squares they leave are emptied
 export const moveOperations = (squares: Iterable<number>, direction: direction) => {
     const list = [...squares]
@@ -84,18 +111,19 @@ export const moveOperations = (squares: Iterable<number>, direction: direction) 
     }
     operations.update(operations => shift(operations, () => ""))
     args.update(args => shift(args, () => []))
+    muted.update(muted => shift(muted, () => false))
 }
 
-// The operations and arguments last copied, as a rectangle read row by row
-type Copied = { width: number, height: number, operations: string[], args: string[][] }
+// The operations, arguments and mutes last copied, as a rectangle read row by row
+type Copied = { width: number, height: number, operations: string[], args: string[][], muted: boolean[] }
 let clipboard: Copied | null = null
 
 type Rectangle = { x1: number, x2: number, y1: number, y2: number }
 
-// Copies the operations and arguments in the rectangle, empty squares included
+// Copies the operations, arguments and mutes in the rectangle, empty squares included
 export const copyOperations = ({ x1, x2, y1, y2 }: Rectangle) => {
     const size = get(gridSize)
-    const [$operations, $args] = [get(operations), get(args)]
+    const [$operations, $args, $muted] = [get(operations), get(args), get(muted)]
     const squares: number[] = []
     for (let y = y1; y <= y2; y++) {
         for (let x = x1; x <= x2; x++) squares.push(y * size + x)
@@ -105,6 +133,7 @@ export const copyOperations = ({ x1, x2, y1, y2 }: Rectangle) => {
         height: y2 - y1 + 1,
         operations: squares.map(i => $operations[i]),
         args: squares.map(i => $args[i]),
+        muted: squares.map(i => $muted[i]),
     }
 }
 
@@ -127,6 +156,7 @@ export const pasteOperations = (x: number, y: number): Rectangle | null => {
     }
     operations.update(operations => paste(operations, clipboard!.operations))
     args.update(args => paste(args, clipboard!.args))
+    muted.update(muted => paste(muted, clipboard!.muted))
     return pasted
 }
 
@@ -134,4 +164,5 @@ export const clearOperations = () => {
     releaseOperations()
     operations.set(Array.from({ length: Math.pow(get(gridSize), 2) }, () => ""))
     args.set(Array.from({ length: Math.pow(get(gridSize), 2) }, () => []))
+    muted.set(Array.from({ length: Math.pow(get(gridSize), 2) }, () => false))
 }

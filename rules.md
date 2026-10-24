@@ -24,12 +24,14 @@ There are three kinds of object:
 
 A generator and an operator may share a letter. The generator emits values on its own; the operator emits only when it receives one.
 
+Shift+Enter mutes the selected objects, or unmutes them when they are all muted. A muted object is greyed out, its label and outline alike, and does nothing: values pass through it unchanged. It keeps its arguments and whatever it remembers (such as an increment's count), and is unmuted when its square is given a different object.
+
 ## Generators
 
 Shown as a green outlined square.
 
 * **B** `bang(n, direction)`: output a bang every `n` cycles, in `direction`. Defaults: `n = 1`, `direction = e`. Displayed as `B`.
-* **V** `value(value, n, direction)`: output `value` every `n` cycles, in `direction`. Defaults: `value = 0`, `n = 1`, `direction = e`. Displayed as `V`.
+* **V** `value(value, n, direction)`: output `value` every `n` cycles, in `direction`. Defaults: `value = 0`, `n = 1`, `direction = e`. Displayed as the number.
 * **I** `increment(from, to, n, direction)`: count from `from` to `to`, outputting each step every `n` cycles, in `direction`. Wraps around at the ends, and counts down when `to` is below `from`. Defaults: `from = 0`, `to = 7`, `n = 1`, `direction = e`. Displayed as `I`.
 
 ## Operators

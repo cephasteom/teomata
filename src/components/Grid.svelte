@@ -6,7 +6,7 @@
     gridFocused, cursor, bounds, selection, placeCursor, moveCursor, selectAll, selectionCanMove, moveSelection,
   } from "../stores/cursor";
   import {
-    operations, args, setOperations, moveOperations, copyOperations, pasteOperations,
+    operations, args, muted, toggleMuted, setOperations, moveOperations, copyOperations, pasteOperations,
   } from "../stores/operations";
   import {
     editing, shownSquare, argCells, openArea, openArgs, closeArgs, placeArgCursor, moveArgCursor, typeArg, eraseArg,
@@ -41,8 +41,8 @@
   let grid: HTMLDivElement
 
   // Generators and outputs are bordered in their own colours, outputs in the
-  // one their messages print in. The borders all go while an operation's
-  // arguments are open
+  // one their messages print in, or grey while muted. The borders all go
+  // while an operation's arguments are open
   const borders: Partial<Record<string, string>> = {
     generator: 'var(--cell-generator)',
     output: 'var(--cell-output)',
@@ -50,7 +50,7 @@
   let bordered = $derived($editing === null
     ? $operations.flatMap((letter, i) => {
       const color = borders[kindOf(letter) ?? '']
-      return color ? [{ i, color }] : []
+      return color ? [{ i, color: $muted[i] ? 'var(--cell-muted)' : color }] : []
     })
     : [])
 
@@ -132,8 +132,12 @@
         typeArg(event.key)
       }
       else if (event.key === 'Backspace' || event.key === 'Delete') eraseArg()
+    } else if (event.key === 'Enter' && event.shiftKey) {
+      // Shift+Enter mutes the selected operations, or unmutes them
+      toggleMuted($selection)
     } else if (event.key === 'Enter') {
-      openArgs($cursor, $selection)
+      // Only an operation with params has arguments to open
+      if (paramsFor($operations[$cursor], $gridSize).length) openArgs($cursor, $selection)
     } else if (direction) {
       // Stop the arrow keys from scrolling the page
       event.preventDefault()
@@ -182,7 +186,7 @@
         <span class="letter" style:--length={1}>{$operations[$editing]}</span>
       {:else if $operations[i]}
         <!-- A cell passing over its square inverts the label -->
-        <span class="letter" class:arrow={arrowLabels.has(labels[i])} style:--length={labels[i].length}>{labels[i]}</span>
+        <span class="letter" class:arrow={arrowLabels.has(labels[i])} class:muted={$muted[i]} style:--length={labels[i].length}>{labels[i]}</span>
       {/if}
     </div>
   {/each}
@@ -304,6 +308,11 @@
   .letter.arrow {
     font-size: calc(var(--text-size) * 2);
     font-weight: normal;
+  }
+
+  /* A muted operation greys out, over an empty square or a cell alike */
+  .letter.muted {
+    color: var(--cell-muted);
   }
 
   .invalid {

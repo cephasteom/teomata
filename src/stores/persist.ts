@@ -1,6 +1,6 @@
 import { get, type Writable } from "svelte/store"
 import { cps, q, gridSize, showConsole, showInstructions, MIN_CPS, MAX_CPS, MIN_Q, MAX_Q, MIN_SIZE, MAX_SIZE } from "./global"
-import { operations, args } from "./operations"
+import { operations, args, muted } from "./operations"
 import { resizeGrid } from "./size"
 
 const PREFIX = "teomata:"
@@ -59,6 +59,8 @@ const restore = () => {
         if (fits(savedArgs) && savedArgs.every(a => Array.isArray(a) && a.every(t => typeof t === "string"))) {
             args.set(savedArgs as string[][])
         }
+        const savedMuted = load("muted")
+        if (fits(savedMuted) && savedMuted.every(m => typeof m === "boolean")) muted.set(savedMuted as boolean[])
     }
 }
 
@@ -68,5 +70,6 @@ save("q", q)
 save("s", gridSize)
 save("operations", operations)
 save("args", args)
+save("muted", muted)
 save("console", showConsole)
 save("instructions", showInstructions)

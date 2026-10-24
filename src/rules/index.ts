@@ -96,9 +96,10 @@ export const labelFor = (i: number, letter: string, size: number, given?: string
     return remembered ?? operation.label?.(...args) ?? letter
 }
 
-// Applies the rule for every square with an operation
-// Invalid arguments fall back to defaults
-const applyRules: GridRule = (cells, size, letters, args, tick) => {
+// Applies the rule for every square with an operation that isn't muted
+// Invalid arguments fall back to defaults. A muted square's rule is kept, so
+// it carries on from where it was when unmuted
+const applyRules: GridRule = (cells, size, letters, args, muted, tick) => {
     if (tick === 0 || size !== builtSize) built = new Map()
     builtSize = size
     return cells.map((cell, i) => {
@@ -106,6 +107,7 @@ const applyRules: GridRule = (cells, size, letters, args, tick) => {
             built.delete(i)
             return cell
         }
+        if (muted[i]) return cell
         return ruleFor(i, letters[i], size, args[i])(cell, tick)
     })
 }
