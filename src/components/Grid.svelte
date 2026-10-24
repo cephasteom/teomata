@@ -139,7 +139,8 @@
       event.preventDefault()
       // Shift stretches the selection out to the cursor's new square
       moveCursor(direction, event.shiftKey)
-    } else if (/^[a-zA-Z.]$/.test(event.key)) {
+    } else if (kindOf(event.key)) {
+      // Only the letters of generators, operators and outputs can be typed
       event.preventDefault()
       const before = { operations: $operations, args: $args }
       setOperations($selection, event.key)
