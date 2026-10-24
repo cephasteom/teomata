@@ -6,8 +6,8 @@ import { toMidi } from "./note"
 import { about } from "./instructions"
 
 // Sends each number that arrives as a MIDI CC message on the device, channel
-// and controller, printing it to the console. An array sends its first
-// number. Bangs are ignored, and the cell is left alone
+// and controller. An array sends its first number. Bangs are ignored, and
+// the cell is left alone
 const createCc = (device: number, channel: number, controller: number): CellRule => cell => {
     const { value } = cell
     if (!isMoving(cell) || value === BANG) return cell
@@ -15,7 +15,6 @@ const createCc = (device: number, channel: number, controller: number): CellRule
     if (first === undefined) return cell
     const n = toMidi(first)
     emit({ type: "cc", device, channel, controller, value: n })
-    emit({ type: "print", text: `cc${controller}: ${n}`, color: "var(--cell-output)" })
     return cell
 }
 

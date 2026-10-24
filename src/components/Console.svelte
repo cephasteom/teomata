@@ -37,6 +37,24 @@
     return () => observer.disconnect();
   });
 
+  // The scrollbar shows while it's scrolled by hand, hovered or dragged, and
+  // fades out once it's been left alone a while. Scrolling to follow new lines
+  // doesn't show it
+  const SHOW_FOR = 1000;
+  let scrolled = $state(false);
+  let hovered = $state(false);
+  let dragging = $state(false);
+  let shown = $derived(scrolled || hovered || dragging);
+  let hide: ReturnType<typeof setTimeout> | undefined;
+
+  const reveal = () => {
+    scrolled = true;
+    clearTimeout(hide);
+    hide = setTimeout(() => scrolled = false, SHOW_FOR);
+  };
+
+  $effect(() => () => clearTimeout(hide));
+
   // Dragging the thumb scrolls by as much of the lines as it moves over of the track
   let drag: { y: number, scrollTop: number } | null = null;
 
@@ -45,6 +63,13 @@
     event.preventDefault();
     (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
     drag = { y: event.clientY, scrollTop: list.scrollTop };
+    dragging = true;
+  };
+
+  const onthumbup = () => {
+    drag = null;
+    dragging = false;
+    reveal();
   };
 
   const onthumbmove = (event: PointerEvent) => {
@@ -59,6 +84,7 @@
     const track = (event.currentTarget as HTMLElement).getBoundingClientRect();
     const at = (event.clientY - track.top) / track.height;
     list.scrollTop = (at - thumb.height / 2) * list.scrollHeight;
+    reveal();
   };
 </script>
 
@@ -66,20 +92,23 @@
      to the grid's bottom edge. The scrollbar sits outside them, in the gap
      before the grid -->
 <div class="console">
-  <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
-  <ol id="console" aria-label="Console" aria-live="off" tabindex="0" bind:this={list} {onscroll}>
-    {#each $lines as { id, text, color } (id)}
-      <li style:color>{text}</li>
+  <!-- svelte-ignore a11y_no_noninteractive_tabindex, a11y_no_noninteractive_element_interactions -->
+  <ol id="console" aria-label="Console" aria-live="off" tabindex="0" bind:this={list} {onscroll}
+    onwheel={reveal} ontouchmove={reveal} onkeydown={reveal}
+  >
+    {#each $lines as { id, text } (id)}
+      <li>{text}</li>
     {/each}
   </ol>
   {#if overflowing}
     <!-- svelte-ignore a11y_interactive_supports_focus -->
-    <div class="track" role="scrollbar" aria-controls="console" aria-orientation="vertical"
+    <div class="track" class:shown role="scrollbar" aria-controls="console" aria-orientation="vertical"
       aria-valuenow={Math.round(thumb.top / (1 - thumb.height) * 100)} onpointerdown={ontrackdown}
+      onpointerenter={() => hovered = true} onpointerleave={() => hovered = false}
     >
       <div class="thumb" role="presentation" style:top="{thumb.top * 100}%" style:height="{thumb.height * 100}%"
         onpointerdown={onthumbdown} onpointermove={onthumbmove}
-        onpointerup={() => drag = null} onpointercancel={() => drag = null}
+        onpointerup={onthumbup} onpointercancel={onthumbup}
       ></div>
     </div>
   {/if}
@@ -143,6 +172,14 @@
     background: var(--grid-line);
     cursor: pointer;
     touch-action: none;
+    opacity: 0;
+    /* Fades out slowly, and back in quickly */
+    transition: opacity 0.6s;
+  }
+
+  .track.shown {
+    opacity: 1;
+    transition-duration: 0.15s;
   }
 
   .thumb {

@@ -4,7 +4,7 @@
 export type Event =
     | { type: "note", device: number, channel: number, notes: number[], amp: number, dur: number }
     | { type: "cc", device: number, channel: number, controller: number, value: number }
-    | { type: "print", text: string, color?: string }
+    | { type: "print", text: string }
 
 let queue: Event[] = []
 

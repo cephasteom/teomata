@@ -12,7 +12,7 @@ const DUR = 0.5
 export const toMidi = (n: number) => ((Math.round(n) % 128) + 128) % 128
 
 // Plays each number that arrives as a MIDI note, or an array as a chord, on
-// the device and channel, printing it to the console
+// the device and channel
 // Bangs are ignored, and the cell is left alone
 const createNote = (device: number, channel: number): CellRule => cell => {
     const { value } = cell
@@ -20,7 +20,6 @@ const createNote = (device: number, channel: number): CellRule => cell => {
     const notes = (Array.isArray(value) ? value : [value!]).map(toMidi)
     if (!notes.length) return cell
     emit({ type: "note", device, channel, notes, amp: AMP, dur: DUR })
-    emit({ type: "print", text: notes.join(", "), color: "var(--cell-output)" })
     return cell
 }
 

@@ -24,7 +24,7 @@ const loop = new Loop((time) => {
 	getDraw().schedule(() => {
 		showCells(grid, version)
 		for (const event of events) {
-			if (event.type === "print") printLine(event.text, event.color)
+			if (event.type === "print") printLine(event.text)
 		}
 	}, time)
 }, `${get(q)}n`).start(0);
