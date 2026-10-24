@@ -21,10 +21,9 @@ export const printLine = (text: string, color?: string) => {
     lines.update(lines => [...lines, { id: printed++, text, color }].slice(-MAX_LINES))
 }
 
-// Prints a value to the console, an array as its numbers joined by commas
-export const printValue = (value: Value) => {
-    printLine(Array.isArray(value) ? value.join(", ") : String(value))
-}
+// A value as the console shows it, an array as its numbers joined by commas
+export const formatValue = (value: Value) =>
+    Array.isArray(value) ? value.join(", ") : String(value)
 
 // Empties the console
 export const clearConsole = () => {

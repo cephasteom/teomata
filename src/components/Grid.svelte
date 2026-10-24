@@ -239,7 +239,6 @@
     place-items: center;
     font-size: calc(100cqi / var(--size) * 0.45);
     line-height: 1;
-    user-select: none;
     overflow: hidden;
     background: var(--cell-empty);
     color: var(--cell-alive);

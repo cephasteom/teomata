@@ -1,7 +1,6 @@
 import type { CellRule, Operation, Param } from "./types"
 import { BANG } from "../lib/utils"
-import { sendControl } from "../lib/midi"
-import { printLine } from "../stores/console"
+import { emit } from "./events"
 import { channelParam, deviceParam, isMoving, isWhole } from "./shared"
 import { toMidi } from "./note"
 import { about } from "./instructions"
@@ -15,8 +14,8 @@ const createCc = (device: number, channel: number, controller: number): CellRule
     const first = Array.isArray(value) ? value[0] : value!
     if (first === undefined) return cell
     const n = toMidi(first)
-    sendControl(device, channel, controller, n)
-    printLine(`cc${controller}: ${n}`, "var(--cell-output)")
+    emit({ type: "cc", device, channel, controller, value: n })
+    emit({ type: "print", text: `cc${controller}: ${n}`, color: "var(--cell-output)" })
     return cell
 }
 

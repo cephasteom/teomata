@@ -1,6 +1,6 @@
 import { get, type Writable } from "svelte/store"
 import { gridSize } from "./global"
-import { cells } from "./cells"
+import { cells, setCells } from "./cells"
 import { operations, args } from "./operations"
 import { cursor, anchor } from "./cursor"
 import { closeArgs } from "./editing"
@@ -15,7 +15,7 @@ export const resizeGrid = (size: number) => {
     if (size === from) return
     // The open arguments' squares could fall off the grid
     closeArgs()
-    cells.update(cells => resize(cells, from, size, () => ({})))
+    setCells(resize(get(cells), from, size, () => ({})))
     operations.update(operations => resize(operations, from, size, () => ""))
     args.update(args => resize(args, from, size, () => []))
     const clamp = (i: number) => {

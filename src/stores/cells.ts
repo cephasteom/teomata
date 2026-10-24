@@ -3,6 +3,7 @@ import { gridSize } from "./global"
 import { rules } from "../rules"
 import { appliedOperations } from "./operations"
 import { randomDirection, randomValue } from "../lib/utils"
+import { drain } from "../rules/events"
 
 export type direction = 'n' | 's' | 'e' | 'w' 
 // A bang, which for now counts as a 1 wherever a number is needed
@@ -30,23 +31,45 @@ const emptyGrid = (): Cell[] => Array.from(
     () => ({})
 )
 
+// The cells on screen, which lag the grid the rules work on by up to the
+// scheduler's lookahead
 export const cells = writable<Cell[]>(emptyGrid())
 
-// Runs the cells through each rule in order
+// The grid the rules step from, worked out ahead of the tick being heard
+let grid: Cell[] = get(cells)
+// Counts up with every change made outside the rules, so a grid stepped
+// before it is never shown over it
+let version = 0
+
+// Replaces the grid, showing it at once
+export const setCells = (next: Cell[]) => {
+    grid = next
+    version++
+    cells.set(next)
+}
+
+// Runs the grid through each rule in order, giving the new grid and the
+// events the rules queued, for the scheduler to send and show in time
 // Tick is the number of ticks since the transport started
-export const updateCells = (tick: number) => {
+export const stepCells = (tick: number) => {
     const size = get(gridSize)
     // The operations being edited run as they were until their arguments close
     const { operations: letters, args: given } = appliedOperations()
-    cells.update(cells => rules.reduce((cells, rule) => rule(cells, size, letters, given, tick), cells))
+    grid = rules.reduce((cells, rule) => rule(cells, size, letters, given, tick), grid)
+    return { grid, events: drain(), version }
+}
+
+// Shows a stepped grid, unless the grid was changed since it was stepped
+export const showCells = (next: Cell[], from: number) => {
+    if (from === version) cells.set(next)
 }
 
 // Empties every cell on the grid
 export const clearCells = () => {
-    cells.set(Array.from({ length: Math.pow(get(gridSize), 2) }, () => ({})))
+    setCells(emptyGrid())
 }
 
 // Reseeds the grid with a fresh random state
 export const randomizeCells = () => {
-    cells.set(randomGrid())
+    setCells(randomGrid())
 }

@@ -1,7 +1,6 @@
 import type { CellRule, Operation } from "./types"
 import { BANG } from "../lib/utils"
-import { playNote } from "../lib/midi"
-import { printLine } from "../stores/console"
+import { emit } from "./events"
 import { channelParam, deviceParam, isMoving } from "./shared"
 import { about } from "./instructions"
 
@@ -20,8 +19,8 @@ const createNote = (device: number, channel: number): CellRule => cell => {
     if (!isMoving(cell) || value === BANG) return cell
     const notes = (Array.isArray(value) ? value : [value!]).map(toMidi)
     if (!notes.length) return cell
-    playNote(device, channel, notes, AMP, DUR)
-    printLine(notes.join(", "), "var(--cell-output)")
+    emit({ type: "note", device, channel, notes, amp: AMP, dur: DUR })
+    emit({ type: "print", text: notes.join(", "), color: "var(--cell-output)" })
     return cell
 }
 

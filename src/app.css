@@ -49,6 +49,14 @@
 body {
   background: var(--page-bg);
   color: var(--page-text);
+  /* The app's text can't be highlighted, only what's typed into its inputs */
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+input {
+  -webkit-user-select: text;
+  user-select: text;
 }
 
 .fa-solid {

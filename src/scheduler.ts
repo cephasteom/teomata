@@ -1,8 +1,9 @@
 import { get } from 'svelte/store';
 import { Loop, getDraw, getTransport, start } from 'tone'
 import { cps, isPlaying, q } from './stores/global';
-import { updateCells } from './stores/cells';
-import { clearConsole } from './stores/console';
+import { showCells, stepCells } from './stores/cells';
+import { clearConsole, printLine } from './stores/console';
+import { midiTime, playNote, sendControl } from './lib/midi';
 
 const loop = new Loop((time) => {
 	// Ticks since the transport last started, which time-based rules read.
@@ -11,9 +12,21 @@ const loop = new Loop((time) => {
 	const transport = getTransport()
 	const division = transport.PPQ * 4 / get(q)
 	const now = Math.round(transport.getTicksAtTime(time) / division)
-	// Tone fires callbacks slightly ahead of the audio clock, so schedule the
-	// visual update for when the tick is actually heard
-	getDraw().schedule(() => updateCells(now), time)
+	// Tone fires callbacks ahead of the audio clock, so the rules step now and
+	// their MIDI is sent for when the tick is heard, on WebMidi's clock
+	const at = midiTime(time)
+	const { grid, events, version } = stepCells(now)
+	for (const event of events) {
+		if (event.type === "note") playNote(event.device, event.channel, event.notes, event.amp, event.dur, at)
+		if (event.type === "cc") sendControl(event.device, event.channel, event.controller, event.value, at)
+	}
+	// The grid and console update when the tick is heard too
+	getDraw().schedule(() => {
+		showCells(grid, version)
+		for (const event of events) {
+			if (event.type === "print") printLine(event.text, event.color)
+		}
+	}, time)
 }, `${get(q)}n`).start(0);
 
 // "Nn" is an Nth of a bar of four. The loop's repeats stay counted from the
