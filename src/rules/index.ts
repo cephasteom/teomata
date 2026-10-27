@@ -11,6 +11,7 @@ import { logic } from "./logic"
 import { print } from "./print"
 import { note } from "./note"
 import { cc } from "./cc"
+import { waveform, waveformGenerator } from "./waveform"
 
 // Every operation by its letter. Case matters: generators are uppercase, and
 // may share a letter with a lowercase operator
@@ -18,6 +19,7 @@ const operations: Record<string, Operation> = {
     B: bangGenerator,
     I: incrementGenerator,
     V: valueGenerator,
+    W: waveformGenerator,
     b: bang,
     d: die,
     h: harmony,
@@ -27,6 +29,7 @@ const operations: Record<string, Operation> = {
     p: print,
     r: rotate,
     v: value,
+    w: waveform,
     c: cc,
     n: note,
 }
