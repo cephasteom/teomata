@@ -3,12 +3,12 @@
 // generator and an operator can share a name. Each operation's file takes its
 // text from here, by its params' names
 
-const direction = "n, e, s or w, or x, y or xy for a random direction along that axis or either."
-const cycles = "Cycles between outputs: 1 is once per cycle, .5 is twice per cycle, etc."
+const direction = "n, e, s or w. x, y or xy randomly chooses a direction on the axis/axes."
+const cycles = "Bangs per cycle: 1 is once per cycle, .5 is twice per cycle, etc."
 const device = "The MIDI output by its number, counting from 0."
 const channel = "A MIDI channel from 1 to 16."
 const type = "saw, sin, cos, tri or sqr, or noi (noise) for smoothed randomness."
-const freq = "Waveform cycles per cycle: 1 is one complete waveform per cycle, 2 is two, .5 is one every two cycles, etc. For noi, how many new random values it eases between per cycle."
+const freq = "Frequency of the waveform relative to cps."
 
 export const about = {
     // Generators
@@ -30,7 +30,7 @@ export const about = {
         params: { value: "Any number.", n: cycles, direction },
     },
     W: {
-        about: "Output the value of a waveform, from 0 to 1, every n cycles, in a given direction. Values arriving pass through.",
+        about: "Output the current position of a waveform, from 0 to 1, every n cycles, in a given direction. Values arriving pass through.",
         params: { type, freq, n: cycles, direction },
     },
     // Operators
@@ -85,7 +85,7 @@ export const about = {
         params: { value: "Any number." },
     },
     w: {
-        about: "Turn any bang or non zero value arriving into the value of a waveform at that moment, from 0 to 1.",
+        about: "Output the current position of a waveform, from 0 to 1.",
         params: { type, freq },
     },
     // Outputs

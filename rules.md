@@ -33,7 +33,7 @@ Shown as a green outlined square.
 * **B** `bang(n, direction)`: output a bang every `n` cycles, in `direction`. Defaults: `n = 1`, `direction = e`. Displayed as `B`.
 * **V** `value(value, n, direction)`: output `value` every `n` cycles, in `direction`. Defaults: `value = 0`, `n = 1`, `direction = e`. Displayed as the number.
 * **I** `increment(from, to, n, direction)`: count from `from` to `to`, outputting each step every `n` cycles, in `direction`. Wraps around at the ends, and counts down when `to` is below `from`. Defaults: `from = 0`, `to = 7`, `n = 1`, `direction = e`. Displayed as `I`.
-* **W** `waveform(type, freq, n, direction)`: output the value of a waveform, from 0 to 1, every `n` cycles, in `direction`. `type` is `saw`, `sin`, `cos`, `tri`, `sqr` or `noi` (ignoring case), and `freq` is waveform cycles per cycle, so `1` is one complete waveform per cycle and `2` is two. `noi` (noise) is smoothed randomness: a new random value at the start of each of its cycles, eased into the next, different for each square and each run. The waveform is in phase with the transport, starting at the top of the first cycle. Defaults: `type = sin`, `freq = 1`, `n = 1`, `direction = e`. Displayed as `W`.
+* **W** `wave(type, freq, n, direction)`: output the value of a waveform, from 0 to 1, every `n` cycles, in `direction`. `type` is `saw`, `sin`, `cos`, `tri`, `sqr` or `noi` (ignoring case), and `freq` is waveform cycles per cycle, so `1` is one complete waveform per cycle and `2` is two. `noi` (noise) is smoothed randomness: a new random value at the start of each of its cycles, eased into the next, different for each square and each run. The waveform is in phase with the transport, starting at the top of the first cycle. Defaults: `type = sin`, `freq = 1`, `n = 1`, `direction = e`. Displayed as `W`.
 
 ## Operators
 
@@ -46,7 +46,7 @@ Shown as a green outlined square.
 * **p** `print()`: print to console.
 * **r** `rotate(direction)`: turn the incoming value in `direction`. Default: `direction = x`. Displayed as the unicode direction.
 * **v** `value(value)`: uses `values()`. Any incoming number or bang outputs the value. Default: `value = 0`. Displayed as the number.
-* **w** `waveform(type, freq)`: transform any bang or non-zero value into the value of a waveform, from 0 to 1, at that point in time, as **W** does. Zero passes unchanged. Defaults: `type = sin`, `freq = 1`. Displayed as the type.
+* **w** `wave(type, freq)`: transform any bang or non-zero value into the value of a waveform, from 0 to 1, at that point in time, as **W** does. Zero passes unchanged. Defaults: `type = sin`, `freq = 1`. Displayed as the type.
 
 ## Outputs
 

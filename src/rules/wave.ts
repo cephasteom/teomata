@@ -60,13 +60,13 @@ const freqParam = (about: string): Param => ({ name: "freq", about, fallback: "1
 
 // Puts a new cell with the waveform's value heading in the given direction on
 // the square every n cycles. Cells arriving between times pass through
-const createWaveformGenerator = (type: string, freq: number, cycles: number, to: heading): CellRule => {
+const createWaveGenerator = (type: string, freq: number, cycles: number, to: heading): CellRule => {
     const wave = createWave(type, freq)
     return (cell, tick) => fires(cycles, tick) ? { value: wave(tick), direction: pickDirection(to) } : cell
 }
 
-export const waveformGenerator: Operation = {
-    name: "waveform",
+export const waveGenerator: Operation = {
+    name: "wave",
     kind: "generator",
     about: about.W.about,
     params: [
@@ -76,7 +76,7 @@ export const waveformGenerator: Operation = {
         directionParam(about.W.params.direction),
     ],
     rule: (type, freq, cycles, to) =>
-        createWaveformGenerator(type.toLowerCase(), Number(freq), Number(cycles), to.toLowerCase() as heading),
+        createWaveGenerator(type.toLowerCase(), Number(freq), Number(cycles), to.toLowerCase() as heading),
 }
 
 // Gives each bang or non zero value arriving the waveform's value on the tick
@@ -85,8 +85,8 @@ const createWaveform = (type: string, freq: number): CellRule => {
     return (cell, tick) => isMoving(cell) && cell.value !== 0 ? { ...cell, value: wave(tick) } : cell
 }
 
-export const waveform: Operation = {
-    name: "waveform",
+export const wave: Operation = {
+    name: "wave",
     kind: "operator",
     about: about.w.about,
     params: [typeParam(about.w.params.type), freqParam(about.w.params.freq)],
