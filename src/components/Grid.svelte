@@ -55,7 +55,7 @@
     : [])
 
   // How each square's operation shows, such as Cma for a harmony or the next
-  // count for an increment. Some come from what the rules remember, so
+  // number for a count. Some come from what the rules remember, so
   // they are worked out again each time the cells change
   let labels = $derived.by(() => {
     void $cells
@@ -126,7 +126,7 @@
       if (direction) event.preventDefault()
       if (event.key === 'Enter' || event.key === 'Escape') closeArgs()
       else if (direction) moveArgCursor(direction)
-      else if (/^[a-zA-Z0-9.#~+\-*/%^<>=!&|]$/.test(event.key)) {
+      else if (/^[a-zA-Z0-9.#~+\-*/%^<>=!&|()]$/.test(event.key)) {
         // Stop / opening the browser's quick find
         event.preventDefault()
         typeArg(event.key)

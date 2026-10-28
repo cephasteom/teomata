@@ -16,15 +16,6 @@ export const about = {
         about: "Output a bang every n cycles, in a given direction. Values arriving pass through.",
         params: { n: cycles, direction },
     },
-    I: {
-        about: "Count from one number to another, outputting each step every n cycles, in a given direction. Wraps around at the ends. Values arriving pass through.",
-        params: {
-            from: "Any number, the first count.",
-            to: "Any number, the last count. Counts down when below from.",
-            n: cycles,
-            direction,
-        },
-    },
     V: {
         about: "Output a value every n cycles, in a given direction. Values arriving pass through.",
         params: { value: "Any number.", n: cycles, direction },

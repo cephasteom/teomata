@@ -5,7 +5,7 @@ import { die } from "./die"
 import { bang, bangGenerator } from "./bang"
 import { value, valueGenerator } from "./value"
 import { harmony } from "./harmony"
-import { increment, incrementGenerator } from "./increment"
+import { count } from "./count"
 import { math } from "./math"
 import { logic } from "./logic"
 import { print } from "./print"
@@ -18,13 +18,12 @@ import { scale } from "./scale"
 // may share a letter with a lowercase operator
 const operations: Record<string, Operation> = {
     B: bangGenerator,
-    I: incrementGenerator,
     V: valueGenerator,
     W: waveGenerator,
     b: bang,
     d: die,
     h: harmony,
-    i: increment,
+    i: count,
     l: logic,
     m: math,
     p: print,
@@ -90,7 +89,7 @@ const ruleFor = (i: number, letter: string, size: number, given?: string[]) => {
 }
 
 // How a square's operation shows on the grid: what its rule remembers, such
-// as an increment's next count, or else what its arguments give, or else its
+// as a count's next number, or else what its arguments give, or else its
 // letter
 export const labelFor = (i: number, letter: string, size: number, given?: string[]) => {
     const operation = operationFor(letter)

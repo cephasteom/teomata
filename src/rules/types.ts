@@ -4,7 +4,7 @@ import type { Cell } from "../stores/cells"
 export type GridRule = (cells: Cell[], size: number, operations: string[], args: string[][], muted: boolean[], tick: number) => Cell[]
 
 // A square's rule, which can say how its square shows on the grid from what
-// it remembers, such as an increment's next count
+// it remembers, such as a count's next number
 export type CellRule = ((cell: Cell, tick: number) => Cell) & { label?: () => string }
 
 export interface Param {

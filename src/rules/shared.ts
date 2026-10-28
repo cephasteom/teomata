@@ -43,23 +43,6 @@ export const channelParam = (about: string): Param => ({
 // It fires on the first tick at or after each trigger, and at most once a tick
 export const fires = (cycles: number, tick: number) => tick % (cycles * get(q)) < 1
 
-// A count from one number to another, stepping by 1 towards to, or down by 1
-// when to is below from. Once the count would pass to it wraps back to from
-export const createCount = (from: number, to: number) => {
-    const by = to < from ? -1 : 1
-    let count = from
-    return {
-        // The count the next call to next gives
-        peek: () => count,
-        next: () => {
-            const value = count
-            const after = count + by
-            count = (by > 0 ? after > to : after < to) ? from : after
-            return value
-        },
-    }
-}
-
 // Whether a cell is moving with a value, which is what operators and outputs act on
 export const isMoving = (cell: { direction?: unknown, value?: unknown }) =>
     cell.direction !== undefined && cell.value !== undefined

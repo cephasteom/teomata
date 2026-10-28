@@ -4,6 +4,8 @@ import { gridSize } from "./global"
 import { operations, args, setArg, holdOperations, releaseOperations } from "./operations"
 import { cursor, anchor, placeCursor } from "./cursor"
 import { argsFor, paramsFor } from "../rules"
+import type { Param } from "../rules/types"
+import { calculate, formatArg } from "../lib/arithmetic"
 
 // The square whose operation has its arguments open for editing, or null
 export const editing = writable<number | null>(null)
@@ -36,6 +38,14 @@ export const openArea = derived([shownSquare, argSquares, gridSize], ([$shown, $
     return { x1: Math.min(...columns), x2: Math.max(...columns), y1: y, y2: y }
 })
 
+// An argument as it's kept, which is the result when it is arithmetic, such
+// as 1/8 for .125, giving a number the param takes, and as typed otherwise
+const settled = (param: Param, text: string) => {
+    if (param.accepts(text)) return text
+    const value = calculate(text)
+    return value !== null && param.accepts(formatArg(value)) ? formatArg(value) : text
+}
+
 // What each argument square shows, keyed by square
 export const argCells = derived([editing, argSquares, operations, args, gridSize], ([$editing, $squares, $operations, $args, $size]) => {
     const shown = new Map<number, { text: string, valid: boolean }>()
@@ -43,7 +53,7 @@ export const argCells = derived([editing, argSquares, operations, args, gridSize
     const params = paramsFor($operations[$editing], $size, $args[$editing])
     $squares.forEach((square, k) => {
         const text = $args[$editing][k] ?? params[k].fallback
-        shown.set(square, { text, valid: params[k].accepts(text) })
+        shown.set(square, { text, valid: params[k].accepts(settled(params[k], text)) })
     })
     return shown
 })
@@ -90,9 +100,21 @@ export const openArgs = (
     fresh = true
 }
 
+// Keeps the argument under the cursor as its result when it is arithmetic,
+// once the cursor leaves it
+const settleArg = () => {
+    const square = get(editing)
+    const k = cursorArg()
+    if (square === null || k < 0) return
+    const param = paramsFor(get(operations)[square], get(gridSize), get(args)[square])[k]
+    const text = get(args)[square][k]
+    if (param && text !== undefined && settled(param, text) !== text) setArg(targets, k, settled(param, text))
+}
+
 // Puts the cursor back on the operation's square, with the selection it had,
 // and lets the rules run on what was edited
 export const closeArgs = () => {
+    settleArg()
     const square = get(editing)
     editing.set(null)
     releaseOperations()
@@ -106,6 +128,7 @@ export const closeArgs = () => {
 // the cursor where it is
 export const placeArgCursor = (square: number) => {
     if (get(argSquares).includes(square)) {
+        if (square !== get(cursor)) settleArg()
         placeCursor(square)
         fresh = true
     } else if (square !== get(shownSquare)) {
