@@ -3,6 +3,7 @@ import type { direction } from "./cells"
 import { SIZE } from "./global"
 import { operations, args, setArg, holdOperations, releaseOperations } from "./operations"
 import { cursor, anchor, placeCursor } from "./cursor"
+import { snapshot, record, type Snapshot } from "./history"
 import { argsFor, paramsFor } from "../rules"
 import type { Param } from "../rules/types"
 import { calculate, formatArg } from "../lib/arithmetic"
@@ -69,6 +70,10 @@ let targets: number[] = []
 // Where the selection was anchored when the arguments opened
 let selectedFrom = 0
 
+// What was there before the arguments opened, so everything done while they
+// are open can be undone as one change once they close
+let beforeEdit: Snapshot | null = null
+
 // Opens a square's arguments for editing. Arguments typed in also go to the
 // other selected squares with the same operation. Every one of
 // them is filled in with defaults where its arguments are unset. The cursor
@@ -79,7 +84,7 @@ let selectedFrom = 0
 export const openArgs = (
     square: number,
     selected: Iterable<number> = [],
-    before = { operations: get(operations), args: get(args) },
+    before = snapshot(),
 ) => {
     const all = get(operations)
     const operation = all[square]
@@ -88,6 +93,7 @@ export const openArgs = (
         i !== square && all[i] === operation
     )]
     holdOperations(targets, before)
+    beforeEdit = before
     args.update(args => {
         const next = [...args]
         for (const i of targets) next[i] = argsFor(operation, SIZE, args[i])
@@ -117,6 +123,8 @@ export const closeArgs = () => {
     const square = get(editing)
     editing.set(null)
     releaseOperations()
+    if (beforeEdit) record(beforeEdit)
+    beforeEdit = null
     if (square === null) return
     placeCursor(square)
     anchor.set(selectedFrom)

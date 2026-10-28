@@ -28,6 +28,8 @@ A generator and an operator may share a letter. The generator emits values on it
 
 Shift+Enter mutes the selected objects, or unmutes them when they are all muted. A muted object is greyed out, its label and outline alike, and does nothing: values pass through it unchanged. It keeps its arguments and whatever it remembers (such as a count's next number), and is unmuted when its square is given a different object.
 
+Cmd/Ctrl+Z undoes the last change to the objects (typing, deleting, cutting, pasting, moving or muting them, or editing their arguments, which counts as one change from opening them to closing them), and Cmd/Ctrl+Shift+Z or Cmd/Ctrl+Y redoes it. The last 4 changes can be undone. Undoing puts the selection back where it was before the change.
+
 ## Generators
 
 Shown as a green outlined square.

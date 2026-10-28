@@ -11,6 +11,7 @@
   import {
     editing, shownSquare, argCells, openArea, openArgs, closeArgs, placeArgCursor, moveArgCursor, typeArg, eraseArg,
   } from "../stores/editing";
+  import { snapshot, record, change, undo, redo } from "../stores/history";
   import { paramsFor, kindOf, labelFor } from "../rules";
   import { arrows } from "../lib/utils";
   import { toggle } from "../scheduler";
@@ -27,15 +28,18 @@
     c: () => copyOperations($bounds),
     x: () => {
       copyOperations($bounds)
-      setOperations($selection, "")
+      change(() => setOperations($selection, ""))
     },
     // Pastes from the selection's top left corner and selects what was pasted
-    v: () => {
+    v: () => change(() => {
       const pasted = pasteOperations($bounds.x1, $bounds.y1)
       if (!pasted) return
       placeCursor(pasted.y1 * SIZE + pasted.x1)
       placeCursor(pasted.y2 * SIZE + pasted.x2, true)
-    },
+    }),
+    // Shift+Z redoes, as does Y
+    z: () => undo(),
+    y: () => redo(),
   }
 
   let grid: HTMLDivElement
@@ -304,8 +308,9 @@
       return
     }
 
-    // Select all, copy, cut and paste work on squares instead of the page's text
-    const shortcut = shortcuts[event.key.toLowerCase()]
+    // Select all, copy, cut, paste, undo and redo work on squares instead of the page's text
+    const key = event.key.toLowerCase()
+    const shortcut = key === 'z' && event.shiftKey ? redo : shortcuts[key]
     if ((event.metaKey || event.ctrlKey) && !event.altKey && shortcut) {
       event.preventDefault()
       if ($editing === null) shortcut()
@@ -316,10 +321,10 @@
     const direction = keys[event.key]
     if (event.altKey && direction && !(event.metaKey || event.ctrlKey)) {
       event.preventDefault()
-      if ($editing === null && selectionCanMove(direction)) {
+      if ($editing === null && selectionCanMove(direction)) change(() => {
         moveOperations($selection, direction)
         moveSelection(direction)
-      }
+      })
       return
     }
 
@@ -339,7 +344,7 @@
       else if (event.key === 'Backspace' || event.key === 'Delete') eraseArg()
     } else if (event.key === 'Enter' && event.shiftKey) {
       // Shift+Enter mutes the selected operations, or unmutes them
-      toggleMuted($selection)
+      change(() => toggleMuted($selection))
     } else if (event.key === 'Enter') {
       // Only an operation with params has arguments to open
       if (paramsFor($operations[$cursor], SIZE).length) openArgs($cursor, $selection)
@@ -351,13 +356,14 @@
     } else if (kindOf(event.key)) {
       // Only the letters of generators, operators and outputs can be typed
       event.preventDefault()
-      const before = { operations: $operations, args: $args }
+      const before = snapshot()
       setOperations($selection, event.key)
       // A typed operation opens its arguments, when it has any, and only
-      // starts running once they close
+      // starts running once they close, when it can be undone along with them
       if (paramsFor(event.key, SIZE).length) openArgs($cursor, $selection, before)
+      else record(before)
     } else if (event.key === 'Backspace' || event.key === 'Delete') {
-      setOperations($selection, "")
+      change(() => setOperations($selection, ""))
     }
   }
 </script>
