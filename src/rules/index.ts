@@ -12,6 +12,7 @@ import { print } from "./print"
 import { note } from "./note"
 import { cc } from "./cc"
 import { wave, waveGenerator } from "./wave"
+import { scale } from "./scale"
 
 // Every operation by its letter. Case matters: generators are uppercase, and
 // may share a letter with a lowercase operator
@@ -28,6 +29,7 @@ const operations: Record<string, Operation> = {
     m: math,
     p: print,
     r: rotate,
+    s: scale,
     v: value,
     w: wave,
     c: cc,
