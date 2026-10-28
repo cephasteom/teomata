@@ -181,9 +181,9 @@
       onclick={(event) => $editing !== null ? placeArgCursor(i) : placeCursor(i, event.shiftKey)}
     >
       {#if arg}
-        <span class="arg" class:invalid={!arg.valid} style:--length={Math.max(1, arg.text.length)}>{arg.text}</span>
+        <span class="arg" class:invalid={!arg.valid} class:muted={$muted[$editing ?? -1]} style:--length={Math.max(1, arg.text.length)}>{arg.text}</span>
       {:else if $editing !== null && i === $shownSquare}
-        <span class="letter" style:--length={1}>{$operations[$editing]}</span>
+        <span class="letter" class:muted={$muted[$editing]} style:--length={1}>{$operations[$editing]}</span>
       {:else if $operations[i]}
         <!-- A cell passing over its square inverts the label -->
         <span class="letter" class:arrow={arrowLabels.has(labels[i])} class:muted={$muted[i]} style:--length={labels[i].length}>{labels[i]}</span>
@@ -310,12 +310,14 @@
     font-weight: normal;
   }
 
-  /* A muted operation greys out, over an empty square or a cell alike */
-  .letter.muted {
+  /* A muted operation greys out, over an empty square or a cell alike, and
+     so do its arguments while they're open */
+  .letter.muted,
+  .arg.muted {
     color: var(--cell-muted);
   }
 
-  .invalid {
+  .arg.invalid {
     color: var(--cell-cursor);
   }
 

@@ -9,6 +9,8 @@ const device = "The MIDI output by its number, counting from 0."
 const channel = "A MIDI channel from 1 to 16."
 const type = "saw, sin, cos, tri or sqr, or noi (noise) for smoothed randomness."
 const freq = "Frequency of the waveform relative to cps."
+const lo = "The value at the bottom of the waveform."
+const hi = "The value at the top of the waveform."
 
 export const about = {
     // Generators
@@ -30,8 +32,8 @@ export const about = {
         params: { value: "Any number.", n: cycles, direction },
     },
     W: {
-        about: "Output the current position of a waveform, from 0 to 1, every n cycles, in a given direction. Values arriving pass through.",
-        params: { type, freq, n: cycles, direction },
+        about: "Output the current position of a waveform, from lo to hi, every n cycles, in a given direction. Values arriving pass through.",
+        params: { type, freq, lo, hi, n: cycles, direction },
     },
     // Operators
     b: {
@@ -85,8 +87,8 @@ export const about = {
         params: { value: "Any number." },
     },
     w: {
-        about: "Output the current position of a waveform, from 0 to 1.",
-        params: { type, freq },
+        about: "Output the current position of a waveform, from lo to hi.",
+        params: { type, freq, lo, hi },
     },
     // Outputs
     c: {
