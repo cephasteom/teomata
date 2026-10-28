@@ -1,4 +1,4 @@
-import { arrows, pickDirection, type heading } from "../lib/utils"
+import { arrows, headingOf, pickDirection, type heading } from "../lib/utils"
 import type { CellRule, Operation } from "./types"
 import { directionParam } from "./shared"
 import { about } from "./instructions"
@@ -12,6 +12,6 @@ export const rotate: Operation = {
     kind: "operator",
     about: about.r.about,
     params: [directionParam(about.r.params.direction, "x")],
-    label: to => arrows[to.toLowerCase() as heading],
-    rule: to => createRotate(to.toLowerCase() as heading),
+    label: to => arrows[headingOf(to) as heading],
+    rule: to => createRotate(headingOf(to) as heading),
 }

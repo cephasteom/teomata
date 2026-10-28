@@ -20,6 +20,11 @@ const headings: Record<heading, direction[]> = {
 }
 export const isHeading = (text: string): text is heading => Object.hasOwn(headings, text)
 
+// A heading as typed, ignoring case, or by its number, from 0 (n) to 6 (xy),
+// in the order n, e, s, w, x, y, xy
+export const headingOf = (text: string) =>
+    /^\d+$/.test(text) ? Object.keys(headings)[Number(text)] ?? text : text.toLowerCase()
+
 // A direction from the heading, picked at random for an axis
 export const pickDirection = (to: heading): direction => {
     const ways = headings[to]

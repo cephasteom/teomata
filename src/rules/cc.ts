@@ -29,7 +29,7 @@ export const cc: Operation = {
     name: "cc",
     kind: "output",
     about: about.c.about,
-    params: [deviceParam(about.c.params.device), channelParam(about.c.params.channel), controller],
-    label: (_, __, controller) => `cc${controller}`,
-    rule: (device, channel, controller) => createCc(Number(device), Number(channel), Number(controller)),
+    params: [controller, deviceParam(about.c.params.device), channelParam(about.c.params.channel)],
+    label: controller => `cc${controller}`,
+    rule: (controller, device, channel) => createCc(Number(device), Number(channel), Number(controller)),
 }

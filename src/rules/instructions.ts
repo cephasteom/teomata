@@ -3,11 +3,11 @@
 // generator and an operator can share a name. Each operation's file takes its
 // text from here, by its params' names
 
-const direction = "n, e, s or w. x, y or xy randomly chooses a direction on the axis/axes."
+const direction = "n, e, s or w. x, y or xy randomly chooses a direction on the axis/axes. Or a number: 0 n, 1 e, 2 s, 3 w, 4 x, 5 y, 6 xy."
 const cycles = "Bangs per cycle: 1 is once per cycle, .5 is twice per cycle, etc."
 const device = "The MIDI output by its number, counting from 0."
 const channel = "A MIDI channel from 1 to 16."
-const type = "saw, sin, cos, tri or sqr, or noi (noise) for smoothed randomness."
+const type = "saw, sin, cos, tri or sqr, or noi (noise) for smoothed randomness, or its number from 0 (saw) to 5 (noi)."
 const freq = "Frequency of the waveform relative to cps."
 
 export const about = {
@@ -22,7 +22,7 @@ export const about = {
     },
     W: {
         about: "Output the current position of a waveform, from 0 to 1, every n cycles, in a given direction. Values arriving pass through.",
-        params: { type, freq, n: cycles, direction },
+        params: { freq, type, n: cycles, direction },
     },
     // Operators
     b: {
@@ -86,15 +86,20 @@ export const about = {
     },
     w: {
         about: "Output the current position of a waveform, from 0 to 1.",
-        params: { type, freq },
+        params: { freq, type },
     },
     // Outputs
     c: {
         about: "Send incoming numbers as MIDI CC messages, rounded and wrapped to 0 to 127, or the first of several. Bangs are ignored.",
-        params: { device, channel, cc: "The controller number, from 0 to 127." },
+        params: { cc: "The controller number, from 0 to 127.", device, channel },
     },
     n: {
         about: "Send incoming numbers as MIDI notes, rounded and wrapped to 0 to 127, or several as a chord. Bangs are ignored.",
-        params: { device, channel },
+        params: {
+            vel: "The velocity, from 0 to 127.",
+            dur: "How long each note lasts, in seconds.",
+            device,
+            channel,
+        },
     },
 }

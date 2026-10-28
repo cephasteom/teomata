@@ -1,6 +1,6 @@
 import { get } from "svelte/store"
 import { q } from "../stores/global"
-import { isHeading } from "../lib/utils"
+import { headingOf, isHeading } from "../lib/utils"
 import type { Param } from "./types"
 
 export const isNumber = (text: string) => text !== "" && Number.isFinite(Number(text))
@@ -9,12 +9,14 @@ export const isWhole = (text: string) => /^\d+$/.test(text)
 
 // The params several operations share, each with its own about text
 
-// A direction: n, e, s or w, or x, y or xy for a random one along that axis or either
+// A direction: n, e, s or w, or x, y or xy for a random one along that axis or
+// either, or its number from 0 to 6
 export const directionParam = (about: string, fallback = "e"): Param => ({
     name: "direction",
     about,
     fallback,
-    accepts: text => isHeading(text.toLowerCase()),
+    accepts: text => isHeading(headingOf(text)),
+    settle: headingOf,
 })
 
 // How many cycles between a generator's outputs, so 1 is once a cycle and .5 twice

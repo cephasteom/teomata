@@ -40,11 +40,13 @@ export const openArea = derived([shownSquare, argSquares], ([$shown, $squares]):
 })
 
 // An argument as it's kept, which is the result when it is arithmetic, such
-// as 1/8 for .125, giving a number the param takes, and as typed otherwise
+// as 1/8 for .125, giving a number the param takes, and as typed otherwise,
+// settled by the param when it takes it
 const settled = (param: Param, text: string) => {
-    if (param.accepts(text)) return text
+    const settle = param.settle ?? (text => text)
+    if (param.accepts(text)) return settle(text)
     const value = calculate(text)
-    return value !== null && param.accepts(formatArg(value)) ? formatArg(value) : text
+    return value !== null && param.accepts(formatArg(value)) ? settle(formatArg(value)) : text
 }
 
 // What each argument square shows, keyed by square

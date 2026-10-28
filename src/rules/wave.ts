@@ -1,8 +1,8 @@
 import { get } from "svelte/store"
 import { q } from "../stores/global"
-import { pickDirection, type heading } from "../lib/utils"
+import { headingOf, pickDirection, type heading } from "../lib/utils"
 import type { CellRule, Operation, Param } from "./types"
-import { cyclesParam, directionParam, fires, isMoving, isNumber } from "./shared"
+import { cyclesParam, directionParam, fires, isMoving, isNumber, isWhole } from "./shared"
 import { about } from "./instructions"
 
 // Each repeating waveform by name, from its phase (0 to 1 through one of its
@@ -39,6 +39,9 @@ const createNoise = () => {
 
 const types = [...Object.keys(periodic), "noi"]
 
+// A type by name, ignoring case, or by its index in types, so 0 is saw and 1 sin
+const typeOf = (text: string) => isWhole(text) ? types[Number(text)] ?? text : text.toLowerCase()
+
 // The waveform of the type, from the time in cycles (bars) to its value,
 // freq being its cycles per cycle
 const createWave = (type: string, freq: number) => {
@@ -53,7 +56,8 @@ const typeParam = (about: string): Param => ({
     name: "type",
     about,
     fallback: "sin",
-    accepts: text => types.includes(text.toLowerCase()),
+    accepts: text => types.includes(typeOf(text)),
+    settle: typeOf,
 })
 
 const freqParam = (about: string): Param => ({ name: "freq", about, fallback: "1", accepts: isNumber })
@@ -70,13 +74,13 @@ export const waveGenerator: Operation = {
     kind: "generator",
     about: about.W.about,
     params: [
-        typeParam(about.W.params.type),
         freqParam(about.W.params.freq),
+        typeParam(about.W.params.type),
         cyclesParam(about.W.params.n),
         directionParam(about.W.params.direction),
     ],
-    rule: (type, freq, cycles, to) =>
-        createWaveGenerator(type.toLowerCase(), Number(freq), Number(cycles), to.toLowerCase() as heading),
+    rule: (freq, type, cycles, to) =>
+        createWaveGenerator(typeOf(type), Number(freq), Number(cycles), headingOf(to) as heading),
 }
 
 // Gives each bang or non zero value arriving the waveform's value on the tick
@@ -89,7 +93,7 @@ export const wave: Operation = {
     name: "wave",
     kind: "operator",
     about: about.w.about,
-    params: [typeParam(about.w.params.type), freqParam(about.w.params.freq)],
-    label: type => type.toLowerCase(),
-    rule: (type, freq) => createWaveform(type.toLowerCase(), Number(freq)),
+    params: [freqParam(about.w.params.freq), typeParam(about.w.params.type)],
+    label: (_, type) => typeOf(type),
+    rule: (freq, type) => createWaveform(typeOf(type), Number(freq)),
 }

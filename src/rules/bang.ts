@@ -1,4 +1,4 @@
-import { BANG, pickDirection, type heading } from "../lib/utils"
+import { BANG, headingOf, pickDirection, type heading } from "../lib/utils"
 import type { Operation, CellRule } from "./types"
 import { cyclesParam, directionParam, fires, isMoving } from "./shared"
 import { about } from "./instructions"
@@ -14,7 +14,7 @@ export const bangGenerator: Operation = {
     kind: "generator",
     about: about.B.about,
     params: [cyclesParam(about.B.params.n), directionParam(about.B.params.direction)],
-    rule: (cycles, to) => createBangGenerator(Number(cycles), to.toLowerCase() as heading),
+    rule: (cycles, to) => createBangGenerator(Number(cycles), headingOf(to) as heading),
 }
 
 // Turns any value arriving into a bang

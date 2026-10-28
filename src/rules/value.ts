@@ -1,4 +1,4 @@
-import { BANG, pickDirection, type heading } from "../lib/utils"
+import { BANG, headingOf, pickDirection, type heading } from "../lib/utils"
 import type { CellRule, Operation, Param } from "./types"
 import { cyclesParam, directionParam, fires, isMoving, isNumber } from "./shared"
 import { about } from "./instructions"
@@ -28,7 +28,7 @@ export const valueGenerator: Operation = {
     about: about.V.about,
     params: [valueParam(about.V.params.value), cyclesParam(about.V.params.n), directionParam(about.V.params.direction)],
     label: value => value,
-    rule: (value, cycles, to) => createValueGenerator(Number(value), Number(cycles), to.toLowerCase() as heading),
+    rule: (value, cycles, to) => createValueGenerator(Number(value), Number(cycles), headingOf(to) as heading),
 }
 
 export const value: Operation = {

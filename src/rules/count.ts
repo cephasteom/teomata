@@ -1,4 +1,3 @@
-import type { Cell } from "../stores/cells"
 import type { CellRule, Operation, Param } from "./types"
 import { isMoving, isNumber } from "./shared"
 import { about } from "./instructions"
@@ -12,8 +11,6 @@ const createCounter = (from: number, to: number) => {
     const by = to < from ? -1 : 1
     let count = from
     return {
-        // The count the next call to next gives
-        peek: () => count,
         next: () => {
             const value = count
             const after = count + by
@@ -26,17 +23,13 @@ const createCounter = (from: number, to: number) => {
 // Gives each value arriving the next count
 const createCount = (from: number, to: number): CellRule => {
     const counter = createCounter(from, to)
-    return Object.assign(
-        (cell: Cell) => isMoving(cell) ? { ...cell, value: counter.next() } : cell,
-        { label: () => `${counter.peek()}` },
-    )
+    return cell => isMoving(cell) ? { ...cell, value: counter.next() } : cell
 }
 
 export const count: Operation = {
-    name: "count",
+    name: "increment",
     kind: "operator",
     about: about.i.about,
     params: [fromParam(about.i.params.from), toParam(about.i.params.to)],
-    label: from => from,
     rule: (from, to) => createCount(Number(from), Number(to)),
 }

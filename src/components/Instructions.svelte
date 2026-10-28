@@ -17,7 +17,7 @@
     <div class="operation">
       <dt class={kind}>{letter}</dt>
       <dd>
-        {name}{#if params.length || rest}({#each params as param, k (param.name)}{#if k}, {/if}{param.name}{/each}{#if rest}{#if params.length}, {/if}...{rest.name}{/if}){/if}
+        {name}({#each params as param, k (param.name)}{#if k}, {/if}{param.name}{/each}{#if rest}{#if params.length}, {/if}...{rest.name}{/if})
       </dd>
       <!-- The active operation explains itself and its params underneath. The
       text is our own and may hold links, which are clicked without taking focus

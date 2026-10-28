@@ -12,6 +12,9 @@ export interface Param {
     about: string
     fallback: string
     accepts: (text: string) => boolean
+    // How an argument it takes is kept once the editor leaves it, such as a
+    // direction typed as a number kept as its name. Kept as typed when it's left out
+    settle?: (text: string) => string
 }
 
 // Generators (uppercase) put out values on their own schedule, operators
