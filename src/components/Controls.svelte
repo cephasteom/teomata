@@ -1,7 +1,6 @@
 <script lang="ts">
   import { toggle } from "../scheduler";
-  import { MAX_CPS, MAX_Q, MAX_SIZE, MIN_CPS, MIN_Q, MIN_SIZE, cps, isPlaying, q, showConsole, showInstructions } from "../stores/global";
-  import { size } from "../stores/size";
+  import { MAX_CPS, MAX_Q, MIN_CPS, MIN_Q, cps, isPlaying, q, showConsole, showInstructions } from "../stores/global";
   import NumberSquare from "./NumberSquare.svelte";
   import { clearCells, randomizeCells } from "../stores/cells";
   import { clearConsole } from "../stores/console";
@@ -13,7 +12,7 @@
   const onplaykeydown = (event: KeyboardEvent) => {
     if (event.key === 'Tab' && event.shiftKey) {
       event.preventDefault()
-      document.querySelector<HTMLElement>('[aria-label="Grid"]')?.focus()
+      document.querySelector<HTMLElement>('[aria-label="Grid"]')?.focus({ preventScroll: true })
     }
   }
 
@@ -50,7 +49,6 @@
   </button>
   <NumberSquare id="cps" label="cps" value={cps} min={MIN_CPS} max={MAX_CPS} step={0.05} places={2} row={6} />
   <NumberSquare id="q" label="q" value={q} min={MIN_Q} max={MAX_Q} step={1} places={0} row={7} />
-  <NumberSquare id="size" label="s" value={size} min={MIN_SIZE} max={MAX_SIZE} step={1} places={0} row={8} />
   {#if focused !== null}
     <div class="focus" style:grid-row="{focused + 1} / {focused + 2}"></div>
   {/if}
@@ -62,7 +60,7 @@
     top: 0;
     right: calc(100% + var(--square));
     display: grid;
-    grid-template-rows: repeat(8, var(--square));
+    grid-template-rows: repeat(7, var(--square));
     width: calc(var(--square) + 2 * var(--line));
     /* Gridlines the same way as the grid: the background shows through the gaps */
     border: var(--line) solid var(--grid-line);

@@ -4,14 +4,15 @@
   import Instructions from "./components/Instructions.svelte";
   import Console from "./components/Console.svelte";
   import Devices from "./components/Devices.svelte";
-  import { DEFAULT_SIZE, gridSize, showConsole, showInstructions } from "./stores/global";
+  import { DEFAULT_ZOOM, zoom, showConsole, showInstructions } from "./stores/global";
 
-  // On the root, so the grid and the controls can both size against it
+  // The squares the grid's window shows per side, on the root, so the grid
+  // and the controls can both size against it
   $effect(() => {
-    document.documentElement.style.setProperty('--size', String($gridSize))
+    document.documentElement.style.setProperty('--size', String($zoom))
   })
-  // The controls keep the squares' size at the default grid size, whatever its size now
-  document.documentElement.style.setProperty('--default-size', String(DEFAULT_SIZE))
+  // The controls keep the squares' size at the default zoom, however far it's zoomed
+  document.documentElement.style.setProperty('--default-size', String(DEFAULT_ZOOM))
 </script>
 
 <main>
@@ -44,11 +45,11 @@
   }
 
   /* The devices and then the console, a square apart, starting a square
-     below the controls' eight squares and reaching down to the grid's bottom
+     below the controls' seven squares and reaching down to the grid's bottom
      edge. Their right edge lines up with the controls' */
   .side {
     position: absolute;
-    top: calc(9 * var(--square) + 9 * var(--line));
+    top: calc(8 * var(--square) + 8 * var(--line));
     bottom: 0;
     right: calc(100% + var(--square));
     display: flex;

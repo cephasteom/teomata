@@ -1,5 +1,5 @@
 import { writable, get } from "svelte/store"
-import { gridSize } from "./global"
+import { SIZE } from "./global"
 import { rules } from "../rules"
 import { appliedOperations } from "./operations"
 import { randomDirection, randomValue } from "../lib/utils"
@@ -22,12 +22,12 @@ const randomCell = (): Cell => ({
 })
 
 const randomGrid = (): Cell[] => Array.from(
-    { length: Math.pow(get(gridSize), 2) },
+    { length: SIZE * SIZE },
     () => (Math.random() > .95 ? randomCell() : {})
 )
 
 const emptyGrid = (): Cell[] => Array.from(
-    { length: Math.pow(get(gridSize), 2) },
+    { length: SIZE * SIZE },
     () => ({})
 )
 
@@ -52,10 +52,9 @@ export const setCells = (next: Cell[]) => {
 // events the rules queued, for the scheduler to send and show in time
 // Tick is the number of ticks since the transport started
 export const stepCells = (tick: number) => {
-    const size = get(gridSize)
     // The operations being edited run as they were until their arguments close
     const { operations: letters, args: given, muted } = appliedOperations()
-    grid = rules.reduce((cells, rule) => rule(cells, size, letters, given, muted, tick), grid)
+    grid = rules.reduce((cells, rule) => rule(cells, SIZE, letters, given, muted, tick), grid)
     return { grid, events: drain(), version }
 }
 

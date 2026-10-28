@@ -1,25 +1,25 @@
 import { writable, get } from "svelte/store"
-import { gridSize } from "./global"
+import { SIZE } from "./global"
 import type { direction } from "./cells"
 import { step } from "../lib/utils"
 
 // One operation per square, or "" for none. Operations belong to the square rather
 // than the cell on it, so they stay put while cells move over them.
 export const operations = writable<string[]>(
-    Array.from({ length: Math.pow(get(gridSize), 2) }, () => "")
+    Array.from({ length: SIZE * SIZE }, () => "")
 )
 
 // The arguments typed in for each square's operation, as text. A square's
 // arguments are cleared when its operation changes
 export const args = writable<string[][]>(
-    Array.from({ length: Math.pow(get(gridSize), 2) }, () => [])
+    Array.from({ length: SIZE * SIZE }, () => [])
 )
 
 // Whether each square's operation is muted. A muted operation stays on its
 // square but does nothing, and keeps what it remembers, until it is unmuted.
 // A square is unmuted when its operation changes
 export const muted = writable<boolean[]>(
-    Array.from({ length: Math.pow(get(gridSize), 2) }, () => false)
+    Array.from({ length: SIZE * SIZE }, () => false)
 )
 
 // Mutes the operations on the squares, or unmutes them when every one is
@@ -99,14 +99,17 @@ export const setArg = (squares: Iterable<number>, k: number, text: string) => {
 
 // Steps the operations on the squares, with their arguments and whether they
 // are muted, one square over.
-// They land on top of whatever was there, and the squares they leave are emptied
+// They land on top of whatever was there, and the squares they leave are
+// emptied. Any that would step past the edge are lost
 export const moveOperations = (squares: Iterable<number>, direction: direction) => {
     const list = [...squares]
-    const size = get(gridSize)
     const shift = <T>(values: T[], empty: () => T) => {
         const next = [...values]
         for (const i of list) next[i] = empty()
-        for (const i of list) next[step(i, direction, size)] = values[i]
+        for (const i of list) {
+            const to = step(i, direction, SIZE)
+            if (to !== undefined) next[to] = values[i]
+        }
         return next
     }
     operations.update(operations => shift(operations, () => ""))
@@ -122,11 +125,10 @@ type Rectangle = { x1: number, x2: number, y1: number, y2: number }
 
 // Copies the operations, arguments and mutes in the rectangle, empty squares included
 export const copyOperations = ({ x1, x2, y1, y2 }: Rectangle) => {
-    const size = get(gridSize)
     const [$operations, $args, $muted] = [get(operations), get(args), get(muted)]
     const squares: number[] = []
     for (let y = y1; y <= y2; y++) {
-        for (let x = x1; x <= x2; x++) squares.push(y * size + x)
+        for (let x = x1; x <= x2; x++) squares.push(y * SIZE + x)
     }
     clipboard = {
         width: x2 - x1 + 1,
@@ -143,13 +145,12 @@ export const copyOperations = ({ x1, x2, y1, y2 }: Rectangle) => {
 export const pasteOperations = (x: number, y: number): Rectangle | null => {
     if (!clipboard) return null
     const { width, height } = clipboard
-    const size = get(gridSize)
-    const pasted = { x1: x, x2: Math.min(x + width, size) - 1, y1: y, y2: Math.min(y + height, size) - 1 }
+    const pasted = { x1: x, x2: Math.min(x + width, SIZE) - 1, y1: y, y2: Math.min(y + height, SIZE) - 1 }
     const paste = <T>(values: T[], copied: T[]) => {
         const next = [...values]
         for (let dy = 0; dy <= pasted.y2 - y; dy++) {
             for (let dx = 0; dx <= pasted.x2 - x; dx++) {
-                next[(y + dy) * size + x + dx] = copied[dy * width + dx]
+                next[(y + dy) * SIZE + x + dx] = copied[dy * width + dx]
             }
         }
         return next
@@ -162,7 +163,7 @@ export const pasteOperations = (x: number, y: number): Rectangle | null => {
 
 export const clearOperations = () => {
     releaseOperations()
-    operations.set(Array.from({ length: Math.pow(get(gridSize), 2) }, () => ""))
-    args.set(Array.from({ length: Math.pow(get(gridSize), 2) }, () => []))
-    muted.set(Array.from({ length: Math.pow(get(gridSize), 2) }, () => false))
+    operations.set(Array.from({ length: SIZE * SIZE }, () => ""))
+    args.set(Array.from({ length: SIZE * SIZE }, () => []))
+    muted.set(Array.from({ length: SIZE * SIZE }, () => false))
 }

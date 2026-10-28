@@ -3,7 +3,7 @@ import { opposite, step } from "../lib/utils"
 import type { GridRule } from "./types"
 
 // Moves every cell one step in its direction
-// Cells wrap around the boundary of the grid
+// Cells that would step past the edge of the grid die
 // Head on collisions reverse direction
 // Last cells wins multiple cell occupancy
 export const move: GridRule = (cells, size) => {
@@ -13,10 +13,12 @@ export const move: GridRule = (cells, size) => {
             if (cell.value !== undefined) next[i] = cell
             return
         }
-        const other = cells[step(i, cell.direction, size)].direction
+        const ahead = step(i, cell.direction, size)
+        const other = ahead === undefined ? undefined : cells[ahead].direction
         const collided = other !== undefined && other !== cell.direction
         const direction = collided ? opposite[cell.direction] : cell.direction
-        next[step(i, direction, size)] = collided ? { ...cell, direction } : cell
+        const to = step(i, direction, size)
+        if (to !== undefined) next[to] = collided ? { ...cell, direction } : cell
     })
     return next
 }

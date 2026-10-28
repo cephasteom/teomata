@@ -44,16 +44,17 @@ export const randomValue = () => Math.floor(Math.random() * (MAX_VALUE + 1))
 
 export const randomDirection = () => pickDirection('xy')
 
-// Index of the square one step from i in the given direction
-// Wraps around the edges of the grid
+// Index of the square one step from i in the given direction, or undefined
+// when that would go past the edge of the grid
 export const step = (i: number, direction: direction, size: number) => {
     const [dx, dy] = offsets[direction]
-    const x = (i % size + dx + size) % size
-    const y = (Math.floor(i / size) + dy + size) % size
-    return y * size + x
+    const x = i % size + dx
+    const y = Math.floor(i / size) + dy
+    return x < 0 || x >= size || y < 0 || y >= size ? undefined : y * size + x
 }
 
-// Copies a grid's squares onto a grid of a new size, keeping each at the same
+// Copies a grid's squares onto a grid of a new size, for operations saved
+// when the grid's size could change, keeping each at the same
 // column and row. Squares past the old edges come in empty, and those past
 // the new edges are cut off
 export const resize = <T>(values: T[], from: number, to: number, empty: () => T) =>

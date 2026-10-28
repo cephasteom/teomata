@@ -1,6 +1,6 @@
 import { writable, derived, get } from "svelte/store"
 import type { direction } from "./cells"
-import { gridSize } from "./global"
+import { SIZE } from "./global"
 import { operations, args, setArg, holdOperations, releaseOperations } from "./operations"
 import { cursor, anchor, placeCursor } from "./cursor"
 import { argsFor, paramsFor } from "../rules"
@@ -13,28 +13,28 @@ export const editing = writable<number | null>(null)
 // The square the open operation shows in while its arguments are open. It is
 // its own square, or moved left along the row when its arguments would run
 // off the end, so they always fit to its right
-export const shownSquare = derived([editing, operations, args, gridSize], ([$editing, $operations, $args, $size]) => {
+export const shownSquare = derived([editing, operations, args], ([$editing, $operations, $args]) => {
     if ($editing === null) return null
-    const count = paramsFor($operations[$editing], $size, $args[$editing]).length
-    return $editing - Math.max(0, $editing % $size + count - ($size - 1))
+    const count = paramsFor($operations[$editing], SIZE, $args[$editing]).length
+    return $editing - Math.max(0, $editing % SIZE + count - (SIZE - 1))
 })
 
 // The squares the open operation's arguments show in, in order, running left
 // to right from the square after the shown operation. Some operations show
 // fewer of them depending on what their arguments are
-export const argSquares = derived([editing, shownSquare, operations, args, gridSize], ([$editing, $shown, $operations, $args, $size]) => {
+export const argSquares = derived([editing, shownSquare, operations, args], ([$editing, $shown, $operations, $args]) => {
     if ($editing === null || $shown === null) return []
-    return paramsFor($operations[$editing], $size, $args[$editing]).map((_, k) => $shown + k + 1)
+    return paramsFor($operations[$editing], SIZE, $args[$editing]).map((_, k) => $shown + k + 1)
 })
 
 type Area = { x1: number, x2: number, y1: number, y2: number }
 
 // The open row of squares, the operation's with its arguments', as an
 // inclusive rectangle. Null when no arguments are open
-export const openArea = derived([shownSquare, argSquares, gridSize], ([$shown, $squares, $size]): Area | null => {
+export const openArea = derived([shownSquare, argSquares], ([$shown, $squares]): Area | null => {
     if ($shown === null) return null
-    const columns = [$shown, ...$squares].map(square => square % $size)
-    const y = Math.floor($shown / $size)
+    const columns = [$shown, ...$squares].map(square => square % SIZE)
+    const y = Math.floor($shown / SIZE)
     return { x1: Math.min(...columns), x2: Math.max(...columns), y1: y, y2: y }
 })
 
@@ -47,10 +47,10 @@ const settled = (param: Param, text: string) => {
 }
 
 // What each argument square shows, keyed by square
-export const argCells = derived([editing, argSquares, operations, args, gridSize], ([$editing, $squares, $operations, $args, $size]) => {
+export const argCells = derived([editing, argSquares, operations, args], ([$editing, $squares, $operations, $args]) => {
     const shown = new Map<number, { text: string, valid: boolean }>()
     if ($editing === null) return shown
-    const params = paramsFor($operations[$editing], $size, $args[$editing])
+    const params = paramsFor($operations[$editing], SIZE, $args[$editing])
     $squares.forEach((square, k) => {
         const text = $args[$editing][k] ?? params[k].fallback
         shown.set(square, { text, valid: params[k].accepts(settled(params[k], text)) })
@@ -88,10 +88,9 @@ export const openArgs = (
         i !== square && all[i] === operation
     )]
     holdOperations(targets, before)
-    const size = get(gridSize)
     args.update(args => {
         const next = [...args]
-        for (const i of targets) next[i] = argsFor(operation, size, args[i])
+        for (const i of targets) next[i] = argsFor(operation, SIZE, args[i])
         return next
     })
     selectedFrom = get(anchor)
@@ -106,7 +105,7 @@ const settleArg = () => {
     const square = get(editing)
     const k = cursorArg()
     if (square === null || k < 0) return
-    const param = paramsFor(get(operations)[square], get(gridSize), get(args)[square])[k]
+    const param = paramsFor(get(operations)[square], SIZE, get(args)[square])[k]
     const text = get(args)[square][k]
     if (param && text !== undefined && settled(param, text) !== text) setArg(targets, k, settled(param, text))
 }

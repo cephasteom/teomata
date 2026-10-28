@@ -11,8 +11,8 @@
   --cell-generator: #51cf66;
   /* A muted operation's label and border */
   --cell-muted: #868e96;
-  /* The largest square that fits the viewport with a gutter all round as wide
-     as one of the squares at the default grid size, the same gap the controls
+  /* The grid's window: the largest square that fits the viewport with a
+     gutter all round as wide as one of the squares at the default zoom, the same gap the controls
      and instructions keep from the grid. The gutter depends on the grid's
      width, so solving W = V - 2 * (W - (D + 1) * line) / D for W gives it.
      Viewport units track the window, so it resizes along with it. --default-size
@@ -27,11 +27,12 @@
 }
 
 /* Sizes that follow the squares. On .default-size they're worked out again at
-   the default grid size, so the controls stay the same size as the grid changes */
+   the default zoom, so the controls stay the same size as the grid zooms */
 :root,
 .default-size {
-  /* One of the grid's squares: its width less the border and gaps, shared
-     out. --size, the squares per side, is set on the root by App */
+  /* One of the grid's squares: the window's width less the border and gaps,
+     shared out. --size, the squares per side the window shows, is set on the
+     root by App */
   --square: calc((var(--grid-width) - (var(--size) + 1) * var(--line)) / var(--size));
   /* Icons scale with the squares on small screens, up to a fixed size, and
      are the same size in the grid and the controls */

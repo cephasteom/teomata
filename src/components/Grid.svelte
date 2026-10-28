@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { onMount, flushSync } from "svelte";
   import { cells, type direction } from "../stores/cells";
-  import { gridSize } from "../stores/global";
+  import { SIZE, DEFAULT_ZOOM, MIN_ZOOM, MAX_ZOOM, zoom } from "../stores/global";
   import {
     gridFocused, cursor, bounds, selection, placeCursor, moveCursor, selectAll, selectionCanMove, moveSelection,
   } from "../stores/cursor";
@@ -33,12 +33,209 @@
     v: () => {
       const pasted = pasteOperations($bounds.x1, $bounds.y1)
       if (!pasted) return
-      placeCursor(pasted.y1 * $gridSize + pasted.x1)
-      placeCursor(pasted.y2 * $gridSize + pasted.x2, true)
+      placeCursor(pasted.y1 * SIZE + pasted.x1)
+      placeCursor(pasted.y2 * SIZE + pasted.x2, true)
     },
   }
 
   let grid: HTMLDivElement
+  // The window onto the grid, which scrolls to show the part of it in view
+  let scroller: HTMLDivElement
+
+  // How far apart squares are, in pixels, measured between the first two, as
+  // the gridlines are fractions of a pixel
+  const pitch = () => {
+    const [a, b] = grid.children
+    return b.getBoundingClientRect().left - a.getBoundingClientRect().left
+  }
+
+  // The column and row of the square in the window's top left corner, which
+  // may be a fraction of the way across it after a drag
+  const corner = () => ({ x: scroller.scrollLeft / pitch(), y: scroller.scrollTop / pitch() })
+
+  // Scrolls the window so the column and row are in its top left corner,
+  // rounded to whole squares, so the window's edges always fall on gridlines
+  const scrollToSquare = (x: number, y: number, behavior: ScrollBehavior = 'instant') => {
+    const size = pitch()
+    scroller.scrollTo({ left: Math.round(x) * size, top: Math.round(y) * size, behavior })
+  }
+
+  // Scrolls the window by as few squares as it takes to bring the square into view
+  const reveal = (i: number) => {
+    const [x, y] = [i % SIZE, Math.floor(i / SIZE)]
+    const from = corner()
+    const fit = (to: number, at: number) => Math.min(Math.max(Math.round(at), to - $zoom + 1), to)
+    scrollToSquare(fit(x, from.x), fit(y, from.y))
+  }
+
+  // The window follows the cursor, showing as much of the open arguments as
+  // fits along with it
+  $effect(() => {
+    if ($openArea) reveal($openArea.y1 * SIZE + $openArea.x2)
+    reveal($cursor)
+  })
+
+  // Zooms to show that many squares per side, rounded to whole squares, keeping
+  // the grid as still as it can be under a point in the window: the one given,
+  // or the cursor's square when it's in view, or else the middle
+  const zoomTo = (next: number, at?: { x: number, y: number }) => {
+    next = Math.round(Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, next)))
+    if (next === $zoom) return
+    const { clientWidth, clientHeight } = scroller
+    const from = corner()
+    const onCursor = !at
+    if (!at) {
+      const size = pitch()
+      const [cx, cy] = [($cursor % SIZE + 0.5 - from.x) * size, (Math.floor($cursor / SIZE) + 0.5 - from.y) * size]
+      const inView = cx >= 0 && cx <= clientWidth && cy >= 0 && cy <= clientHeight
+      at = inView ? { x: cx, y: cy } : { x: clientWidth / 2, y: clientHeight / 2 }
+    }
+    // The point, in squares from the grid's top left corner
+    const [sx, sy] = [from.x + at.x / pitch(), from.y + at.y / pitch()]
+    // The grid takes its new size at once, so the window can scroll against it
+    flushSync(() => zoom.set(next))
+    const size = pitch()
+    scrollToSquare(sx - at.x / size, sy - at.y / size)
+    // Rounding to whole squares can push the cursor's square half out of view
+    if (onCursor) reveal($cursor)
+  }
+
+  // The zoom keys step through these, as squares per side
+  const levels = [4, 6, 8, 12, 16, 24, 32, 48, 64]
+  const zoomIn = () => zoomTo(levels.findLast(level => level < $zoom - 0.01) ?? MIN_ZOOM)
+  const zoomOut = () => zoomTo(levels.find(level => level > $zoom + 0.01) ?? MAX_ZOOM)
+
+  // The page's zoom keys zoom the grid instead while it has focus
+  const zoomKeys: Record<string, () => void> = {
+    '=': zoomIn,
+    '+': zoomIn,
+    '-': zoomOut,
+    '_': zoomOut,
+    '0': () => zoomTo(DEFAULT_ZOOM),
+  }
+
+  // A point on the page as a point in the window
+  const inWindow = (x: number, y: number) => {
+    const { left, top } = scroller.getBoundingClientRect()
+    return { x: x - left, y: y - top }
+  }
+
+  // Pinching a trackpad, or a wheel with ctrl held, zooms the grid instead of
+  // the page, about the pointer. Without ctrl the wheel scrolls the window as usual
+  // The zoom the wheel has reached, kept between whole squares so small turns
+  // add up, and caught up with the zoom when that has changed some other way
+  let wheelZoom = DEFAULT_ZOOM
+  const onwheel = (event: WheelEvent) => {
+    if (!event.ctrlKey) return
+    event.preventDefault()
+    if (Math.round(wheelZoom) !== $zoom) wheelZoom = $zoom
+    const delta = Math.max(-25, Math.min(25, event.deltaY))
+    wheelZoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, wheelZoom * Math.exp(delta * 0.01)))
+    zoomTo(wheelZoom, inWindow(event.clientX, event.clientY))
+  }
+
+  // Once the window stops scrolling it settles onto the nearest whole
+  // squares, apart from while fingers are still dragging it
+  const onscrollend = () => {
+    if (touches.size) return
+    const { x, y } = corner()
+    // Browsers round scrolling to device pixels, so near enough is aligned
+    const off = (n: number) => Math.abs(n - Math.round(n)) > 0.02
+    if (off(x) || off(y)) scrollToSquare(x, y, 'smooth')
+  }
+
+  // Fingers on the window, by pointer id, where each was last
+  const touches = new Map<number, { x: number, y: number }>()
+  // The fingers' spread and the zoom when a pinch started
+  let pinch: { spread: number, zoom: number } | null = null
+  // Where a lone finger first went down, and whether it has since moved far
+  // enough to be a drag rather than a tap
+  let pressed = { x: 0, y: 0 }
+  let dragged = false
+
+  const middle = () => {
+    const [a, b] = [...touches.values()]
+    return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }
+  }
+  const spread = () => {
+    const [a, b] = [...touches.values()]
+    return Math.hypot(a.x - b.x, a.y - b.y)
+  }
+
+  // Safari pinches with its own gesture events rather than the wheel. On a
+  // touch screen the fingers are followed instead
+  let gestureZoom = DEFAULT_ZOOM
+  const ongesturestart = (event: Event) => {
+    event.preventDefault()
+    gestureZoom = $zoom
+  }
+  const ongesturechange = (event: Event) => {
+    event.preventDefault()
+    const { scale, clientX, clientY } = event as Event & { scale: number, clientX: number, clientY: number }
+    if (!touches.size) zoomTo(gestureZoom / scale, inWindow(clientX, clientY))
+  }
+
+  // Listened to by hand, as they have to be able to stop the page zooming
+  onMount(() => {
+    const options = { passive: false }
+    scroller.addEventListener('wheel', onwheel, options)
+    scroller.addEventListener('gesturestart', ongesturestart, options)
+    scroller.addEventListener('gesturechange', ongesturechange, options)
+    scroller.addEventListener('scrollend', onscrollend)
+    return () => {
+      scroller.removeEventListener('scrollend', onscrollend)
+      scroller.removeEventListener('wheel', onwheel)
+      scroller.removeEventListener('gesturestart', ongesturestart)
+      scroller.removeEventListener('gesturechange', ongesturechange)
+    }
+  })
+
+  // One finger drags the grid about, and two pinch to zoom it while dragging
+  // it along with them. Mice and pens click and scroll as usual
+  const onpointerdown = (event: PointerEvent) => {
+    if (event.pointerType !== 'touch') {
+      dragged = false
+      return
+    }
+    const point = { x: event.clientX, y: event.clientY }
+    touches.set(event.pointerId, point)
+    if (touches.size === 1) {
+      pressed = point
+      dragged = false
+    } else if (touches.size === 2) {
+      pinch = { spread: spread(), zoom: $zoom }
+      dragged = true
+    }
+  }
+
+  const onpointermove = (event: PointerEvent) => {
+    const last = touches.get(event.pointerId)
+    if (!last) return
+    const from = touches.size === 2 ? middle() : last
+    touches.set(event.pointerId, { x: event.clientX, y: event.clientY })
+    const to = touches.size === 2 ? middle() : { x: event.clientX, y: event.clientY }
+    scroller.scrollLeft += from.x - to.x
+    scroller.scrollTop += from.y - to.y
+    if (pinch && touches.size === 2) {
+      zoomTo(pinch.zoom * pinch.spread / spread(), inWindow(to.x, to.y))
+    } else if (Math.hypot(event.clientX - pressed.x, event.clientY - pressed.y) > 8) {
+      dragged = true
+    }
+  }
+
+  const onpointerup = (event: PointerEvent) => {
+    if (!touches.delete(event.pointerId)) return
+    if (touches.size < 2) pinch = null
+    // Browsers without scrollend still settle onto whole squares after a drag
+    if (!touches.size) onscrollend()
+  }
+
+  // A drag ends without clicking the square it ended on
+  const onclickcapture = (event: MouseEvent) => {
+    if (!dragged) return
+    event.stopPropagation()
+    dragged = false
+  }
 
   // Generators and outputs are bordered in their own colours, outputs in the
   // one their messages print in, or grey while muted. The borders all go
@@ -59,7 +256,7 @@
   // they are worked out again each time the cells change
   let labels = $derived.by(() => {
     void $cells
-    return $operations.map((letter, i) => letter ? labelFor(i, letter, $gridSize, $args[i]) : "")
+    return $operations.map((letter, i) => letter ? labelFor(i, letter, SIZE, $args[i]) : "")
   })
 
   // A label that is a lone arrow, as a rotate's is, shows bigger, as arrows
@@ -68,7 +265,7 @@
   let borderColors = $derived(new Map(bordered.map(({ i, color }) => [i, color])))
 
   // The page starts on the grid, and tabbing from there carries on round to the controls
-  onMount(() => grid.focus())
+  onMount(() => grid.focus({ preventScroll: true }))
 
   // An arrow pressed anywhere else brings focus back to the grid, with the
   // cursor where it was left. Keys typed into a field, like the controls' CPS,
@@ -87,7 +284,7 @@
     if (keys[event.key] && !(event.metaKey || event.ctrlKey || event.altKey)) {
       // Stop the arrow keys from scrolling the page
       event.preventDefault()
-      grid.focus()
+      grid.focus({ preventScroll: true })
     }
   }
 
@@ -96,6 +293,14 @@
     if (event.key === 'Tab' && !event.shiftKey) {
       event.preventDefault()
       document.querySelector<HTMLElement>('[aria-label="Controls"] button')?.focus()
+      return
+    }
+
+    // The zoom keys zoom the grid instead of the page
+    const zooming = zoomKeys[event.key]
+    if ((event.metaKey || event.ctrlKey) && !event.altKey && zooming) {
+      event.preventDefault()
+      zooming()
       return
     }
 
@@ -137,7 +342,7 @@
       toggleMuted($selection)
     } else if (event.key === 'Enter') {
       // Only an operation with params has arguments to open
-      if (paramsFor($operations[$cursor], $gridSize).length) openArgs($cursor, $selection)
+      if (paramsFor($operations[$cursor], SIZE).length) openArgs($cursor, $selection)
     } else if (direction) {
       // Stop the arrow keys from scrolling the page
       event.preventDefault()
@@ -150,7 +355,7 @@
       setOperations($selection, event.key)
       // A typed operation opens its arguments, when it has any, and only
       // starts running once they close
-      if (paramsFor(event.key, $gridSize).length) openArgs($cursor, $selection, before)
+      if (paramsFor(event.key, SIZE).length) openArgs($cursor, $selection, before)
     } else if (event.key === 'Backspace' || event.key === 'Delete') {
       setOperations($selection, "")
     }
@@ -162,10 +367,15 @@
   onkeyup={(event) => { if (event.key === ' ' && event.target instanceof HTMLButtonElement) event.preventDefault() }}
 />
 
+<!-- The window shows part of the grid, scrolled by the cursor, the wheel or a finger -->
+<!-- svelte-ignore a11y_no_static_element_interactions -->
+<div class="window" bind:this={scroller}
+  {onpointerdown} {onpointermove} {onpointerup} onpointercancel={onpointerup} {onclickcapture}
+>
 <!-- Tabbing comes here after the controls -->
 <!-- svelte-ignore a11y_no_noninteractive_tabindex, a11y_no_noninteractive_element_interactions -->
 <div class="grid" class:editing={$editing !== null} class:focused={$gridFocused} bind:this={grid}
-  role="application" aria-label="Grid" tabindex="0"
+  role="application" aria-label="Grid" tabindex="0" style:--squares={SIZE}
   {onkeydown} onfocus={() => $gridFocused = true} onblur={() => $gridFocused = false}
 >
   {#each $cells as cell, i (i)}
@@ -191,7 +401,7 @@
     </div>
   {/each}
   {#each bordered as { i, color } (i)}
-    {@const [x, y] = [i % $gridSize, Math.floor(i / $gridSize)]}
+    {@const [x, y] = [i % SIZE, Math.floor(i / SIZE)]}
     <!-- Behind each bordered square, in its colour, so the gridlines round it
          join up with its border instead of showing through. It comes before
          the selection, which colours the lines over it. Both lines are
@@ -217,16 +427,34 @@
     style:grid-row="{$bounds.y1 + 1} / {$bounds.y2 + 2}"
   ></div>
 </div>
+</div>
 
 <style>
+  /* Its own scrollbars are hidden, and fingers are followed by hand, so they
+     can pinch the grid without zooming the page */
+  .window {
+    width: var(--grid-width);
+    aspect-ratio: 1;
+    overflow: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+    touch-action: none;
+  }
+
+  .window::-webkit-scrollbar {
+    display: none;
+  }
+
   .grid {
     position: relative;
     display: grid;
     /* minmax(0, 1fr) stops a cell's operation from stretching its track, and the
        explicit rows keep every row the same height as the columns are wide */
-    grid-template-columns: repeat(var(--size), minmax(0, 1fr));
-    grid-template-rows: repeat(var(--size), minmax(0, 1fr));
-    width: var(--grid-width);
+    grid-template-columns: repeat(var(--squares), minmax(0, 1fr));
+    grid-template-rows: repeat(var(--squares), minmax(0, 1fr));
+    /* Every square at the zoomed size, with the gaps and border round them,
+       so the window shows --size of them across */
+    width: calc(var(--squares) * var(--square) + (var(--squares) + 1) * var(--line));
     aspect-ratio: 1;
     border: var(--line) solid var(--grid-line);
     /* The background shows through the gaps between cells as gridlines */
@@ -241,7 +469,7 @@
   .cell {
     display: grid;
     place-items: center;
-    font-size: calc(100cqi / var(--size) * 0.45);
+    font-size: calc(100cqi / var(--squares) * 0.45);
     line-height: 1;
     overflow: hidden;
     background: var(--cell-empty);
