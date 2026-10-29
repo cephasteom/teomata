@@ -9,14 +9,14 @@ export const toMidi = (n: number) => ((Math.round(n) % 128) + 128) % 128
 
 // Plays each number that arrives as a MIDI note, or an array as a chord, at
 // the velocity for dur seconds, on the device and channel
-// Bangs are ignored, and the cell is left alone
+// Bangs are ignored, and every moving cell is absorbed
 const createNote = (amp: number, dur: number, device: number, channel: number): CellRule => cell => {
     const { value } = cell
-    if (!isMoving(cell) || value === BANG) return cell
+    if (!isMoving(cell)) return cell
+    if (value === BANG) return {}
     const notes = (Array.isArray(value) ? value : [value!]).map(toMidi)
-    if (!notes.length) return cell
-    emit({ type: "note", device, channel, notes, amp, dur })
-    return cell
+    if (notes.length) emit({ type: "note", device, channel, notes, amp, dur })
+    return {}
 }
 
 const velocity: Param = {

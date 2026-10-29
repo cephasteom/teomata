@@ -22,7 +22,7 @@ There are three kinds of object:
 
 - **Generators** (uppercase, green outline): output values on their own schedule. Values may pass through unchanged without triggering output.
 - **Operators** (lowercase, no outline): transform incoming values.
-- **Outputs** (lowercase, blue outline): translate values as MIDI notes and control messages.
+- **Outputs** (lowercase, blue outline): translate values as MIDI notes and control messages, absorbing every value that arrives.
 
 A generator and an operator may share a letter. The generator emits values on its own; the operator emits only when it receives one.
 
@@ -54,5 +54,5 @@ Shown as a green outlined square.
 
 ## Outputs
 
-* **n** `note(vel, dur, device, channel)`: send incoming numbers as MIDI notes at velocity `vel` (0 to 127), lasting `dur` seconds. Bangs are ignored; numbers are rounded and wrapped to 0 to 127. Defaults: `vel = 100`, `dur = .5`, `device = 0`, `channel = 1`. Displayed as `n`.
-* **c** `cc(cc, device, channel)`: send incoming numbers as CC messages. Bangs are ignored; numbers are rounded and wrapped to 0 to 127, and a chord sends its first number. Defaults: `cc = 1`, `device = 0`, `channel = 1`. Displayed as `cc<number>`, e.g. `cc7`.
+* **n** `note(vel, dur, device, channel)`: send incoming numbers as MIDI notes at velocity `vel` (0 to 127), lasting `dur` seconds, absorbing every value. Bangs are ignored; numbers are rounded and wrapped to 0 to 127. Defaults: `vel = 100`, `dur = .5`, `device = 0`, `channel = 1`. Displayed as `n`.
+* **c** `cc(cc, device, channel)`: send incoming numbers as CC messages, absorbing every value. Bangs are ignored; numbers are rounded and wrapped to 0 to 127, and a chord sends its first number. Defaults: `cc = 1`, `device = 0`, `channel = 1`. Displayed as `cc<number>`, e.g. `cc7`.

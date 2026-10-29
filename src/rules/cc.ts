@@ -7,15 +7,14 @@ import { about } from "./instructions"
 
 // Sends each number that arrives as a MIDI CC message on the device, channel
 // and controller. An array sends its first number. Bangs are ignored, and
-// the cell is left alone
+// every moving cell is absorbed
 const createCc = (device: number, channel: number, controller: number): CellRule => cell => {
     const { value } = cell
-    if (!isMoving(cell) || value === BANG) return cell
+    if (!isMoving(cell)) return cell
+    if (value === BANG) return {}
     const first = Array.isArray(value) ? value[0] : value!
-    if (first === undefined) return cell
-    const n = toMidi(first)
-    emit({ type: "cc", device, channel, controller, value: n })
-    return cell
+    if (first !== undefined) emit({ type: "cc", device, channel, controller, value: toMidi(first) })
+    return {}
 }
 
 const controller: Param = {
