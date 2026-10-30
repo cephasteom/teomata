@@ -5,10 +5,8 @@
   import { clearCells, randomizeCells } from "../stores/cells";
   import { clearConsole } from "../stores/console";
 
-  // The row of the control with keyboard focus, which the focus square sits behind
   let focused = $state<number | null>(null)
 
-  // Tabbing back from the first control wraps round to the grid
   const onplaykeydown = (event: KeyboardEvent) => {
     if (event.key === 'Tab' && event.shiftKey) {
       event.preventDefault()
@@ -16,15 +14,15 @@
     }
   }
 
-  // Counts only the controls, as the number squares' labels sit among them
   const onfocusin = (event: FocusEvent) => {
     const control = event.target as HTMLElement
     const controls = [...control.parentElement!.querySelectorAll(':scope > button, :scope > input')]
-    focused = control.matches(':focus-visible') ? controls.indexOf(control) : null
+    focused = control.matches(':focus-visible') 
+      ? controls.indexOf(control) 
+      : null
   }
 </script>
 
-<!-- A column of grid squares, one per control, sitting a square's width to the grid's left -->
 <div class="controls default-size" role="toolbar" aria-label="Controls" aria-orientation="vertical"
   {onfocusin} onfocusout={() => focused = null}
 >
@@ -62,16 +60,12 @@
     display: grid;
     grid-template-rows: repeat(7, var(--square));
     width: calc(var(--square) + 2 * var(--line));
-    /* Gridlines the same way as the grid: the background shows through the gaps */
     border: var(--line) solid var(--grid-line);
     gap: var(--line);
     background: var(--grid-line);
-    /* Keeps the focus square's negative z-index above the background */
     isolation: isolate;
   }
 
-  /* Like the grid's selection, it sits behind the focused button and reaches
-     one gap past it, so the gridlines around it change colour */
   .focus {
     position: absolute;
     inset: calc(-1 * var(--line));
@@ -79,7 +73,6 @@
     background: var(--cell-cursor);
   }
 
-  /* The whole square is the button, so the usual button border and padding go */
   button {
     display: grid;
     place-items: center;
@@ -90,7 +83,6 @@
     color: var(--cell-alive);
   }
 
-  /* A toggle that's off dims its icon */
   button.off {
     color: var(--grid-line);
   }
@@ -100,7 +92,6 @@
     color: var(--cell-empty);
   }
 
-  /* Focus looks like the grid's cursor */
   button:focus-visible {
     outline: none;
     box-shadow: inset 0 0 0 2px var(--cell-cursor);
