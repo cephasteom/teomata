@@ -2,12 +2,7 @@
   import { lines } from "../stores/console";
 
   let list = $state<HTMLOListElement>();
-  // Like a terminal, it follows new lines while scrolled to the bottom, and
-  // stays put while scrolled back up through older ones
   let following = true;
-
-  // The scrollbar is drawn here rather than left to the browser, so it looks
-  // the same everywhere. The thumb's top and height are fractions of the track
   let thumb = $state({ top: 0, height: 1 });
   let overflowing = $derived(thumb.height < 1);
 
@@ -23,13 +18,14 @@
     measure();
   };
 
+  // follow new content
   $effect(() => {
     $lines;
     if (list && following) list.scrollTop = list.scrollHeight;
     measure();
   });
 
-  // The squares resize with the window, and the console with them
+  // On resize
   $effect(() => {
     if (!list) return;
     const observer = new ResizeObserver(measure);
@@ -37,9 +33,6 @@
     return () => observer.disconnect();
   });
 
-  // The scrollbar shows while it's scrolled by hand, hovered or dragged, and
-  // fades out once it's been left alone a while. Scrolling to follow new lines
-  // doesn't show it
   const SHOW_FOR = 1000;
   let scrolled = $state(false);
   let hovered = $state(false);
@@ -55,7 +48,6 @@
 
   $effect(() => () => clearTimeout(hide));
 
-  // Dragging the thumb scrolls by as much of the lines as it moves over of the track
   let drag: { y: number, scrollTop: number } | null = null;
 
   const onthumbdown = (event: PointerEvent) => {
@@ -77,7 +69,6 @@
     list.scrollTop = drag.scrollTop + (event.clientY - drag.y) * list.scrollHeight / list.clientHeight;
   };
 
-  // Clicking the track centres the thumb on the click
   const ontrackdown = (event: PointerEvent) => {
     if (!list || event.target !== event.currentTarget) return;
     event.preventDefault();
@@ -88,9 +79,6 @@
   };
 </script>
 
-<!-- The printed values, one per line, under the devices and reaching down
-     to the grid's bottom edge. The scrollbar sits outside them, in the gap
-     before the grid -->
 <div class="console">
   <!-- svelte-ignore a11y_no_noninteractive_tabindex, a11y_no_noninteractive_element_interactions -->
   <ol id="console" aria-label="Console" aria-live="off" tabindex="0" bind:this={list} {onscroll}
@@ -143,8 +131,6 @@
     display: none;
   }
 
-  /* Focus rings the console in the cursor's colour, like the grid and the
-     controls, outside it so the values stay in line with the controls */
   ol:focus {
     outline: none;
   }
@@ -152,8 +138,6 @@
   ol:focus-visible {
     box-shadow: 0 0 0 2px var(--cell-cursor);
   }
-
-  /* Lines keep their height, so the console scrolls rather than squashing them */
   li {
     flex-shrink: 0;
     overflow: hidden;
@@ -162,7 +146,6 @@
     text-align: right;
   }
 
-  /* A third of the way across the gap between the values and the grid */
   .track {
     position: absolute;
     top: 0;
@@ -173,7 +156,6 @@
     cursor: pointer;
     touch-action: none;
     opacity: 0;
-    /* Fades out slowly, and back in quickly */
     transition: opacity 0.6s;
   }
 
