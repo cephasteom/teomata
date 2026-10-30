@@ -1,7 +1,7 @@
 import type { Writable } from "svelte/store"
 import { cps, q, zoom, showConsole, showInstructions, SIZE, MIN_CPS, MAX_CPS, MIN_Q, MAX_Q, MIN_ZOOM, MAX_ZOOM } from "./global"
-import { operations, args, muted } from "./operations"
-import { resize } from "../lib/utils"
+import { operations, args, muted, expansions, fitExpansions } from "./operations"
+import { isDirection, resize } from "../lib/utils"
 
 const PREFIX = "teomata:"
 
@@ -67,6 +67,16 @@ const restore = () => {
         if (fits(savedMuted) && savedMuted.every(m => typeof m === "boolean")) {
             muted.set(fitted(savedMuted as boolean[], () => false))
         }
+        const savedExpansions = load("expansions")
+        const isExpansion = (e: unknown) => e === null || (
+            typeof e === "object" && "direction" in e && "length" in e &&
+            typeof e.direction === "string" && isDirection(e.direction) &&
+            typeof e.length === "number" && Number.isInteger(e.length) && e.length > 0
+        )
+        if (fits(savedExpansions) && savedExpansions.every(isExpansion)) {
+            expansions.set(fitted(savedExpansions as Parameters<typeof expansions.set>[0], () => null))
+            fitExpansions()
+        }
     }
     // The size is no longer saved, as the grid's is fixed
     try {
@@ -83,5 +93,6 @@ save("zoom", zoom)
 save("operations", operations)
 save("args", args)
 save("muted", muted)
+save("expansions", expansions)
 save("console", showConsole)
 save("instructions", showInstructions)

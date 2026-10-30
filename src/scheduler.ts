@@ -15,14 +15,14 @@ const loop = new Loop((time) => {
 	// Tone fires callbacks ahead of the audio clock, so the rules step now and
 	// their MIDI is sent for when the tick is heard, on WebMidi's clock
 	const at = midiTime(time)
-	const { grid, events, version } = stepCells(now)
+	const { shown, events, version } = stepCells(now)
 	for (const event of events) {
 		if (event.type === "note") playNote(event.device, event.channel, event.notes, event.amp, event.dur, at)
 		if (event.type === "cc") sendControl(event.device, event.channel, event.controller, event.value, at)
 	}
 	// The grid and console update when the tick is heard too
 	getDraw().schedule(() => {
-		showCells(grid, version)
+		showCells(shown, version)
 		for (const event of events) {
 			if (event.type === "print") printLine(event.text)
 		}

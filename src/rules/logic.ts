@@ -1,6 +1,6 @@
 import { BANG, toNumber } from "../lib/utils"
 import type { CellRule, Operation, Param } from "./types"
-import { isMoving, isNumber } from "./shared"
+import { isMoving, isNumber, named } from "./shared"
 import { about } from "./instructions"
 
 // Tests a number against n, which only ! goes without
@@ -29,6 +29,9 @@ const alone: Record<string, Test> = {
 
 const operators = { ...withN, ...alone }
 
+// An operator by name, or by its index in the table
+const names = named(Object.keys(operators))
+
 // Turns a moving cell's value into a bang when the test passes, and empties
 // the cell when it doesn't. An array value passes when every one of its
 // numbers does, and a bang counts as a 1
@@ -43,7 +46,11 @@ const operator: Param = {
     name: "operator",
     about: about.l.params.operator,
     fallback: "==",
-    accepts: text => Object.hasOwn(operators, text),
+    accepts: names.accepts,
+    settle: names.settle,
+    options: names.options,
+    // Changes what the operation is, so it's only set in the argument editor
+    editorOnly: true,
 }
 
 const n: Param = {
@@ -59,7 +66,9 @@ export const logic: Operation = {
     about: about.l.about,
     params: [operator, n],
     // n only shows for the operators that take it
-    shown: ([operator = ""]) => Object.hasOwn(alone, operator) ? 1 : 2,
-    label: operator => operator,
-    rule: (operator, n) => createLogic(operators[operator], Number(n)),
+    shown: ([operator = ""]) => Object.hasOwn(alone, names.nameOf(operator)) ? 1 : 2,
+    label: operator => names.nameOf(operator),
+    // The operator has no input, so it still shows while n has one
+    expandedLabel: operator => names.nameOf(operator),
+    rule: (operator, n) => createLogic(operators[names.nameOf(operator)], Number(n)),
 }

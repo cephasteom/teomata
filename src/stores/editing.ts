@@ -6,7 +6,7 @@ import { cursor, anchor, placeCursor } from "./cursor"
 import { snapshot, record, type Snapshot } from "./history"
 import { argsFor, paramsFor } from "../rules"
 import type { Param } from "../rules/types"
-import { calculate, formatArg } from "../lib/arithmetic"
+import { calculate, formatArg, shortened } from "../lib/arithmetic"
 
 // The square whose operation has its arguments open for editing, or null
 export const editing = writable<number | null>(null)
@@ -49,14 +49,16 @@ const settled = (param: Param, text: string) => {
     return value !== null && param.accepts(formatArg(value)) ? settle(formatArg(value)) : text
 }
 
-// What each argument square shows, keyed by square
-export const argCells = derived([editing, argSquares, operations, args], ([$editing, $squares, $operations, $args]) => {
+// What each argument square shows, keyed by square: a number with 2 decimal
+// places, apart from the one under the cursor, which shows as typed
+export const argCells = derived([editing, argSquares, operations, args, cursor], ([$editing, $squares, $operations, $args, $cursor]) => {
     const shown = new Map<number, { text: string, valid: boolean }>()
     if ($editing === null) return shown
     const params = paramsFor($operations[$editing], SIZE, $args[$editing])
     $squares.forEach((square, k) => {
         const text = $args[$editing][k] ?? params[k].fallback
-        shown.set(square, { text, valid: params[k].accepts(settled(params[k], text)) })
+        const valid = params[k].accepts(settled(params[k], text))
+        shown.set(square, { text: square === $cursor ? text : shortened(text), valid })
     })
     return shown
 })
@@ -154,6 +156,22 @@ export const moveArgCursor = (direction: direction) => {
     if (!open.length) return
     const at = open.indexOf(get(cursor)) + (direction === "e" ? 1 : -1)
     placeArgCursor(open[(at + open.length) % open.length])
+}
+
+// Steps the argument under the cursor to the next of its param's names, or
+// back to the one before, wrapping around at either end. An argument that
+// isn't one of them steps to the first or last. Typing after replaces it
+export const stepArg = (by: 1 | -1) => {
+    const square = get(editing)
+    const k = cursorArg()
+    if (square === null || k < 0) return
+    const param = paramsFor(get(operations)[square], SIZE, get(args)[square])[k]
+    const options = param?.options
+    if (!options) return
+    const at = options.indexOf(settled(param, get(args)[square][k] ?? param.fallback).toLowerCase())
+    const next = at < 0 ? (by > 0 ? 0 : options.length - 1) : (at + by + options.length) % options.length
+    setArg(targets, k, options[next])
+    fresh = true
 }
 
 // Index of the argument under the cursor, or -1 when it is on the operation

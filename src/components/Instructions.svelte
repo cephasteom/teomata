@@ -2,11 +2,12 @@
   import { instructions } from "../rules";
   import { gridFocused, cursor } from "../stores/cursor";
   import { editing } from "../stores/editing";
-  import { operations } from "../stores/operations";
+  import { operations, inputs } from "../stores/operations";
 
-  // The operation under the cursor, or the one whose arguments are open, shows
-  // on its own. Anywhere else, or while the grid doesn't have focus, every operation shows
-  let focused = $derived($gridFocused ? $operations[$editing ?? $cursor] ?? "" : "");
+  // The operation under the cursor, or the one whose input it's on, or the one
+  // whose arguments are open, shows on its own. Anywhere else, or while the
+  // grid doesn't have focus, every operation shows
+  let focused = $derived($gridFocused ? $operations[$editing ?? $inputs.get($cursor)?.owner ?? $cursor] ?? "" : "");
   let matching = $derived(instructions.filter(({ letter }) => letter === focused));
   let shown = $derived(matching.length ? matching : instructions);
 </script>

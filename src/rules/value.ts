@@ -17,10 +17,10 @@ export const createValues = (values: number[]): CellRule => cell => {
 
 const valueParam = (about: string): Param => ({ name: "value", about, fallback: "0", accepts: isNumber })
 
-// Puts a new cell with the value heading in the given direction on the
-// square every n cycles. Cells arriving between times pass through
-const createValueGenerator = (value: number, cycles: number, to: heading): CellRule => (cell, tick) =>
-    fires(cycles, tick) ? { value, direction: pickDirection(to) } : cell
+// Puts out a new cell with the value heading in the given direction every n
+// cycles, for applyRules to put on the neighbouring square
+const createValueGenerator = (value: number, cycles: number, to: heading): CellRule => (_, tick) =>
+    fires(cycles, tick) ? { value, direction: pickDirection(to) } : {}
 
 export const valueGenerator: Operation = {
     name: "value",

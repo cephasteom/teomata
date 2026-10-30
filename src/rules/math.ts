@@ -1,6 +1,6 @@
 import { toNumber } from "../lib/utils"
 import type { CellRule, Operation, Param } from "./types"
-import { isMoving, isNumber } from "./shared"
+import { isMoving, isNumber, named } from "./shared"
 import { about } from "./instructions"
 
 // Works out a number from a value and n, which is undefined when its square is empty
@@ -65,6 +65,9 @@ const alone: Record<string, Apply> = {
 
 const operators = { ...withN, ...alone }
 
+// An operator by name, ignoring case, or by its index in the table
+const names = named(Object.keys(operators))
+
 // Works out a moving cell's new value from its old one, keeping its direction
 // An array value has the sum done to each of its numbers, and a bang counts
 // as a 1. The results aren't rounded, or kept to MIDI's range, but a number
@@ -82,7 +85,11 @@ const operator: Param = {
     name: "operator",
     about: about.m.params.operator,
     fallback: "+",
-    accepts: text => Object.hasOwn(operators, text.toLowerCase()),
+    accepts: names.accepts,
+    settle: names.settle,
+    options: names.options,
+    // Changes what the operation is, so it's only set in the argument editor
+    editorOnly: true,
 }
 
 const n: Param = {
@@ -98,7 +105,9 @@ export const math: Operation = {
     about: about.m.about,
     params: [operator, n],
     // n only shows for the operators that take it
-    shown: ([operator = ""]) => Object.hasOwn(alone, operator.toLowerCase()) ? 1 : 2,
-    label: operator => operator.toLowerCase(),
-    rule: (operator, n) => createMath(operators[operator.toLowerCase()], isNumber(n) ? Number(n) : undefined),
+    shown: ([operator = ""]) => Object.hasOwn(alone, names.nameOf(operator)) ? 1 : 2,
+    label: operator => names.nameOf(operator),
+    // The operator has no input, so it still shows while n has one
+    expandedLabel: operator => names.nameOf(operator),
+    rule: (operator, n) => createMath(operators[names.nameOf(operator)], isNumber(n) ? Number(n) : undefined),
 }

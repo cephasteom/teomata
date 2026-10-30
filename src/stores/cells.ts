@@ -1,7 +1,7 @@
 import { writable, get } from "svelte/store"
 import { SIZE } from "./global"
 import { rules } from "../rules"
-import { appliedOperations } from "./operations"
+import { appliedOperations, setInputArg } from "./operations"
 import { randomDirection, randomValue } from "../lib/utils"
 import { drain } from "../rules/events"
 
@@ -49,13 +49,22 @@ export const setCells = (next: Cell[]) => {
 }
 
 // Runs the grid through each rule in order, giving the new grid and the
-// events the rules queued, for the scheduler to send and show in time
-// Tick is the number of ticks since the transport started
+// events the rules queued, for the scheduler to send and show in time, and
+// the grid to show, which also has the cells absorbed by inputs and outputs
+// on the tick, so they flash there before they go
+// Tick is the number of ticks since the transport started. Arguments set by
+// values arriving on inputs are kept at once, so the next tick runs on them
 export const stepCells = (tick: number) => {
     // The operations being edited run as they were until their arguments close
-    const { operations: letters, args: given, muted } = appliedOperations()
-    grid = rules.reduce((cells, rule) => rule(cells, SIZE, letters, given, muted, tick), grid)
-    return { grid, events: drain(), version }
+    const { operations: letters, args: given, muted, inputs } = appliedOperations()
+    grid = rules.reduce((cells, rule) => rule(cells, SIZE, letters, given, muted, inputs, tick), grid)
+    const events = drain()
+    const shown = [...grid]
+    for (const event of events) {
+        if (event.type === "arg") setInputArg(event.square, event.k, event.text)
+        if (event.type === "absorb") shown[event.square] = event.cell
+    }
+    return { shown, events, version }
 }
 
 // Shows a stepped grid, unless the grid was changed since it was stepped

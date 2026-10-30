@@ -6,14 +6,17 @@
     gridFocused, cursor, bounds, selection, placeCursor, moveCursor, selectAll, selectionCanMove, moveSelection,
   } from "../stores/cursor";
   import {
-    operations, args, muted, toggleMuted, setOperations, moveOperations, copyOperations, pasteOperations,
+    operations, args, muted, inputs, expansions, inputSquares, toggleMuted, setOperations, moveOperations,
+    copyOperations, pasteOperations, expand,
   } from "../stores/operations";
   import {
     editing, shownSquare, argCells, openArea, openArgs, closeArgs, placeArgCursor, moveArgCursor, typeArg, eraseArg,
+    stepArg,
   } from "../stores/editing";
   import { snapshot, record, change, undo, redo } from "../stores/history";
-  import { paramsFor, kindOf, labelFor } from "../rules";
+  import { paramsFor, argsFor, kindOf, labelFor } from "../rules";
   import { arrows } from "../lib/utils";
+  import { shortened } from "../lib/arithmetic";
   import { toggle } from "../scheduler";
 
   const keys: Record<string, direction> = {
@@ -251,7 +254,8 @@
   let bordered = $derived($editing === null
     ? $operations.flatMap((letter, i) => {
       const color = borders[kindOf(letter) ?? '']
-      return color ? [{ i, color: $muted[i] ? 'var(--cell-muted)' : color }] : []
+      // An operation with inputs is outlined along with them instead
+      return color && !$expansions[i] ? [{ i, color: $muted[i] ? 'var(--cell-muted)' : color }] : []
     })
     : [])
 
@@ -260,8 +264,30 @@
   // they are worked out again each time the cells change
   let labels = $derived.by(() => {
     void $cells
-    return $operations.map((letter, i) => letter ? labelFor(i, letter, SIZE, $args[i]) : "")
+    return $operations.map((letter, i) => letter ? labelFor(i, letter, SIZE, $args[i], !!$expansions[i]) : "")
   })
+
+  // Each input square shows the argument it sets, greyed while its operation
+  // is muted. They go while arguments are open
+  let inputLabels = $derived($editing === null
+    ? new Map([...$inputs].map(([square, { owner, k }]) => {
+      const text = shortened(argsFor($operations[owner], SIZE, $args[owner])[k] ?? '')
+      return [square, { text, muted: $muted[owner] }]
+    }))
+    : new Map<number, { text: string, muted: boolean }>())
+
+  // An operation with inputs is outlined in one border round it and them, in
+  // its border colour, or the cells' colour for an operator, and grey while
+  // it's muted
+  let outlines = $derived($editing === null
+    ? $expansions.flatMap((expansion, i) => {
+      if (!expansion) return []
+      const squares = [i, ...inputSquares(i, expansion)]
+      const [xs, ys] = [squares.map(square => square % SIZE), squares.map(square => Math.floor(square / SIZE))]
+      const color = $muted[i] ? 'var(--cell-muted)' : borders[kindOf($operations[i]) ?? ''] ?? 'var(--cell-alive)'
+      return [{ i, color, x1: Math.min(...xs), x2: Math.max(...xs), y1: Math.min(...ys), y2: Math.max(...ys) }]
+    })
+    : [])
 
   // A label that is a lone arrow, as a rotate's is, shows bigger, as arrows
   // are small beside letters
@@ -317,8 +343,16 @@
       return
     }
 
-    // Alt with an arrow carries the selected operations along with the selection
+    // Alt and Shift with an arrow reaches the operation under the cursor out
+    // into one more input that way, or draws one back the opposite way
     const direction = keys[event.key]
+    if (event.altKey && event.shiftKey && direction && !(event.metaKey || event.ctrlKey)) {
+      event.preventDefault()
+      if ($editing === null) change(() => expand($cursor, direction))
+      return
+    }
+
+    // Alt with an arrow carries the selected operations along with the selection
     if (event.altKey && direction && !(event.metaKey || event.ctrlKey)) {
       event.preventDefault()
       if ($editing === null && selectionCanMove(direction)) change(() => {
@@ -335,6 +369,8 @@
       // Stop the arrow keys from scrolling the page
       if (direction) event.preventDefault()
       if (event.key === 'Enter' || event.key === 'Escape') closeArgs()
+      // Up and down step through the names an argument takes, such as a direction
+      else if (direction === 'n' || direction === 's') stepArg(direction === 'n' ? 1 : -1)
       else if (direction) moveArgCursor(direction)
       else if (/^[a-zA-Z0-9.#~+\-*/%^<>=!&|()]$/.test(event.key)) {
         // Stop / opening the browser's quick find
@@ -386,11 +422,11 @@
 >
   {#each $cells as cell, i (i)}
     {@const arg = $argCells.get(i)}
+    {@const input = inputLabels.get(i)}
     <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
     <div
       class="cell"
       class:alive={cell.value !== undefined && !arg}
-      class:cursor={i === $cursor}
       class:bordered={borderColors.has(i)}
       style:--border={borderColors.get(i)}
       class:hidden={$editing !== null && i !== $shownSquare && !arg}
@@ -403,6 +439,8 @@
       {:else if $operations[i]}
         <!-- A cell passing over its square inverts the label -->
         <span class="letter" class:arrow={arrowLabels.has(labels[i])} class:muted={$muted[i]} style:--length={labels[i].length}>{labels[i]}</span>
+      {:else if input}
+        <span class="arg" class:muted={input.muted} style:--length={Math.max(1, input.text.length)}>{input.text}</span>
       {/if}
     </div>
   {/each}
@@ -420,6 +458,22 @@
       style:grid-row="{y + 1} / {y + 2}"
     ></div>
   {/each}
+  {#each outlines as { i, color, x1, x2, y1, y2 } (i)}
+    <!-- Over the squares, so it shows round them whatever they hold, with the
+         gridlines round them coloured behind, as a bordered square's are -->
+    <div
+      class="outline"
+      style:--border={color}
+      style:grid-column="{x1 + 1} / {x2 + 2}"
+      style:grid-row="{y1 + 1} / {y2 + 2}"
+    ></div>
+    <div
+      class="outline-line"
+      style:--border={color}
+      style:grid-column="{x1 + 1} / {x2 + 2}"
+      style:grid-row="{y1 + 1} / {y2 + 2}"
+    ></div>
+  {/each}
   {#if $openArea}
     <div
       class="backdrop"
@@ -427,6 +481,11 @@
       style:grid-row="{$openArea.y1 + 1} / {$openArea.y2 + 2}"
     ></div>
   {/if}
+  <div
+    class="cursor-ring"
+    style:grid-column="{$cursor % SIZE + 1} / {$cursor % SIZE + 2}"
+    style:grid-row="{Math.floor($cursor / SIZE) + 1} / {Math.floor($cursor / SIZE) + 2}"
+  ></div>
   <div
     class="selection"
     style:grid-column="{$bounds.x1 + 1} / {$bounds.x2 + 2}"
@@ -555,7 +614,26 @@
     color: var(--cell-cursor);
   }
 
-  /* The cursor's ring comes after, so it shows over the border */
+  /* Covers the operation and its inputs, drawn like a single square's border,
+     letting clicks through to the squares */
+  .outline {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    box-shadow: inset 0 0 0 2px var(--border);
+  }
+
+  /* Colours just the gridlines round the outline, not those between its
+     squares. Behind the cells and before the selection, so the selection's
+     lines show over it */
+  .outline-line {
+    position: absolute;
+    inset: calc(-1 * var(--line));
+    z-index: -1;
+    box-shadow: inset 0 0 0 var(--line) var(--border);
+  }
+
   .bordered {
     box-shadow: inset 0 0 0 2px var(--border);
   }
@@ -569,7 +647,19 @@
     display: none;
   }
 
-  .focused .cursor {
-    box-shadow: inset 0 0 0 2px var(--cell-cursor);
+  /* The cursor's ring is drawn over everything on its square, the outline
+     round an operation and its inputs included. It reaches out over the
+     gridlines round the square too, as the outline crosses them where it
+     runs from an operation to its inputs */
+  .cursor-ring {
+    position: absolute;
+    inset: calc(-1 * var(--line));
+    z-index: 2;
+    pointer-events: none;
+    box-shadow: inset 0 0 0 calc(2px + var(--line)) var(--cell-cursor);
+  }
+
+  .grid:not(.focused) .cursor-ring {
+    display: none;
   }
 </style>

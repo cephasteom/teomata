@@ -3,11 +3,10 @@ import type { Operation, CellRule } from "./types"
 import { cyclesParam, directionParam, fires, isMoving } from "./shared"
 import { about } from "./instructions"
 
-// Puts a new cell with a bang heading in the given direction on the square
-// every n cycles, for the next move to carry onto the neighbouring square.
-// Cells arriving between times pass through
-const createBangGenerator = (cycles: number, to: heading): CellRule => (cell, tick) =>
-    fires(cycles, tick) ? { value: BANG, direction: pickDirection(to) } : cell
+// Puts out a new cell with a bang heading in the given direction every n
+// cycles, for applyRules to put on the neighbouring square
+const createBangGenerator = (cycles: number, to: heading): CellRule => (_, tick) =>
+    fires(cycles, tick) ? { value: BANG, direction: pickDirection(to) } : {}
 
 export const bangGenerator: Operation = {
     name: "bang",

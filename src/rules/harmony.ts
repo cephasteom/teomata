@@ -1,6 +1,6 @@
 import { createValues } from "./value"
 import type { Operation, Param } from "./types"
-import { isWhole } from "./shared"
+import { isWhole, named, wrapped } from "./shared"
 import { about } from "./instructions"
 import { harmonies } from "../lib/harmony"
 
@@ -14,6 +14,11 @@ const MAX_OCTAVES = 8
 
 // A note name with an optional # or b, ignoring case, so cb is the B below c
 const isRoot = (text: string) => /^[a-g][#b]?$/i.test(text)
+
+// Each note of the octave by its semitones above c, so a root can be given as
+// a number, which is kept as its name
+const chromatic = ["c", "c#", "d", "d#", "e", "f", "f#", "g", "g#", "a", "a#", "b"]
+const rootOf = (text: string) => isWhole(text) ? chromatic[Number(text)] ?? text : text
 const semitones = (root: string) => {
     const [letter, accidental] = root.toLowerCase()
     return notes[letter] + (accidental === "#" ? 1 : accidental === "b" ? -1 : 0)
@@ -30,14 +35,23 @@ const root: Param = {
     name: "root",
     about: about.h.params.root,
     fallback: "c",
-    accepts: isRoot,
+    accepts: text => isRoot(rootOf(text)),
+    settle: rootOf,
+    fromNumber: n => wrapped(chromatic, n),
+    options: chromatic,
 }
+
+// A harmony by name, ignoring case, or by its index in harmonies
+const types = named(Object.keys(harmonies))
 
 const type: Param = {
     name: "type",
     about: about.h.params.type,
     fallback: "ma",
-    accepts: text => Object.hasOwn(harmonies, text.toLowerCase()),
+    accepts: types.accepts,
+    settle: types.settle,
+    fromNumber: types.fromNumber,
+    options: types.options,
 }
 
 const octaves: Param = {
@@ -53,6 +67,9 @@ export const harmony: Operation = {
     about: about.h.about,
     params: [root, type, octaves],
     // The root's letter in capitals, then the type, cut to 3 letters, such as Cma or F#d
-    label: (root, type) => (root[0].toUpperCase() + root.slice(1).toLowerCase() + type.toLowerCase()).slice(0, 3),
-    rule: (root, type, octaves) => createValues(harmonyNotes(root, type, Number(octaves))),
+    label: (root, type) => {
+        const [name, kind] = [rootOf(root), types.nameOf(type)]
+        return (name[0].toUpperCase() + name.slice(1).toLowerCase() + kind).slice(0, 3)
+    },
+    rule: (root, type, octaves) => createValues(harmonyNotes(rootOf(root), types.nameOf(type), Number(octaves))),
 }

@@ -1,28 +1,32 @@
 import { get } from "svelte/store"
 import { SIZE } from "./global"
-import { operations, args, muted } from "./operations"
+import { operations, args, muted, expansions, type Expansion } from "./operations"
 import { cursor, anchor } from "./cursor"
 
 // How many changes can be undone
 export const HISTORY = 4
 
-// The operations, arguments and mutes at one time, with the selection then
+// The operations, arguments, mutes and inputs at one time, with the selection then
 export type Snapshot = {
-    operations: string[], args: string[][], muted: boolean[], cursor: number, anchor: number,
+    operations: string[], args: string[][], muted: boolean[], expansions: (Expansion | null)[],
+    cursor: number, anchor: number,
 }
 
 let undos: Snapshot[] = []
 let redos: Snapshot[] = []
 
 export const snapshot = (): Snapshot => ({
-    operations: get(operations), args: get(args), muted: get(muted), cursor: get(cursor), anchor: get(anchor),
+    operations: get(operations), args: get(args), muted: get(muted), expansions: get(expansions),
+    cursor: get(cursor), anchor: get(anchor),
 })
 
-// Whether two snapshots have the same operations, arguments and mutes. The
+// Whether two snapshots have the same operations, arguments, mutes and inputs. The
 // stores are copied on every change, so they are compared square by square
 const same = (a: Snapshot, b: Snapshot) => {
     for (let i = 0; i < SIZE * SIZE; i++) {
         if (a.operations[i] !== b.operations[i] || a.muted[i] !== b.muted[i]) return false
+        const [e, f] = [a.expansions[i], b.expansions[i]]
+        if (e?.direction !== f?.direction || e?.length !== f?.length) return false
         const [x, y] = [a.args[i], b.args[i]]
         if (x !== y && (x.length !== y.length || x.some((arg, k) => arg !== y[k]))) return false
     }
@@ -48,6 +52,7 @@ const restore = (to: Snapshot) => {
     operations.set(to.operations)
     args.set(to.args)
     muted.set(to.muted)
+    expansions.set(to.expansions)
     cursor.set(to.cursor)
     anchor.set(to.anchor)
 }

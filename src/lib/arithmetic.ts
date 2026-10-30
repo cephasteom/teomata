@@ -54,3 +54,12 @@ export const calculate = (text: string): number | null => {
 
 // A number as an argument, as short as it goes, so 0.125 is .125
 export const formatArg = (value: number) => String(value).replace(/^(-?)0\./, "$1.")
+
+// A number argument as it shows, a whole number as it is and any other with 2
+// decimal places, filled with 0s, so .5 shows as .50, as a wave's value can
+// run to many. The argument itself keeps every place
+export const shortened = (text: string) => {
+    if (text === "" || !Number.isFinite(Number(text))) return text
+    const n = Number(text)
+    return Number.isInteger(n) ? formatArg(n) : n.toFixed(2).replace(/^(-?)0\./, "$1.")
+}
