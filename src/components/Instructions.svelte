@@ -4,15 +4,13 @@
   import { editing } from "../stores/editing";
   import { operations, inputs } from "../stores/operations";
 
-  // The operation under the cursor, or the one whose input it's on, or the one
-  // whose arguments are open, shows on its own. Anywhere else, or while the
-  // grid doesn't have focus, every operation shows
-  let focused = $derived($gridFocused ? $operations[$editing ?? $inputs.get($cursor)?.owner ?? $cursor] ?? "" : "");
+  let focused = $derived($gridFocused 
+    ? $operations[$editing ?? $inputs.get($cursor)?.owner ?? $cursor] ?? "" 
+    : "");
   let matching = $derived(instructions.filter(({ letter }) => letter === focused));
   let shown = $derived(matching.length ? matching : instructions);
 </script>
 
-<!-- The operations by letter, sitting a square's width to the grid's right -->
 <dl class="instructions default-size" aria-label="Operations">
   {#each shown as { letter, name, kind, about, params, rest } (letter)}
     <div class="operation">
@@ -20,9 +18,6 @@
       <dd>
         {name}({#each params as param, k (param.name)}{#if k}, {/if}{param.name}{/each}{#if rest}{#if params.length}, {/if}...{rest.name}{/if})
       </dd>
-      <!-- The active operation explains itself and its params underneath. The
-      text is our own and may hold links, which are clicked without taking focus
-      from the grid, as that would hide them -->
       {#if matching.length}
         <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
         <dd class="about" onmousedown={(e) => e.preventDefault()}>
@@ -60,7 +55,6 @@
     color: var(--cell-cursor);
   }
 
-  /* Generators and outputs are coloured as their squares are bordered */
   dt.generator {
     color: var(--cell-generator);
   }
