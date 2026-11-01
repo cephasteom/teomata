@@ -8,7 +8,7 @@ import { about } from "./instructions"
 // Sends each number that arrives as a MIDI CC message on the device, channel
 // and controller. An array sends its first number. Bangs are ignored, and
 // every moving cell is absorbed
-const createCc = (device: number, channel: number, controller: number): CellRule => cell => {
+const createKnob = (device: number, channel: number, controller: number): CellRule => cell => {
     const { value } = cell
     if (!isMoving(cell)) return cell
     if (value === BANG) return {}
@@ -19,16 +19,16 @@ const createCc = (device: number, channel: number, controller: number): CellRule
 
 const controller: Param = {
     name: "cc",
-    about: about.c.params.cc,
+    about: about.k.params.cc,
     fallback: "1",
     accepts: text => isWhole(text) && Number(text) <= 127,
 }
 
-export const cc: Operation = {
-    name: "cc",
+export const knob: Operation = {
+    name: "knob",
     kind: "output",
-    about: about.c.about,
-    params: [controller, deviceParam(about.c.params.device), channelParam(about.c.params.channel)],
+    about: about.k.about,
+    params: [controller, deviceParam(about.k.params.device), channelParam(about.k.params.channel)],
     label: controller => `cc${controller}`,
-    rule: (controller, device, channel) => createCc(Number(device), Number(channel), Number(controller)),
+    rule: (controller, device, channel) => createKnob(Number(device), Number(channel), Number(controller)),
 }

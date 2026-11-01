@@ -31,9 +31,17 @@ export const about = {
         about: "Convert any incoming value into a bang.",
         params: {},
     },
+    c: {
+        about: "Count each incoming value, outputting the count so far.",
+        params: { reset: "0 or 1. While 1, the count is held at 0." },
+    },
     d: {
         about: "Nullify incoming values.",
         params: {},
+    },
+    g: {
+        about: "Only let through values that match. Nullifies everything else. Bangs are 1.",
+        params: { match: "Any number." },
     },
     h: {
         about: "Output the notes of a chord or scale. A bang outputs all the notes, a number outputs the note at that index.",
@@ -43,15 +51,8 @@ export const about = {
             octaves: "How many octaves the notes span upwards, from 1 to 8.",
         },
     },
-    i: {
-        about: "Count from one number to another, outputting the next count each time a value arrives. Wraps around at the ends.",
-        params: {
-            from: "Any number, the first count.",
-            to: "Any number, the last count. Counts down when below from.",
-        },
-    },
     l: {
-        about: "Test incoming values using logical operators. Bangs if true, nullifies if false. Bangs are true.",
+        about: "Test incoming values using logical operators. Outputs 1 if true, 0 if false. Bangs are true.",
         params: {
             operator: "<, >, <=, >=, ==, !=, &&, || and ^ compare the value with num. ! (not) uses the value alone. "
                 + "A number is true when it isn't 0.",
@@ -91,7 +92,7 @@ export const about = {
         params: { type, freq },
     },
     // Outputs
-    c: {
+    k: {
         about: "Send incoming numbers as MIDI CC messages, rounded and wrapped to 0 to 127, or the first of several. Bangs are ignored. Absorbs every value, unless thru.",
         params: { cc: "The controller number, from 0 to 127.", device, channel },
     },

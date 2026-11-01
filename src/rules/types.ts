@@ -11,7 +11,7 @@ export type GridRule = (
 ) => Cell[]
 
 // A square's rule, which can say how its square shows on the grid from what
-// it remembers, such as a count's next number. When its arguments change, the
+// it remembers, such as a count. When its arguments change, the
 // rule built in its place carries on from what the old one kept. A
 // generator's rule is given an empty cell and gives the cell it puts out
 export type CellRule = ((cell: Cell, tick: number) => Cell) & {

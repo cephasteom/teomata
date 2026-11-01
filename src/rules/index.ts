@@ -1,7 +1,7 @@
 import type { Operation, GridRule, CellRule, Kind, Input, Param } from "./types"
 import type { Cell } from "../stores/cells"
-import { argFrom, isModeParam, isMoving, modeParam, outputModeParam } from "./shared"
-import { BANG, step, toNumber } from "../lib/utils"
+import { argFrom, isModeParam, isMoving, modeParam, outputModeParam, stepOption } from "./shared"
+import { BANG, step } from "../lib/utils"
 import { emit } from "./events"
 import { move } from "./move"
 import { rotate } from "./rotate"
@@ -10,11 +10,12 @@ import { bang, bangGenerator } from "./bang"
 import { value, valueGenerator } from "./value"
 import { harmony } from "./harmony"
 import { count } from "./count"
+import { gate } from "./gate"
 import { math } from "./math"
 import { logic } from "./logic"
 import { print } from "./print"
 import { note } from "./note"
-import { cc } from "./cc"
+import { knob } from "./knob"
 import { wave, waveGenerator } from "./wave"
 import { scale } from "./scale"
 
@@ -31,9 +32,10 @@ const operations: Record<string, Operation> = Object.fromEntries(Object.entries(
     V: valueGenerator,
     W: waveGenerator,
     b: bang,
+    c: count,
     d: die,
+    g: gate,
     h: harmony,
-    i: count,
     l: logic,
     m: math,
     p: print,
@@ -41,7 +43,7 @@ const operations: Record<string, Operation> = Object.fromEntries(Object.entries(
     s: scale,
     v: value,
     w: wave,
-    c: cc,
+    k: knob,
     n: note,
 }).map(([letter, operation]) => [letter, withMode(operation)]))
 
@@ -117,7 +119,7 @@ const ruleFor = (i: number, letter: string, size: number, given?: string[]) => {
 }
 
 // How a square's operation shows on the grid: what its rule remembers, such
-// as a count's next number, or else what its arguments give, or else its
+// as a count, or else what its arguments give, or else its
 // letter. While it has inputs, which show its arguments, it shows its
 // expanded label, or else its letter
 export const labelFor = (i: number, letter: string, size: number, given?: string[], expanded = false) => {
@@ -132,9 +134,10 @@ export const labelFor = (i: number, letter: string, size: number, given?: string
 
 // Takes the moving cells with numbers on the inputs of every operation, whatever
 // its mode, so one that's off can be turned back on, each setting its input's
-// argument to the number it brings, when the param takes it. Bangs pass over
-// inputs, but count as a 1 on a mode's. Gives the cells left and the arguments,
-// queueing each one set for the store, and each cell taken to show for the tick
+// argument to the number it brings, when the param takes it. A bang steps a
+// param with options to the next one, and passes over any other input. Gives
+// the cells left and the arguments, queueing each one set for the store, and
+// each cell taken to show for the tick
 const takeInputs = (
     cells: Cell[], size: number, letters: string[], given: string[][], inputs: Map<number, Input>,
 ) => {
@@ -144,9 +147,12 @@ const takeInputs = (
         if (!input || !isMoving(cell)) return cell
         const { owner, k } = input
         const param = paramsFor(letters[owner], size)[k]
-        if (!param || (cell.value === BANG && !isModeParam(param))) return cell
+        if (!param || (cell.value === BANG && !param.options)) return cell
         const value = cell.value!
-        const text = argFrom(param, Array.isArray(value) ? value : toNumber(value))
+        const current = argsFor(letters[owner], size, args[owner])[k]
+        const text = value === BANG
+            ? stepOption(param.options!, param.settle?.(current) ?? current, 1)
+            : argFrom(param, value)
         if (text !== undefined) {
             args[owner] = argsFor(letters[owner], size, args[owner])
             args[owner][k] = text

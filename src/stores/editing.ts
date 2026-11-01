@@ -5,6 +5,7 @@ import { operations, args, setArg, holdOperations, releaseOperations } from "./o
 import { cursor, anchor, placeCursor } from "./cursor"
 import { snapshot, record, type Snapshot } from "./history"
 import { argsFor, paramsFor, shownArgsFor } from "../rules"
+import { stepOption } from "../rules/shared"
 import type { Param } from "../rules/types"
 import { calculate, formatArg, shortened } from "../lib/arithmetic"
 
@@ -170,9 +171,7 @@ export const stepArg = (by: 1 | -1) => {
     const param = paramsFor(get(operations)[square], SIZE)[k]
     const options = param?.options
     if (!options) return
-    const at = options.indexOf(settled(param, get(args)[square][k] ?? param.fallback).toLowerCase())
-    const next = at < 0 ? (by > 0 ? 0 : options.length - 1) : (at + by + options.length) % options.length
-    setArg(targets, k, options[next])
+    setArg(targets, k, stepOption(options, settled(param, get(args)[square][k] ?? param.fallback), by))
     fresh = true
 }
 

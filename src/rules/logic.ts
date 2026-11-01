@@ -1,4 +1,4 @@
-import { BANG, toNumber } from "../lib/utils"
+import { toNumber } from "../lib/utils"
 import type { CellRule, Operation, Param } from "./types"
 import { isMoving, isNumber, named } from "./shared"
 import { about } from "./instructions"
@@ -32,14 +32,14 @@ const operators = { ...withNum, ...alone }
 // An operator by name, or by its index in the table
 const names = named(Object.keys(operators))
 
-// Turns a moving cell's value into a bang when the test passes, and empties
-// the cell when it doesn't. An array value passes when every one of its
-// numbers does, and a bang counts as a 1
+// Turns a moving cell's value into a 1 when the test passes, and a 0 when it
+// doesn't. An array value passes when every one of its numbers does, and a
+// bang counts as a 1
 const createLogic = (test: Test, num: number): CellRule => cell => {
     if (!isMoving(cell)) return cell
     const passes = (value: number) => test(value, num)
     const passed = Array.isArray(cell.value) ? cell.value.every(passes) : passes(toNumber(cell.value!))
-    return passed ? { ...cell, value: BANG } : {}
+    return { ...cell, value: passed ? 1 : 0 }
 }
 
 const operator: Param = {
