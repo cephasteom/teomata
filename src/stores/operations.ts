@@ -2,7 +2,7 @@ import { writable, derived, get } from "svelte/store"
 import { SIZE } from "./global"
 import type { direction } from "./cells"
 import { opposite, step } from "../lib/utils"
-import { argsFor, inputParamsFor, kindOf, modeOf, paramsFor } from "../rules"
+import { argsFor, inputParamsFor, modeOf, paramsFor } from "../rules"
 import { isModeParam } from "../rules/shared"
 import type { Input } from "../rules/types"
 
@@ -119,13 +119,20 @@ export const setInputArg = (square: number, k: number, text: string) => {
     })
 }
 
-// Puts the operations on the squares in the mode, or back to active for those
-// without it
-const setModes = (squares: number[], mode: string) => {
+// Moves the operations on the squares on to the mode after the one the square
+// given is in, or the first with an operation when it hasn't one, among the
+// modes that square's operation has, or back to active for those without it.
+// Squares without an operation are left alone
+export const stepModes = (squares: Iterable<number>, from: number) => {
     const $operations = get(operations)
+    const list = [...squares].filter(i => $operations[i])
+    if (!list.length) return
+    const at = $operations[from] ? from : list[0]
+    const options = paramsFor($operations[at], SIZE).find(isModeParam)!.options!
+    const mode = options[(options.indexOf(get(modes)[at]) + 1) % options.length]
     args.update(args => {
         const next = [...args]
-        for (const i of squares) {
+        for (const i of list) {
             const params = paramsFor($operations[i], SIZE)
             const k = params.findIndex(isModeParam)
             next[i] = argsFor($operations[i], SIZE, next[i])
@@ -133,24 +140,6 @@ const setModes = (squares: number[], mode: string) => {
         }
         return next
     })
-}
-
-// Moves the operations on the squares on to the mode after the one the square
-// given is in, or the first with an operation when it hasn't one, among the
-// modes that square's operation has. Squares without an operation are left alone
-export const stepModes = (squares: Iterable<number>, from: number) => {
-    const $operations = get(operations)
-    const list = [...squares].filter(i => $operations[i])
-    if (!list.length) return
-    const at = $operations[from] ? from : list[0]
-    const options = paramsFor($operations[at], SIZE).find(isModeParam)!.options!
-    setModes(list, options[(options.indexOf(get(modes)[at]) + 1) % options.length])
-}
-
-// Operations saved muted, from before they had modes, become inactive
-export const carryMutes = (saved: boolean[]) => {
-    const $operations = get(operations)
-    setModes(saved.flatMap((isMuted, i) => isMuted && kindOf($operations[i]) ? [i] : []), "inactive")
 }
 
 // What squares had before their arguments opened, keyed by square. The rules

@@ -1,7 +1,7 @@
 import type { Writable } from "svelte/store"
 import { cps, q, zoom, showConsole, showInstructions, SIZE, MIN_CPS, MAX_CPS, MIN_Q, MAX_Q, MIN_ZOOM, MAX_ZOOM } from "./global"
-import { operations, args, expansions, fitExpansions, carryMutes } from "./operations"
-import { isDirection, resize } from "../lib/utils"
+import { operations, args, expansions, fitExpansions } from "./operations"
+import { isDirection } from "../lib/utils"
 
 const PREFIX = "teomata:"
 
@@ -30,9 +30,8 @@ const save = <T>(key: string, store: Writable<T>) => {
 const inRange = (value: unknown, min: number, max: number): value is number =>
     typeof value === "number" && Number.isFinite(value) && value >= min && value <= max
 
-// Puts back what was saved last time. Operations saved when the grid could
-// be resized, with its size saved as s, are copied onto the top left of the
-// grid. Operations and arguments are only restored when they fit it
+// Puts back what was saved last time. Operations and arguments are only
+// restored when they fit the grid
 const restore = () => {
     const savedCps = load("cps")
     if (inRange(savedCps, MIN_CPS, MAX_CPS)) cps.set(savedCps)
@@ -49,25 +48,14 @@ const restore = () => {
     const savedInstructions = load("instructions")
     if (typeof savedInstructions === "boolean") showInstructions.set(savedInstructions)
 
-    const savedSize = load("s")
-    const from = inRange(savedSize, 1, SIZE) && Number.isInteger(savedSize) ? savedSize : SIZE
-    const fits = (value: unknown): value is unknown[] =>
-        Array.isArray(value) && (value.length === SIZE * SIZE || value.length === from * from)
-    const fitted = <T>(values: T[], empty: () => T) =>
-        values.length === SIZE * SIZE ? values : resize(values, from, SIZE, empty)
+    const fits = (value: unknown): value is unknown[] => Array.isArray(value) && value.length === SIZE * SIZE
 
     const savedOperations = load("operations")
     const savedArgs = load("args")
     if (fits(savedOperations) && savedOperations.every(o => typeof o === "string")) {
-        operations.set(fitted(savedOperations as string[], () => ""))
+        operations.set(savedOperations as string[])
         if (fits(savedArgs) && savedArgs.every(a => Array.isArray(a) && a.every(t => typeof t === "string"))) {
-            // Thru was once called porous
-            const named = (savedArgs as string[][]).map(a => a.map(t => t === "porous" ? "thru" : t))
-            args.set(fitted(named, () => []))
-        }
-        const savedMuted = load("muted")
-        if (fits(savedMuted) && savedMuted.every(m => typeof m === "boolean")) {
-            carryMutes(fitted(savedMuted as boolean[], () => false))
+            args.set(savedArgs as string[][])
         }
         const savedExpansions = load("expansions")
         const isExpansion = (e: unknown) => e === null || (
@@ -76,16 +64,9 @@ const restore = () => {
             typeof e.length === "number" && Number.isInteger(e.length) && e.length > 0
         )
         if (fits(savedExpansions) && savedExpansions.every(isExpansion)) {
-            expansions.set(fitted(savedExpansions as Parameters<typeof expansions.set>[0], () => null))
+            expansions.set(savedExpansions as Parameters<typeof expansions.set>[0])
             fitExpansions()
         }
-    }
-    // The size is no longer saved, as the grid's is fixed, and modes took over from mutes
-    try {
-        localStorage.removeItem(PREFIX + "s")
-        localStorage.removeItem(PREFIX + "muted")
-    } catch {
-        // Storage is blocked, so there's nothing to remove
     }
 }
 

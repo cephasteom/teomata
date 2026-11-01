@@ -66,13 +66,3 @@ export const stepAround = (i: number, direction: direction, size: number) => {
     const y = (Math.floor(i / size) + dy + size) % size
     return y * size + x
 }
-
-// Copies a grid's squares onto a grid of a new size, for operations saved
-// when the grid's size could change, keeping each at the same
-// column and row. Squares past the old edges come in empty, and those past
-// the new edges are cut off
-export const resize = <T>(values: T[], from: number, to: number, empty: () => T) =>
-    Array.from({ length: to * to }, (_, i) => {
-        const [x, y] = [i % to, Math.floor(i / to)]
-        return x < from && y < from ? values[y * from + x] : empty()
-    })

@@ -100,9 +100,8 @@ export const modeOf = (letter: string, size: number, given?: string[]) => {
 // built from. A square's rule is kept from tick to tick, so it can remember
 // things, until its operation or arguments change, when the rule built in its
 // place carries on from what it kept. Every rule is built afresh when the
-// transport starts or the grid resizes
+// transport starts
 let built = new Map<number, { key: string, rule: CellRule }>()
-let builtSize = 0
 
 const keyFor = (letter: string, args: string[]) => [letter, ...args].join("\n")
 
@@ -181,8 +180,7 @@ const generate = (cells: Cell[], size: number, letters: string[], args: string[]
 // pass through. Invalid arguments fall back to defaults. An inactive square's
 // rule is kept, so it carries on from where it was when it's active again
 const applyRules: GridRule = (given, size, letters, givenArgs, inputs, tick) => {
-    if (tick === 0 || size !== builtSize) built = new Map()
-    builtSize = size
+    if (tick === 0) built = new Map()
     const taken = takeInputs(given, size, letters, givenArgs, inputs)
     const generated = generate(taken.cells, size, letters, taken.args, tick)
     const { cells, args } = takeInputs(generated, size, letters, taken.args, inputs)
