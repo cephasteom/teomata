@@ -1,6 +1,6 @@
 import type { Writable } from "svelte/store"
 import { cps, q, zoom, showConsole, showInstructions, SIZE, MIN_CPS, MAX_CPS, MIN_Q, MAX_Q, MIN_ZOOM, MAX_ZOOM } from "./global"
-import { operations, args, muted, expansions, fitExpansions } from "./operations"
+import { operations, args, expansions, fitExpansions, carryMutes } from "./operations"
 import { isDirection, resize } from "../lib/utils"
 
 const PREFIX = "teomata:"
@@ -61,11 +61,13 @@ const restore = () => {
     if (fits(savedOperations) && savedOperations.every(o => typeof o === "string")) {
         operations.set(fitted(savedOperations as string[], () => ""))
         if (fits(savedArgs) && savedArgs.every(a => Array.isArray(a) && a.every(t => typeof t === "string"))) {
-            args.set(fitted(savedArgs as string[][], () => []))
+            // Thru was once called porous
+            const named = (savedArgs as string[][]).map(a => a.map(t => t === "porous" ? "thru" : t))
+            args.set(fitted(named, () => []))
         }
         const savedMuted = load("muted")
         if (fits(savedMuted) && savedMuted.every(m => typeof m === "boolean")) {
-            muted.set(fitted(savedMuted as boolean[], () => false))
+            carryMutes(fitted(savedMuted as boolean[], () => false))
         }
         const savedExpansions = load("expansions")
         const isExpansion = (e: unknown) => e === null || (
@@ -78,9 +80,10 @@ const restore = () => {
             fitExpansions()
         }
     }
-    // The size is no longer saved, as the grid's is fixed
+    // The size is no longer saved, as the grid's is fixed, and modes took over from mutes
     try {
         localStorage.removeItem(PREFIX + "s")
+        localStorage.removeItem(PREFIX + "muted")
     } catch {
         // Storage is blocked, so there's nothing to remove
     }
@@ -92,7 +95,6 @@ save("q", q)
 save("zoom", zoom)
 save("operations", operations)
 save("args", args)
-save("muted", muted)
 save("expansions", expansions)
 save("console", showConsole)
 save("instructions", showInstructions)

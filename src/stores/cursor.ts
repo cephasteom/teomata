@@ -1,7 +1,7 @@
 import { writable, derived, get } from "svelte/store"
 import { SIZE } from "./global"
 import type { direction } from "./cells"
-import { step } from "../lib/utils"
+import { step, stepAround } from "../lib/utils"
 
 // Whether the grid has focus. The cursor and selection only show while it does
 export const gridFocused = writable<boolean>(false)
@@ -36,9 +36,11 @@ export const placeCursor = (i: number, extend = false) => {
     if (!extend) anchor.set(i)
 }
 
-// Steps the cursor one square, stopping at the edges
+// Steps the cursor one square, wrapping around at the edges. Extending stops at
+// them instead, as the selection would otherwise jump to span the whole grid
 export const moveCursor = (direction: direction, extend = false) => {
-    placeCursor(step(get(cursor), direction, SIZE) ?? get(cursor), extend)
+    const i = get(cursor)
+    placeCursor(extend ? step(i, direction, SIZE) ?? i : stepAround(i, direction, SIZE), extend)
 }
 
 // Selects every square. The selection is a rectangle between the anchor and

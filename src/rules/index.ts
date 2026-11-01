@@ -1,7 +1,7 @@
-import type { Operation, GridRule, CellRule, Kind, Input } from "./types"
+import type { Operation, GridRule, CellRule, Kind, Input, Param } from "./types"
 import type { Cell } from "../stores/cells"
-import { argFrom, isMoving } from "./shared"
-import { BANG, step } from "../lib/utils"
+import { argFrom, isModeParam, isMoving, modeParam, outputModeParam } from "./shared"
+import { BANG, step, toNumber } from "../lib/utils"
 import { emit } from "./events"
 import { move } from "./move"
 import { rotate } from "./rotate"
@@ -18,9 +18,15 @@ import { cc } from "./cc"
 import { wave, waveGenerator } from "./wave"
 import { scale } from "./scale"
 
+// Every operation takes a mode after its own params
+const withMode = (operation: Operation): Operation => ({
+    ...operation,
+    params: [...operation.params, operation.kind === "output" ? outputModeParam : modeParam],
+})
+
 // Every operation by its letter. Case matters: generators are uppercase, and
 // may share a letter with a lowercase operator
-const operations: Record<string, Operation> = {
+const operations: Record<string, Operation> = Object.fromEntries(Object.entries({
     B: bangGenerator,
     V: valueGenerator,
     W: waveGenerator,
@@ -37,7 +43,7 @@ const operations: Record<string, Operation> = {
     w: wave,
     c: cc,
     n: note,
-}
+}).map(([letter, operation]) => [letter, withMode(operation)]))
 
 const operationFor = (letter: string): Operation | undefined =>
     Object.hasOwn(operations, letter) ? operations[letter] : undefined
@@ -56,14 +62,19 @@ export const kindOf = (letter: string) => operationFor(letter)?.kind
 
 // The params an operation takes on a grid of the given size, which is none for
 // operations without a rule. A rest param repeats after the others to fill
-// the rest of the row beside the operation. Given the arguments, only the
-// params the operation shows for them are kept
-export const paramsFor = (letter: string, size: number, given?: string[]) => {
+// the rest of the row beside the operation
+export const paramsFor = (letter: string, size: number): Param[] => {
     const operation = operationFor(letter)
     if (!operation) return []
-    const { params, rest, shown } = operation
-    const all = rest ? [...params, ...Array(Math.max(0, size - 1 - params.length)).fill(rest)] : params
-    return given && shown ? all.slice(0, shown(given)) : all
+    const { params, rest } = operation
+    return rest ? [...params, ...Array(Math.max(0, size - 1 - params.length)).fill(rest)] : params
+}
+
+// The indices of the params the argument editor shows for the arguments: those
+// the operation shows, and the mode, which always shows
+export const shownArgsFor = (letter: string, size: number, given: string[] = []) => {
+    const count = operationFor(letter)?.shown?.(given) ?? Infinity
+    return paramsFor(letter, size).flatMap((param, k) => k < count || isModeParam(param) ? [k] : [])
 }
 
 // The indices of the params an operation's inputs set, in order: every param
@@ -77,6 +88,13 @@ export const argsFor = (letter: string, size: number, given: string[] = []) =>
     paramsFor(letter, size).map((param, k) =>
         given[k] !== undefined && param.accepts(given[k]) ? given[k] : param.fallback
     )
+
+// The mode of an operation given its arguments. An empty square counts as active
+export const modeOf = (letter: string, size: number, given?: string[]) => {
+    const params = paramsFor(letter, size)
+    const k = params.findIndex(isModeParam)
+    return k < 0 ? "active" : params[k].settle!(argsFor(letter, size, given)[k])
+}
 
 // The rule built for each square, with the operation and arguments it was
 // built from. A square's rule is kept from tick to tick, so it can remember
@@ -113,22 +131,23 @@ export const labelFor = (i: number, letter: string, size: number, given?: string
     return remembered ?? label?.(...args) ?? letter
 }
 
-// Takes the moving cells with numbers on the inputs of operations that aren't
-// muted, each setting its input's argument to the number it brings, when the
-// param takes it. Bangs pass over inputs. Gives the cells left and the
-// arguments, queueing each one set for the store, and each cell taken to show
-// for the tick
+// Takes the moving cells with numbers on the inputs of every operation, whatever
+// its mode, so an inactive one can be turned back on, each setting its input's
+// argument to the number it brings, when the param takes it. Bangs pass over
+// inputs, but count as a 1 on a mode's. Gives the cells left and the arguments,
+// queueing each one set for the store, and each cell taken to show for the tick
 const takeInputs = (
-    cells: Cell[], size: number, letters: string[], given: string[][], muted: boolean[], inputs: Map<number, Input>,
+    cells: Cell[], size: number, letters: string[], given: string[][], inputs: Map<number, Input>,
 ) => {
     const args = [...given]
     const left = cells.map((cell, i) => {
         const input = inputs.get(i)
-        if (!input || !isMoving(cell) || cell.value === BANG || muted[input.owner]) return cell
+        if (!input || !isMoving(cell)) return cell
         const { owner, k } = input
         const param = paramsFor(letters[owner], size)[k]
-        if (!param) return cell
-        const text = argFrom(param, cell.value as number | number[])
+        if (!param || (cell.value === BANG && !isModeParam(param))) return cell
+        const value = cell.value!
+        const text = argFrom(param, Array.isArray(value) ? value : toNumber(value))
         if (text !== undefined) {
             args[owner] = argsFor(letters[owner], size, args[owner])
             args[owner][k] = text
@@ -140,13 +159,13 @@ const takeInputs = (
     return { cells: left, args }
 }
 
-// Puts each cell the unmuted generators put out on the square next to them in
+// Puts each cell the generators that aren't inactive put out on the square next to them in
 // its direction, over any cell there, so the operation there acts on it on
 // the tick it's put out. One that would go past the edge isn't put out
-const generate = (cells: Cell[], size: number, letters: string[], args: string[][], muted: boolean[], tick: number) => {
+const generate = (cells: Cell[], size: number, letters: string[], args: string[][], tick: number) => {
     const next = [...cells]
     letters.forEach((letter, i) => {
-        if (kindOf(letter) !== "generator" || muted[i]) return
+        if (kindOf(letter) !== "generator" || modeOf(letter, size, args[i]) === "inactive") return
         const cell = ruleFor(i, letter, size, args[i])({}, tick)
         if (!isMoving(cell)) return
         const to = step(i, cell.direction!, size)
@@ -155,25 +174,28 @@ const generate = (cells: Cell[], size: number, letters: string[], args: string[]
     return next
 }
 
-// Applies the rule for every square with an operation that isn't muted, once
+// Applies the rule for every square with an operation that isn't inactive, once
 // the values on their inputs have set their arguments, so an argument set on
 // a tick works from that tick. The generators put out their cells first, and
 // the inputs take the cells put on them too. Cells arriving on a generator
-// pass through. Invalid arguments fall back to defaults. A muted square's
-// rule is kept, so it carries on from where it was when unmuted
-const applyRules: GridRule = (given, size, letters, givenArgs, muted, inputs, tick) => {
+// pass through. Invalid arguments fall back to defaults. An inactive square's
+// rule is kept, so it carries on from where it was when it's active again
+const applyRules: GridRule = (given, size, letters, givenArgs, inputs, tick) => {
     if (tick === 0 || size !== builtSize) built = new Map()
     builtSize = size
-    const taken = takeInputs(given, size, letters, givenArgs, muted, inputs)
-    const generated = generate(taken.cells, size, letters, taken.args, muted, tick)
-    const { cells, args } = takeInputs(generated, size, letters, taken.args, muted, inputs)
+    const taken = takeInputs(given, size, letters, givenArgs, inputs)
+    const generated = generate(taken.cells, size, letters, taken.args, tick)
+    const { cells, args } = takeInputs(generated, size, letters, taken.args, inputs)
     return cells.map((cell, i) => {
         if (!operationFor(letters[i])) {
             built.delete(i)
             return cell
         }
-        if (muted[i] || kindOf(letters[i]) === "generator") return cell
+        const mode = modeOf(letters[i], size, args[i])
+        if (mode === "inactive" || kindOf(letters[i]) === "generator") return cell
         const next = ruleFor(i, letters[i], size, args[i])(cell, tick)
+        // A thru output does what it does, but lets through what it would absorb
+        if (mode === "thru" && cell.value !== undefined && next.value === undefined) return cell
         // An output's cells still show on it for the tick they're absorbed
         if (kindOf(letters[i]) === "output" && isMoving(cell) && next.value === undefined) {
             emit({ type: "absorb", square: i, cell })

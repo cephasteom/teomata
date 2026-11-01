@@ -1,14 +1,14 @@
 import { get } from "svelte/store"
 import { SIZE } from "./global"
-import { operations, args, muted, expansions, type Expansion } from "./operations"
+import { operations, args, expansions, type Expansion } from "./operations"
 import { cursor, anchor } from "./cursor"
 
 // How many changes can be undone
 export const HISTORY = 4
 
-// The operations, arguments, mutes and inputs at one time, with the selection then
+// The operations, arguments and inputs at one time, with the selection then
 export type Snapshot = {
-    operations: string[], args: string[][], muted: boolean[], expansions: (Expansion | null)[],
+    operations: string[], args: string[][], expansions: (Expansion | null)[],
     cursor: number, anchor: number,
 }
 
@@ -16,15 +16,15 @@ let undos: Snapshot[] = []
 let redos: Snapshot[] = []
 
 export const snapshot = (): Snapshot => ({
-    operations: get(operations), args: get(args), muted: get(muted), expansions: get(expansions),
+    operations: get(operations), args: get(args), expansions: get(expansions),
     cursor: get(cursor), anchor: get(anchor),
 })
 
-// Whether two snapshots have the same operations, arguments, mutes and inputs. The
+// Whether two snapshots have the same operations, arguments and inputs. The
 // stores are copied on every change, so they are compared square by square
 const same = (a: Snapshot, b: Snapshot) => {
     for (let i = 0; i < SIZE * SIZE; i++) {
-        if (a.operations[i] !== b.operations[i] || a.muted[i] !== b.muted[i]) return false
+        if (a.operations[i] !== b.operations[i]) return false
         const [e, f] = [a.expansions[i], b.expansions[i]]
         if (e?.direction !== f?.direction || e?.length !== f?.length) return false
         const [x, y] = [a.args[i], b.args[i]]
@@ -51,7 +51,6 @@ export const change = (make: () => void) => {
 const restore = (to: Snapshot) => {
     operations.set(to.operations)
     args.set(to.args)
-    muted.set(to.muted)
     expansions.set(to.expansions)
     cursor.set(to.cursor)
     anchor.set(to.anchor)

@@ -8,9 +8,7 @@
     min: number
     max: number
     step: number
-    // Decimal places it rounds to, so the arrow keys' steps don't drift
     places: number
-    // The controls' row it sits in, which its label lines up with
     row: number
   }
 

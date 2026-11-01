@@ -58,6 +58,15 @@ export const step = (i: number, direction: direction, size: number) => {
     return x < 0 || x >= size || y < 0 || y >= size ? undefined : y * size + x
 }
 
+// Index of the square one step from i in the given direction, coming back in
+// on the opposite side when that would go past the edge of the grid
+export const stepAround = (i: number, direction: direction, size: number) => {
+    const [dx, dy] = offsets[direction]
+    const x = (i % size + dx + size) % size
+    const y = (Math.floor(i / size) + dy + size) % size
+    return y * size + x
+}
+
 // Copies a grid's squares onto a grid of a new size, for operations saved
 // when the grid's size could change, keeping each at the same
 // column and row. Squares past the old edges come in empty, and those past

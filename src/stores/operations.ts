@@ -2,7 +2,8 @@ import { writable, derived, get } from "svelte/store"
 import { SIZE } from "./global"
 import type { direction } from "./cells"
 import { opposite, step } from "../lib/utils"
-import { argsFor, inputParamsFor } from "../rules"
+import { argsFor, inputParamsFor, kindOf, modeOf, paramsFor } from "../rules"
+import { isModeParam } from "../rules/shared"
 import type { Input } from "../rules/types"
 
 // One operation per square, or "" for none. Operations belong to the square rather
@@ -17,11 +18,11 @@ export const args = writable<string[][]>(
     Array.from({ length: SIZE * SIZE }, () => [])
 )
 
-// Whether each square's operation is muted. A muted operation stays on its
-// square but does nothing, and keeps what it remembers, until it is unmuted.
-// A square is unmuted when its operation changes
-export const muted = writable<boolean[]>(
-    Array.from({ length: SIZE * SIZE }, () => false)
+// The mode each square's operation is in, from its arguments. An inactive
+// operation stays on its square but does nothing, and keeps what it remembers,
+// until it is active again
+export const modes = derived([operations, args], ([$operations, $args]) =>
+    $operations.map((letter, i) => modeOf(letter, SIZE, $args[i]))
 )
 
 // How far each square's operation reaches out into inputs, in a line from its
@@ -118,18 +119,38 @@ export const setInputArg = (square: number, k: number, text: string) => {
     })
 }
 
-// Mutes the operations on the squares, or unmutes them when every one is
-// already muted. Squares without an operation are left alone
-export const toggleMuted = (squares: Iterable<number>) => {
+// Puts the operations on the squares in the mode, or back to active for those
+// without it
+const setModes = (squares: number[], mode: string) => {
+    const $operations = get(operations)
+    args.update(args => {
+        const next = [...args]
+        for (const i of squares) {
+            const params = paramsFor($operations[i], SIZE)
+            const k = params.findIndex(isModeParam)
+            next[i] = argsFor($operations[i], SIZE, next[i])
+            next[i][k] = params[k].accepts(mode) ? mode : params[k].fallback
+        }
+        return next
+    })
+}
+
+// Moves the operations on the squares on to the mode after the one the square
+// given is in, or the first with an operation when it hasn't one, among the
+// modes that square's operation has. Squares without an operation are left alone
+export const stepModes = (squares: Iterable<number>, from: number) => {
     const $operations = get(operations)
     const list = [...squares].filter(i => $operations[i])
     if (!list.length) return
-    const mute = list.some(i => !get(muted)[i])
-    muted.update(muted => {
-        const next = [...muted]
-        for (const i of list) next[i] = mute
-        return next
-    })
+    const at = $operations[from] ? from : list[0]
+    const options = paramsFor($operations[at], SIZE).find(isModeParam)!.options!
+    setModes(list, options[(options.indexOf(get(modes)[at]) + 1) % options.length])
+}
+
+// Operations saved muted, from before they had modes, become inactive
+export const carryMutes = (saved: boolean[]) => {
+    const $operations = get(operations)
+    setModes(saved.flatMap((isMuted, i) => isMuted && kindOf($operations[i]) ? [i] : []), "inactive")
 }
 
 // What squares had before their arguments opened, keyed by square. The rules
@@ -155,7 +176,7 @@ export const appliedOperations = () => {
         $operations[i] = operation
         $args[i] = args
     }
-    return { operations: $operations, args: $args, muted: get(muted), inputs: get(inputs) }
+    return { operations: $operations, args: $args, inputs: get(inputs) }
 }
 
 // Puts the same operation, or "" to clear them, on every one of the squares
@@ -173,11 +194,6 @@ export const setOperations = (squares: Iterable<number>, operation: string) => {
     args.update(args => {
         const next = [...args]
         for (const i of changed) next[i] = []
-        return next
-    })
-    muted.update(muted => {
-        const next = [...muted]
-        for (const i of changed) next[i] = false
         return next
     })
     expansions.update(expansions => {
@@ -200,8 +216,8 @@ export const setArg = (squares: Iterable<number>, k: number, text: string) => {
     })
 }
 
-// Steps the operations on the squares, with their arguments, whether they
-// are muted and their inputs, one square over.
+// Steps the operations on the squares, with their arguments and inputs, one
+// square over.
 // They land on top of whatever was there, and the squares they leave are
 // emptied. Any that would step past the edge are lost
 export const moveOperations = (squares: Iterable<number>, direction: direction) => {
@@ -217,23 +233,21 @@ export const moveOperations = (squares: Iterable<number>, direction: direction) 
     }
     operations.update(operations => shift(operations, () => ""))
     args.update(args => shift(args, () => []))
-    muted.update(muted => shift(muted, () => false))
     expansions.update(expansions => shift(expansions, () => null))
     fitExpansions()
 }
 
-// The operations, arguments, mutes and inputs last copied, as a rectangle read row by row
+// The operations, arguments and inputs last copied, as a rectangle read row by row
 type Copied = {
-    width: number, height: number, operations: string[], args: string[][], muted: boolean[],
-    expansions: (Expansion | null)[],
+    width: number, height: number, operations: string[], args: string[][], expansions: (Expansion | null)[],
 }
 let clipboard: Copied | null = null
 
 type Rectangle = { x1: number, x2: number, y1: number, y2: number }
 
-// Copies the operations, arguments, mutes and inputs in the rectangle, empty squares included
+// Copies the operations, arguments and inputs in the rectangle, empty squares included
 export const copyOperations = ({ x1, x2, y1, y2 }: Rectangle) => {
-    const [$operations, $args, $muted, $expansions] = [get(operations), get(args), get(muted), get(expansions)]
+    const [$operations, $args, $expansions] = [get(operations), get(args), get(expansions)]
     const squares: number[] = []
     for (let y = y1; y <= y2; y++) {
         for (let x = x1; x <= x2; x++) squares.push(y * SIZE + x)
@@ -243,7 +257,6 @@ export const copyOperations = ({ x1, x2, y1, y2 }: Rectangle) => {
         height: y2 - y1 + 1,
         operations: squares.map(i => $operations[i]),
         args: squares.map(i => $args[i]),
-        muted: squares.map(i => $muted[i]),
         expansions: squares.map(i => $expansions[i]),
     }
 }
@@ -266,7 +279,6 @@ export const pasteOperations = (x: number, y: number): Rectangle | null => {
     }
     operations.update(operations => paste(operations, clipboard!.operations))
     args.update(args => paste(args, clipboard!.args))
-    muted.update(muted => paste(muted, clipboard!.muted))
     expansions.update(expansions => paste(expansions, clipboard!.expansions))
     fitExpansions()
     return pasted
@@ -276,6 +288,5 @@ export const clearOperations = () => {
     releaseOperations()
     operations.set(Array.from({ length: SIZE * SIZE }, () => ""))
     args.set(Array.from({ length: SIZE * SIZE }, () => []))
-    muted.set(Array.from({ length: SIZE * SIZE }, () => false))
     expansions.set(Array.from({ length: SIZE * SIZE }, () => null))
 }

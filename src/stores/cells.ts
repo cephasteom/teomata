@@ -56,8 +56,8 @@ export const setCells = (next: Cell[]) => {
 // values arriving on inputs are kept at once, so the next tick runs on them
 export const stepCells = (tick: number) => {
     // The operations being edited run as they were until their arguments close
-    const { operations: letters, args: given, muted, inputs } = appliedOperations()
-    grid = rules.reduce((cells, rule) => rule(cells, SIZE, letters, given, muted, inputs, tick), grid)
+    const { operations: letters, args: given, inputs } = appliedOperations()
+    grid = rules.reduce((cells, rule) => rule(cells, SIZE, letters, given, inputs, tick), grid)
     const events = drain()
     const shown = [...grid]
     for (const event of events) {

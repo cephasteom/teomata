@@ -9,6 +9,8 @@ const device = "The MIDI output by its number, counting from 0."
 const channel = "A MIDI channel from 1 to 16."
 const type = "saw, sin, cos, tri, sqr, or noi, or a number from 0 (saw) to 5 (noi)."
 const freq = "Waveform frequency relative to cps."
+export const mode = "active or inactive, or a number, 0 (active) or 1 (inactive). Inactive lets values pass unchanged. Shift+Enter toggles the mode."
+export const outputMode = "active, inactive or thru, or a number from 0 (active) to 2 (thru). Inactive sends no output. Thru sends as usual, but lets values through. Shift+Enter steps through the modes."
 
 export const about = {
     // Generators
@@ -90,11 +92,11 @@ export const about = {
     },
     // Outputs
     c: {
-        about: "Send incoming numbers as MIDI CC messages, rounded and wrapped to 0 to 127, or the first of several. Bangs are ignored. Absorbs every value.",
+        about: "Send incoming numbers as MIDI CC messages, rounded and wrapped to 0 to 127, or the first of several. Bangs are ignored. Absorbs every value, unless thru.",
         params: { cc: "The controller number, from 0 to 127.", device, channel },
     },
     n: {
-        about: "Send incoming numbers as MIDI notes, rounded and wrapped to 0 to 127, or several as a chord. Bangs are ignored. Absorbs every value.",
+        about: "Send incoming numbers as MIDI notes, rounded and wrapped to 0 to 127, or several as a chord. Bangs are ignored. Absorbs every value, unless thru.",
         params: {
             vel: "The velocity, from 0 to 127.",
             dur: "How long each note lasts, in seconds.",

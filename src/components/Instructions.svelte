@@ -1,14 +1,19 @@
 <script lang="ts">
   import { instructions } from "../rules";
+  import { isModeParam } from "../rules/shared";
   import { gridFocused, cursor } from "../stores/cursor";
   import { editing } from "../stores/editing";
   import { operations, inputs } from "../stores/operations";
+  import type { Param } from "../rules/types";
 
   let focused = $derived($gridFocused 
     ? $operations[$editing ?? $inputs.get($cursor)?.owner ?? $cursor] ?? "" 
     : "");
   let matching = $derived(instructions.filter(({ letter }) => letter === focused));
   let shown = $derived(matching.length ? matching : instructions);
+  // Every operation has a mode, so its signature leaves it out. It's still
+  // explained with the other params under an operation shown alone
+  const signature = (params: Param[]) => params.filter(param => !isModeParam(param));
 </script>
 
 <dl class="instructions default-size" aria-label="Operations">
@@ -16,7 +21,7 @@
     <div class="operation">
       <dt class={kind}>{letter}</dt>
       <dd>
-        {name}({#each params as param, k (param.name)}{#if k}, {/if}{param.name}{/each}{#if rest}{#if params.length}, {/if}...{rest.name}{/if})
+        {name}({#each signature(params) as param, k (param.name)}{#if k}, {/if}{param.name}{/each}{#if rest}{#if signature(params).length}, {/if}...{rest.name}{/if})
       </dd>
       {#if matching.length}
         <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->

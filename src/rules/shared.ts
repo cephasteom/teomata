@@ -2,6 +2,7 @@ import { get } from "svelte/store"
 import { q } from "../stores/global"
 import { arrows, headingOf, isHeading } from "../lib/utils"
 import { formatArg } from "../lib/arithmetic"
+import { mode, outputMode } from "./instructions"
 import type { Param } from "./types"
 
 export const isNumber = (text: string) => text !== "" && Number.isFinite(Number(text))
@@ -71,6 +72,23 @@ export const channelParam = (about: string): Param => ({
     fallback: "1",
     accepts: text => isWhole(text) && Number(text) >= 1 && Number(text) <= 16,
 })
+
+// The final param of every operation, for how it treats the values that
+// arrive. A number on its input picks by index, so one operation can turn
+// another on and off
+const createModeParam = (modes: string[], about: string): Param => {
+    const { accepts, settle, fromNumber, options } = named(modes)
+    return { name: "mode", about, fallback: "active", accepts, settle, fromNumber, options }
+}
+
+// Active does what it does, and inactive lets values pass without running
+export const modeParam = createModeParam(["active", "inactive"], mode)
+
+// Only an output absorbs what arrives, so only it has thru, which does what it
+// does but lets the values carry on
+export const outputModeParam = createModeParam(["active", "inactive", "thru"], outputMode)
+
+export const isModeParam = (param: Param) => param === modeParam || param === outputModeParam
 
 // Whether a generator fires on the tick, given the cycles between its outputs
 // It fires on the first tick at or after each trigger, and at most once a tick

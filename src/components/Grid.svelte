@@ -6,7 +6,7 @@
     gridFocused, cursor, bounds, selection, placeCursor, moveCursor, selectAll, selectionCanMove, moveSelection,
   } from "../stores/cursor";
   import {
-    operations, args, muted, inputs, expansions, inputSquares, toggleMuted, setOperations, moveOperations,
+    operations, args, modes, inputs, expansions, inputSquares, stepModes, setOperations, moveOperations,
     copyOperations, pasteOperations, expand,
   } from "../stores/operations";
   import {
@@ -15,6 +15,7 @@
   } from "../stores/editing";
   import { snapshot, record, change, undo, redo } from "../stores/history";
   import { paramsFor, argsFor, kindOf, labelFor } from "../rules";
+  import { isModeParam } from "../rules/shared";
   import { arrows } from "../lib/utils";
   import { shortened } from "../lib/arithmetic";
   import { toggle } from "../scheduler";
@@ -245,8 +246,8 @@
   }
 
   // Generators and outputs are bordered in their own colours, outputs in the
-  // one their messages print in, or grey while muted. The borders all go
-  // while an operation's arguments are open
+  // one their messages print in, or grey while inactive, and a thru output's
+  // is dashed. The borders all go while an operation's arguments are open
   const borders: Partial<Record<string, string>> = {
     generator: 'var(--cell-generator)',
     output: 'var(--cell-output)',
@@ -255,7 +256,7 @@
     ? $operations.flatMap((letter, i) => {
       const color = borders[kindOf(letter) ?? '']
       // An operation with inputs is outlined along with them instead
-      return color && !$expansions[i] ? [{ i, color: $muted[i] ? 'var(--cell-muted)' : color }] : []
+      return color && !$expansions[i] ? [{ i, thru: $modes[i] === 'thru', color: $modes[i] === 'inactive' ? 'var(--cell-inactive)' : color }] : []
     })
     : [])
 
@@ -268,24 +269,24 @@
   })
 
   // Each input square shows the argument it sets, greyed while its operation
-  // is muted. They go while arguments are open
+  // is inactive. They go while arguments are open
   let inputLabels = $derived($editing === null
     ? new Map([...$inputs].map(([square, { owner, k }]) => {
       const text = shortened(argsFor($operations[owner], SIZE, $args[owner])[k] ?? '')
-      return [square, { text, muted: $muted[owner] }]
+      return [square, { text, inactive: $modes[owner] === 'inactive' }]
     }))
-    : new Map<number, { text: string, muted: boolean }>())
+    : new Map<number, { text: string, inactive: boolean }>())
 
   // An operation with inputs is outlined in one border round it and them, in
   // its border colour, or the cells' colour for an operator, and grey while
-  // it's muted
+  // it's inactive, dashed while it's thru
   let outlines = $derived($editing === null
     ? $expansions.flatMap((expansion, i) => {
       if (!expansion) return []
       const squares = [i, ...inputSquares(i, expansion)]
       const [xs, ys] = [squares.map(square => square % SIZE), squares.map(square => Math.floor(square / SIZE))]
-      const color = $muted[i] ? 'var(--cell-muted)' : borders[kindOf($operations[i]) ?? ''] ?? 'var(--cell-alive)'
-      return [{ i, color, x1: Math.min(...xs), x2: Math.max(...xs), y1: Math.min(...ys), y2: Math.max(...ys) }]
+      const color = $modes[i] === 'inactive' ? 'var(--cell-inactive)' : borders[kindOf($operations[i]) ?? ''] ?? 'var(--cell-alive)'
+      return [{ i, color, thru: $modes[i] === 'thru', x1: Math.min(...xs), x2: Math.max(...xs), y1: Math.min(...ys), y2: Math.max(...ys) }]
     })
     : [])
 
@@ -379,8 +380,8 @@
       }
       else if (event.key === 'Backspace' || event.key === 'Delete') eraseArg()
     } else if (event.key === 'Enter' && event.shiftKey) {
-      // Shift+Enter mutes the selected operations, or unmutes them
-      change(() => toggleMuted($selection))
+      // Shift+Enter moves the selected operations on to their next mode
+      change(() => stepModes($selection, $cursor))
     } else if (event.key === 'Enter') {
       // Only an operation with params has arguments to open
       if (paramsFor($operations[$cursor], SIZE).length) openArgs($cursor, $selection)
@@ -394,9 +395,10 @@
       event.preventDefault()
       const before = snapshot()
       setOperations($selection, event.key)
-      // A typed operation opens its arguments, when it has any, and only
-      // starts running once they close, when it can be undone along with them
-      if (paramsFor(event.key, SIZE).length) openArgs($cursor, $selection, before)
+      // A typed operation opens its arguments, when it has any besides its
+      // mode, and only starts running once they close, when it can be undone
+      // along with them
+      if (paramsFor(event.key, SIZE).some(param => !isModeParam(param))) openArgs($cursor, $selection, before)
       else record(before)
     } else if (event.key === 'Backspace' || event.key === 'Delete') {
       change(() => setOperations($selection, ""))
@@ -428,23 +430,24 @@
       class="cell"
       class:alive={cell.value !== undefined && !arg}
       class:bordered={borderColors.has(i)}
+      class:thru={$modes[i] === 'thru'}
       style:--border={borderColors.get(i)}
       class:hidden={$editing !== null && i !== $shownSquare && !arg}
       onclick={(event) => $editing !== null ? placeArgCursor(i) : placeCursor(i, event.shiftKey)}
     >
       {#if arg}
-        <span class="arg" class:invalid={!arg.valid} class:muted={$muted[$editing ?? -1]} style:--length={Math.max(1, arg.text.length)}>{arg.text}</span>
+        <span class="arg" class:invalid={!arg.valid} class:inactive={$modes[$editing ?? -1] === 'inactive'} style:--length={Math.max(1, arg.text.length)}>{arg.text}</span>
       {:else if $editing !== null && i === $shownSquare}
-        <span class="letter" class:muted={$muted[$editing]} style:--length={1}>{$operations[$editing]}</span>
+        <span class="letter" class:inactive={$modes[$editing] === 'inactive'} style:--length={1}>{$operations[$editing]}</span>
       {:else if $operations[i]}
         <!-- A cell passing over its square inverts the label -->
-        <span class="letter" class:arrow={arrowLabels.has(labels[i])} class:muted={$muted[i]} style:--length={labels[i].length}>{labels[i]}</span>
+        <span class="letter" class:arrow={arrowLabels.has(labels[i])} class:inactive={$modes[i] === 'inactive'} style:--length={labels[i].length}>{labels[i]}</span>
       {:else if input}
-        <span class="arg" class:muted={input.muted} style:--length={Math.max(1, input.text.length)}>{input.text}</span>
+        <span class="arg" class:inactive={input.inactive} style:--length={Math.max(1, input.text.length)}>{input.text}</span>
       {/if}
     </div>
   {/each}
-  {#each bordered as { i, color } (i)}
+  {#each bordered.filter(({ thru }) => !thru) as { i, color } (i)}
     {@const [x, y] = [i % SIZE, Math.floor(i / SIZE)]}
     <!-- Behind each bordered square, in its colour, so the gridlines round it
          join up with its border instead of showing through. It comes before
@@ -458,21 +461,24 @@
       style:grid-row="{y + 1} / {y + 2}"
     ></div>
   {/each}
-  {#each outlines as { i, color, x1, x2, y1, y2 } (i)}
+  {#each outlines as { i, color, thru, x1, x2, y1, y2 } (i)}
     <!-- Over the squares, so it shows round them whatever they hold, with the
          gridlines round them coloured behind, as a bordered square's are -->
     <div
       class="outline"
+      class:thru
       style:--border={color}
       style:grid-column="{x1 + 1} / {x2 + 2}"
       style:grid-row="{y1 + 1} / {y2 + 2}"
     ></div>
-    <div
-      class="outline-line"
-      style:--border={color}
-      style:grid-column="{x1 + 1} / {x2 + 2}"
-      style:grid-row="{y1 + 1} / {y2 + 2}"
-    ></div>
+    {#if !thru}
+      <div
+        class="outline-line"
+        style:--border={color}
+        style:grid-column="{x1 + 1} / {x2 + 2}"
+        style:grid-row="{y1 + 1} / {y2 + 2}"
+      ></div>
+    {/if}
   {/each}
   {#if $openArea}
     <div
@@ -603,11 +609,11 @@
     font-weight: normal;
   }
 
-  /* A muted operation greys out, over an empty square or a cell alike, and
+  /* An inactive operation greys out, over an empty square or a cell alike, and
      so do its arguments while they're open */
-  .letter.muted,
-  .arg.muted {
-    color: var(--cell-muted);
+  .letter.inactive,
+  .arg.inactive {
+    color: var(--cell-inactive);
   }
 
   .arg.invalid {
@@ -636,6 +642,16 @@
 
   .bordered {
     box-shadow: inset 0 0 0 2px var(--border);
+  }
+
+  /* A thru output's border is dashed, as values carry on through it. An
+     outline can be dashed where a box shadow can't, and its gridlines keep
+     their colour so the gaps show */
+  .bordered.thru,
+  .outline.thru {
+    box-shadow: none;
+    outline: 2px dashed var(--border);
+    outline-offset: -2px;
   }
 
   /* The cursor and selection stand in for the focus outline */

@@ -4,10 +4,9 @@ import type { Cell } from "../stores/cells"
 // sets among all its params
 export type Input = { owner: number, k: number }
 
-// Muted squares keep their operations, but their rules don't run. Inputs are
-// keyed by the square they sit on
+// Inputs are keyed by the square they sit on
 export type GridRule = (
-    cells: Cell[], size: number, operations: string[], args: string[][], muted: boolean[],
+    cells: Cell[], size: number, operations: string[], args: string[][],
     inputs: Map<number, Input>, tick: number,
 ) => Cell[]
 
@@ -57,7 +56,7 @@ export interface Operation {
     // A param that repeats after the others, filling the rest of the row
     rest?: Param
     // How many of the params show while the arguments are open, given what
-    // they are now. All of them show when it's left out
+    // they are now, along with the mode. All of them show when it's left out
     shown?: (args: string[]) => number
     // How the square shows on the grid, given its arguments, until its rule
     // gives a label of its own. The letter shows when it's left out
