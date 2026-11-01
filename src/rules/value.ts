@@ -1,6 +1,6 @@
 import { BANG, headingOf, pickDirection, type heading } from "../lib/utils"
 import type { CellRule, Operation, Param } from "./types"
-import { cyclesParam, directionParam, fires, isMoving, isNumber } from "./shared"
+import { rateParam, directionParam, fires, isMoving, isNumber } from "./shared"
 import { about } from "./instructions"
 
 // values(): gives each value arriving one of the given values, keeping its
@@ -17,18 +17,18 @@ export const createValues = (values: number[]): CellRule => cell => {
 
 const valueParam = (about: string): Param => ({ name: "value", about, fallback: "0", accepts: isNumber })
 
-// Puts out a new cell with the value heading in the given direction every n
-// cycles, for applyRules to put on the neighbouring square
-const createValueGenerator = (value: number, cycles: number, to: heading): CellRule => (_, tick) =>
-    fires(cycles, tick) ? { value, direction: pickDirection(to) } : {}
+// Puts out a new cell with the value heading in the given direction, rate times
+// per cycle, for applyRules to put on the neighbouring square
+const createValueGenerator = (value: number, rate: number, to: heading): CellRule => (_, tick) =>
+    fires(rate, tick) ? { value, direction: pickDirection(to) } : {}
 
 export const valueGenerator: Operation = {
     name: "value",
     kind: "generator",
     about: about.V.about,
-    params: [valueParam(about.V.params.value), cyclesParam(about.V.params.n), directionParam(about.V.params.direction)],
+    params: [valueParam(about.V.params.value), rateParam(about.V.params.rate), directionParam(about.V.params.direction)],
     label: value => value,
-    rule: (value, cycles, to) => createValueGenerator(Number(value), Number(cycles), headingOf(to) as heading),
+    rule: (value, rate, to) => createValueGenerator(Number(value), Number(rate), headingOf(to) as heading),
 }
 
 export const value: Operation = {

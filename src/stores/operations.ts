@@ -18,9 +18,9 @@ export const args = writable<string[][]>(
     Array.from({ length: SIZE * SIZE }, () => [])
 )
 
-// The mode each square's operation is in, from its arguments. An inactive
-// operation stays on its square but does nothing, and keeps what it remembers,
-// until it is active again
+// The mode each square's operation is in, from its arguments. An operation
+// that's off stays on its square but does nothing, and keeps what it remembers,
+// until it is on again
 export const modes = derived([operations, args], ([$operations, $args]) =>
     $operations.map((letter, i) => modeOf(letter, SIZE, $args[i]))
 )
@@ -121,7 +121,7 @@ export const setInputArg = (square: number, k: number, text: string) => {
 
 // Moves the operations on the squares on to the mode after the one the square
 // given is in, or the first with an operation when it hasn't one, among the
-// modes that square's operation has, or back to active for those without it.
+// modes that square's operation has, or back to on for those without it.
 // Squares without an operation are left alone
 export const stepModes = (squares: Iterable<number>, from: number) => {
     const $operations = get(operations)

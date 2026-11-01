@@ -4,27 +4,27 @@
 // text from here, by its params' names
 
 const direction = "n, e, s or w. x, y or xy randomly choose a direction on the axis/axes. Or a number from 0 (n) to 6 (xy)."
-const cycles = "1 outputs once per cycle, 0.5 outputs twice per cycle, etc."
+const rate = "Outputs per cycle. 1 outputs once per cycle, 2 twice per cycle, 0.5 every other cycle, etc."
 const device = "The MIDI output by its number, counting from 0."
 const channel = "A MIDI channel from 1 to 16."
 const type = "saw, sin, cos, tri, sqr, or noi, or a number from 0 (saw) to 5 (noi)."
 const freq = "Waveform frequency relative to cps."
-export const mode = "active or inactive, or a number, 0 (active) or 1 (inactive). Inactive lets values pass unchanged. Shift+Enter toggles the mode."
-export const outputMode = "active, inactive or thru, or a number from 0 (active) to 2 (thru). Inactive sends no output. Thru sends as usual, but lets values through. Shift+Enter steps through the modes."
+export const mode = "on or off, or a number, 0 (on) or 1 (off). Off lets values pass unchanged. Shift+Enter toggles the mode."
+export const outputMode = "on, off or thru, or a number from 0 (on) to 2 (thru). Off sends no output. Thru sends as usual, but lets values through. Shift+Enter steps through the modes."
 
 export const about = {
     // Generators
     B: {
-        about: "Output a bang every n cycles, in a given direction. Values arriving pass through.",
-        params: { n: cycles, direction },
+        about: "Output a bang rate times per cycle, in a given direction. Values arriving pass through.",
+        params: { rate, direction },
     },
     V: {
-        about: "Output a value every n cycles, in a given direction. Values arriving pass through.",
-        params: { value: "Any number.", n: cycles, direction },
+        about: "Output a value rate times per cycle, in a given direction. Values arriving pass through.",
+        params: { value: "Any number.", rate, direction },
     },
     W: {
-        about: "Output the current position of a waveform, from 0 to 1, every n cycles, in a given direction. Values arriving pass through.",
-        params: { freq, type, n: cycles, direction },
+        about: "Output the current position of a waveform, from 0 to 1, rate times per cycle, in a given direction. Values arriving pass through.",
+        params: { type, freq, rate, direction },
     },
     // Operators
     b: {
@@ -53,16 +53,16 @@ export const about = {
     l: {
         about: "Test incoming values using logical operators. Bangs if true, nullifies if false. Bangs are true.",
         params: {
-            operator: "<, >, <=, >=, ==, !=, &&, || and ^ compare the value with n. ! (not) uses the value alone. "
+            operator: "<, >, <=, >=, ==, !=, &&, || and ^ compare the value with num. ! (not) uses the value alone. "
                 + "A number is true when it isn't 0.",
-            n: "Any number.",
+            num: "Any number.",
         },
     },
     m: {
         about: "Transform incoming values using math operators. Bangs are 1.",
         params: {
             operator: "+, -, *, /, %, ^, & or |, or any function from the JS Math object, such as min or sqrt.",
-            n: "Any number.",
+            num: "Any number.",
         },
     },
     p: {
@@ -88,7 +88,7 @@ export const about = {
     },
     w: {
         about: "Output the current position of a waveform, from 0 to 1.",
-        params: { freq, type },
+        params: { type, freq },
     },
     // Outputs
     c: {

@@ -246,7 +246,7 @@
   }
 
   // Generators and outputs are bordered in their own colours, outputs in the
-  // one their messages print in, or grey while inactive, and a thru output's
+  // one their messages print in, or grey while off, and a thru output's
   // is dashed. The borders all go while an operation's arguments are open
   const borders: Partial<Record<string, string>> = {
     generator: 'var(--cell-generator)',
@@ -256,7 +256,7 @@
     ? $operations.flatMap((letter, i) => {
       const color = borders[kindOf(letter) ?? '']
       // An operation with inputs is outlined along with them instead
-      return color && !$expansions[i] ? [{ i, thru: $modes[i] === 'thru', color: $modes[i] === 'inactive' ? 'var(--cell-inactive)' : color }] : []
+      return color && !$expansions[i] ? [{ i, thru: $modes[i] === 'thru', color: $modes[i] === 'off' ? 'var(--cell-off)' : color }] : []
     })
     : [])
 
@@ -269,23 +269,23 @@
   })
 
   // Each input square shows the argument it sets, greyed while its operation
-  // is inactive. They go while arguments are open
+  // is off. They go while arguments are open
   let inputLabels = $derived($editing === null
     ? new Map([...$inputs].map(([square, { owner, k }]) => {
       const text = shortened(argsFor($operations[owner], SIZE, $args[owner])[k] ?? '')
-      return [square, { text, inactive: $modes[owner] === 'inactive' }]
+      return [square, { text, off: $modes[owner] === 'off' }]
     }))
-    : new Map<number, { text: string, inactive: boolean }>())
+    : new Map<number, { text: string, off: boolean }>())
 
   // An operation with inputs is outlined in one border round it and them, in
   // its border colour, or the cells' colour for an operator, and grey while
-  // it's inactive, dashed while it's thru
+  // it's off, dashed while it's thru
   let outlines = $derived($editing === null
     ? $expansions.flatMap((expansion, i) => {
       if (!expansion) return []
       const squares = [i, ...inputSquares(i, expansion)]
       const [xs, ys] = [squares.map(square => square % SIZE), squares.map(square => Math.floor(square / SIZE))]
-      const color = $modes[i] === 'inactive' ? 'var(--cell-inactive)' : borders[kindOf($operations[i]) ?? ''] ?? 'var(--cell-alive)'
+      const color = $modes[i] === 'off' ? 'var(--cell-off)' : borders[kindOf($operations[i]) ?? ''] ?? 'var(--cell-alive)'
       return [{ i, color, thru: $modes[i] === 'thru', x1: Math.min(...xs), x2: Math.max(...xs), y1: Math.min(...ys), y2: Math.max(...ys) }]
     })
     : [])
@@ -436,14 +436,14 @@
       onclick={(event) => $editing !== null ? placeArgCursor(i) : placeCursor(i, event.shiftKey)}
     >
       {#if arg}
-        <span class="arg" class:invalid={!arg.valid} class:inactive={$modes[$editing ?? -1] === 'inactive'} style:--length={Math.max(1, arg.text.length)}>{arg.text}</span>
+        <span class="arg" class:invalid={!arg.valid} class:off={$modes[$editing ?? -1] === 'off'} style:--length={Math.max(1, arg.text.length)}>{arg.text}</span>
       {:else if $editing !== null && i === $shownSquare}
-        <span class="letter" class:inactive={$modes[$editing] === 'inactive'} style:--length={1}>{$operations[$editing]}</span>
+        <span class="letter" class:off={$modes[$editing] === 'off'} style:--length={1}>{$operations[$editing]}</span>
       {:else if $operations[i]}
         <!-- A cell passing over its square inverts the label -->
-        <span class="letter" class:arrow={arrowLabels.has(labels[i])} class:inactive={$modes[i] === 'inactive'} style:--length={labels[i].length}>{labels[i]}</span>
+        <span class="letter" class:arrow={arrowLabels.has(labels[i])} class:off={$modes[i] === 'off'} style:--length={labels[i].length}>{labels[i]}</span>
       {:else if input}
-        <span class="arg" class:inactive={input.inactive} style:--length={Math.max(1, input.text.length)}>{input.text}</span>
+        <span class="arg" class:off={input.off} style:--length={Math.max(1, input.text.length)}>{input.text}</span>
       {/if}
     </div>
   {/each}
@@ -609,11 +609,11 @@
     font-weight: normal;
   }
 
-  /* An inactive operation greys out, over an empty square or a cell alike, and
+  /* An operation that's off greys out, over an empty square or a cell alike, and
      so do its arguments while they're open */
-  .letter.inactive,
-  .arg.inactive {
-    color: var(--cell-inactive);
+  .letter.off,
+  .arg.off {
+    color: var(--cell-off);
   }
 
   .arg.invalid {

@@ -89,11 +89,11 @@ export const argsFor = (letter: string, size: number, given: string[] = []) =>
         given[k] !== undefined && param.accepts(given[k]) ? given[k] : param.fallback
     )
 
-// The mode of an operation given its arguments. An empty square counts as active
+// The mode of an operation given its arguments. An empty square counts as on
 export const modeOf = (letter: string, size: number, given?: string[]) => {
     const params = paramsFor(letter, size)
     const k = params.findIndex(isModeParam)
-    return k < 0 ? "active" : params[k].settle!(argsFor(letter, size, given)[k])
+    return k < 0 ? "on" : params[k].settle!(argsFor(letter, size, given)[k])
 }
 
 // The rule built for each square, with the operation and arguments it was
@@ -131,7 +131,7 @@ export const labelFor = (i: number, letter: string, size: number, given?: string
 }
 
 // Takes the moving cells with numbers on the inputs of every operation, whatever
-// its mode, so an inactive one can be turned back on, each setting its input's
+// its mode, so one that's off can be turned back on, each setting its input's
 // argument to the number it brings, when the param takes it. Bangs pass over
 // inputs, but count as a 1 on a mode's. Gives the cells left and the arguments,
 // queueing each one set for the store, and each cell taken to show for the tick
@@ -158,13 +158,13 @@ const takeInputs = (
     return { cells: left, args }
 }
 
-// Puts each cell the generators that aren't inactive put out on the square next to them in
+// Puts each cell the generators that aren't off put out on the square next to them in
 // its direction, over any cell there, so the operation there acts on it on
 // the tick it's put out. One that would go past the edge isn't put out
 const generate = (cells: Cell[], size: number, letters: string[], args: string[][], tick: number) => {
     const next = [...cells]
     letters.forEach((letter, i) => {
-        if (kindOf(letter) !== "generator" || modeOf(letter, size, args[i]) === "inactive") return
+        if (kindOf(letter) !== "generator" || modeOf(letter, size, args[i]) === "off") return
         const cell = ruleFor(i, letter, size, args[i])({}, tick)
         if (!isMoving(cell)) return
         const to = step(i, cell.direction!, size)
@@ -173,12 +173,12 @@ const generate = (cells: Cell[], size: number, letters: string[], args: string[]
     return next
 }
 
-// Applies the rule for every square with an operation that isn't inactive, once
+// Applies the rule for every square with an operation that isn't off, once
 // the values on their inputs have set their arguments, so an argument set on
 // a tick works from that tick. The generators put out their cells first, and
 // the inputs take the cells put on them too. Cells arriving on a generator
-// pass through. Invalid arguments fall back to defaults. An inactive square's
-// rule is kept, so it carries on from where it was when it's active again
+// pass through. Invalid arguments fall back to defaults. The rule of a square that's off
+// is kept, so it carries on from where it was when it's on again
 const applyRules: GridRule = (given, size, letters, givenArgs, inputs, tick) => {
     if (tick === 0) built = new Map()
     const taken = takeInputs(given, size, letters, givenArgs, inputs)
@@ -190,7 +190,7 @@ const applyRules: GridRule = (given, size, letters, givenArgs, inputs, tick) => 
             return cell
         }
         const mode = modeOf(letters[i], size, args[i])
-        if (mode === "inactive" || kindOf(letters[i]) === "generator") return cell
+        if (mode === "off" || kindOf(letters[i]) === "generator") return cell
         const next = ruleFor(i, letters[i], size, args[i])(cell, tick)
         // A thru output does what it does, but lets through what it would absorb
         if (mode === "thru" && cell.value !== undefined && next.value === undefined) return cell

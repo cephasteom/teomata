@@ -51,9 +51,9 @@ export const directionParam = (about: string, fallback = "e"): Param => ({
     options: Object.keys(arrows),
 })
 
-// How many cycles between a generator's outputs, so 1 is once a cycle and .5 twice
-export const cyclesParam = (about: string): Param => ({
-    name: "n",
+// How many times a generator outputs per cycle, so 1 is once a cycle and 2 twice
+export const rateParam = (about: string): Param => ({
+    name: "rate",
     about,
     fallback: "1",
     accepts: text => isNumber(text) && Number(text) > 0,
@@ -78,21 +78,26 @@ export const channelParam = (about: string): Param => ({
 // another on and off
 const createModeParam = (modes: string[], about: string): Param => {
     const { accepts, settle, fromNumber, options } = named(modes)
-    return { name: "mode", about, fallback: "active", accepts, settle, fromNumber, options }
+    return { name: "mode", about, fallback: "on", accepts, settle, fromNumber, options }
 }
 
-// Active does what it does, and inactive lets values pass without running
-export const modeParam = createModeParam(["active", "inactive"], mode)
+// On does what it does, and off lets values pass without running
+export const modeParam = createModeParam(["on", "off"], mode)
 
 // Only an output absorbs what arrives, so only it has thru, which does what it
 // does but lets the values carry on
-export const outputModeParam = createModeParam(["active", "inactive", "thru"], outputMode)
+export const outputModeParam = createModeParam(["on", "off", "thru"], outputMode)
 
 export const isModeParam = (param: Param) => param === modeParam || param === outputModeParam
 
-// Whether a generator fires on the tick, given the cycles between its outputs
+// Whether a generator fires on the tick, given its outputs per cycle
 // It fires on the first tick at or after each trigger, and at most once a tick
-export const fires = (cycles: number, tick: number) => tick % (cycles * get(q)) < 1
+// It counts the triggers up to a tick, tidied of floating point noise so one
+// landing exactly on a tick is neither missed nor counted twice
+export const fires = (rate: number, tick: number) => {
+    const triggers = (t: number) => Math.floor(Number((t * rate / get(q)).toPrecision(12)))
+    return triggers(tick) > triggers(tick - 1)
+}
 
 // Whether a cell is moving with a value, which is what operators and outputs act on
 export const isMoving = (cell: { direction?: unknown, value?: unknown }) =>

@@ -2,7 +2,7 @@ import { get } from "svelte/store"
 import { q } from "../stores/global"
 import { headingOf, pickDirection, type heading } from "../lib/utils"
 import type { CellRule, Operation, Param } from "./types"
-import { cyclesParam, directionParam, fires, isMoving, isNumber, named } from "./shared"
+import { rateParam, directionParam, fires, isMoving, isNumber, named } from "./shared"
 import { about } from "./instructions"
 
 // Each repeating waveform by name, from its phase (0 to 1 through one of its
@@ -75,12 +75,12 @@ const typeParam = (about: string): Param => ({
 
 const freqParam = (about: string): Param => ({ name: "freq", about, fallback: "1", accepts: isNumber })
 
-// Puts out a new cell with the waveform's value heading in the given direction
-// every n cycles, for applyRules to put on the neighbouring square
-const createWaveGenerator = (type: string, freq: number, cycles: number, to: heading): CellRule => {
+// Puts out a new cell with the waveform's value heading in the given direction,
+// rate times per cycle, for applyRules to put on the neighbouring square
+const createWaveGenerator = (type: string, freq: number, rate: number, to: heading): CellRule => {
     const wave = createWave(type, freq)
     const rule: CellRule = (_, tick) =>
-        fires(cycles, tick) ? { value: wave.value(tick), direction: pickDirection(to) } : {}
+        fires(rate, tick) ? { value: wave.value(tick), direction: pickDirection(to) } : {}
     return Object.assign(rule, wave.remembered)
 }
 
@@ -89,13 +89,13 @@ export const waveGenerator: Operation = {
     kind: "generator",
     about: about.W.about,
     params: [
-        freqParam(about.W.params.freq),
         typeParam(about.W.params.type),
-        cyclesParam(about.W.params.n),
+        freqParam(about.W.params.freq),
+        rateParam(about.W.params.rate),
         directionParam(about.W.params.direction),
     ],
-    rule: (freq, type, cycles, to) =>
-        createWaveGenerator(typeOf(type), Number(freq), Number(cycles), headingOf(to) as heading),
+    rule: (type, freq, rate, to) =>
+        createWaveGenerator(typeOf(type), Number(freq), Number(rate), headingOf(to) as heading),
 }
 
 // Gives each bang or non zero value arriving the waveform's value on the tick
@@ -110,7 +110,7 @@ export const wave: Operation = {
     name: "wave",
     kind: "operator",
     about: about.w.about,
-    params: [freqParam(about.w.params.freq), typeParam(about.w.params.type)],
-    label: (_, type) => typeOf(type),
-    rule: (freq, type) => createWaveform(typeOf(type), Number(freq)),
+    params: [typeParam(about.w.params.type), freqParam(about.w.params.freq)],
+    label: type => typeOf(type),
+    rule: (type, freq) => createWaveform(typeOf(type), Number(freq)),
 }

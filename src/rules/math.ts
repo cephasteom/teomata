@@ -3,27 +3,27 @@ import type { CellRule, Operation, Param } from "./types"
 import { isMoving, isNumber, named } from "./shared"
 import { about } from "./instructions"
 
-// Works out a number from a value and n, which is undefined when its square is empty
-type Apply = (value: number, n?: number) => number
+// Works out a number from a value and num, which is undefined when its square is empty
+type Apply = (value: number, num?: number) => number
 
-// Does the sum with n, leaving the value as it is when there's no n
-const binary = (sum: (value: number, n: number) => number): Apply => (value, n) => n === undefined ? value : sum(value, n)
+// Does the sum with num, leaving the value as it is when there's no num
+const binary = (sum: (value: number, num: number) => number): Apply => (value, num) => num === undefined ? value : sum(value, num)
 
-// Works on the value alone, ignoring n
+// Works on the value alone, ignoring num
 const unary = (f: (value: number) => number): Apply => value => f(value)
 
-// Each operator by name, after the JS Math object. Those that take n come
+// Each operator by name, after the JS Math object. Those that take num come
 // first, then those that work on the value alone
-const withN: Record<string, Apply> = {
-    "+": binary((value, n) => value + n),
-    "-": binary((value, n) => value - n),
-    "*": binary((value, n) => value * n),
-    "/": binary((value, n) => value / n),
-    "%": binary((value, n) => value % n),
+const withNum: Record<string, Apply> = {
+    "+": binary((value, num) => value + num),
+    "-": binary((value, num) => value - num),
+    "*": binary((value, num) => value * num),
+    "/": binary((value, num) => value / num),
+    "%": binary((value, num) => value % num),
     "^": binary(Math.pow),
     // JS's bitwise operators, which work on whole numbers, dropping any fraction
-    "&": binary((value, n) => value & n),
-    "|": binary((value, n) => value | n),
+    "&": binary((value, num) => value & num),
+    "|": binary((value, num) => value | num),
     pow: binary(Math.pow),
     atan2: binary(Math.atan2),
     min: binary(Math.min),
@@ -63,7 +63,7 @@ const alone: Record<string, Apply> = {
     clz32: unary(Math.clz32),
 }
 
-const operators = { ...withN, ...alone }
+const operators = { ...withNum, ...alone }
 
 // An operator by name, ignoring case, or by its index in the table
 const names = named(Object.keys(operators))
@@ -72,10 +72,10 @@ const names = named(Object.keys(operators))
 // An array value has the sum done to each of its numbers, and a bang counts
 // as a 1. The results aren't rounded, or kept to MIDI's range, but a number
 // whose result isn't finite, such as after dividing by 0, is left as it was
-const createMath = (apply: Apply, n?: number): CellRule => cell => {
+const createMath = (apply: Apply, num?: number): CellRule => cell => {
     if (!isMoving(cell)) return cell
     const sum = (value: number) => {
-        const result = apply(value, n)
+        const result = apply(value, num)
         return Number.isFinite(result) ? result : value
     }
     return { ...cell, value: Array.isArray(cell.value) ? cell.value.map(sum) : sum(toNumber(cell.value!)) }
@@ -92,9 +92,9 @@ const operator: Param = {
     editorOnly: true,
 }
 
-const n: Param = {
-    name: "n",
-    about: about.m.params.n,
+const num: Param = {
+    name: "num",
+    about: about.m.params.num,
     fallback: "",
     accepts: text => text === "" || isNumber(text),
 }
@@ -103,11 +103,11 @@ export const math: Operation = {
     name: "math",
     kind: "operator",
     about: about.m.about,
-    params: [operator, n],
-    // n only shows for the operators that take it
+    params: [operator, num],
+    // num only shows for the operators that take it
     shown: ([operator = ""]) => Object.hasOwn(alone, names.nameOf(operator)) ? 1 : 2,
     label: operator => names.nameOf(operator),
-    // The operator has no input, so it still shows while n has one
+    // The operator has no input, so it still shows while num has one
     expandedLabel: operator => names.nameOf(operator),
-    rule: (operator, n) => createMath(operators[names.nameOf(operator)], isNumber(n) ? Number(n) : undefined),
+    rule: (operator, num) => createMath(operators[names.nameOf(operator)], isNumber(num) ? Number(num) : undefined),
 }
