@@ -2,21 +2,15 @@
 
 A formal specification of Teomata's rules.
 
-## Types and definitions
+## Overview
 
-Value: bang | number
-A bang into `h` gives a chord, an array of numbers, which operators work on number by number and `n` plays as a chord.
+Objects accept and emit values: either bangs, numbers, or lists of numbers.
 
-Direction: n | e | s | w | x | y | xy, or its number, from 0 (n) to 6 (xy) in that order, which is kept as its name once the editor leaves it
-Compass points are displayed as arrows (e.g. `←`), `↔` for x, `↕` for y, and `⤡` for xy.
+Objects can be `Generators`, `Operators`, or `Outputs`. `Generators` emit values, `Operators` transform them, and `Outputs` send them as MIDI notes and control changes.
 
-cycle - name for a musical bar without having to specify beats/divisions
+`Generators` emit values at a given rate and direction. Directions are compass points - `n`, `e`, `s`, and `w` - or axes - `x`, `y`, or `xy` for all directions. A `?` after an axis randomly chooses a direction. Compass points are displayed as arrows (e.g. `←`), `↔` for x, `↕` for y, and `⤡` for xy.
 
-In the editor, up and down step an argument that takes one of a list of names (a direction, a wave `type`, a harmony `root` or `type`, a math or logic `operator`, a `mode`, or a count's `reset`) to the next or previous name, wrapping around.
-
-Wherever an argument takes a number, it can be typed as arithmetic, with `+`, `-`, `*`, `/`, `%`, `^` (power) and brackets, and is kept as the result when the editor leaves it, so `B(1/8, e)` is kept as `B(.125, e)`. In the editor, a number that isn't whole shows with 2 decimal places, such as `.50`, apart from the argument under the cursor, which shows in full.
-
-Directions are used by generators and the rotate operator. The compass points are fixed. `x`, `y`, and `xy` pick a random direction along the given axis or axes.
+A `cycle` is a single musical bar. Tempo is set as cycles per second (cps) in the control on the left. `q` stands for quantize, and sets the number of divisions per cycle.
 
 ## Objects
 
@@ -26,48 +20,42 @@ There are three kinds of object:
 - **Operators** (lowercase, no outline): transform incoming values.
 - **Outputs** (lowercase, blue outline): translate values as MIDI notes and control messages, absorbing every value that arrives unless thru. An absorbed value still shows on the square for the tick it arrives, as it does on an input.
 
-A generator and an operator may share a letter. The generator emits values on its own; the operator emits only when it receives one.
-
-Every object takes `mode` as its final argument, after those listed below, or its number in the order below, kept as its name. Generators and operators take `on` or `off`, and outputs `thru` as well. Default: `mode = on`.
+Every object takes `mode` as its final argument. Generators and operators can be `on` or `off`. Outputs also take `thru`.
 
 - **on**: does what it does.
-- **off**: greyed out, its label and outline alike, and does nothing: values pass through it unchanged, and a generator outputs nothing. It keeps its arguments and whatever it remembers (such as a count). Its inputs still work, so a value on its `mode` input can turn it back on.
-- **thru** (outputs only): outlined in dashes, and sends as usual, but lets every value carry on unchanged instead of absorbing it, so `n` plays a note and the value carries on, and a bang carries on through `k`. Its inputs still absorb the numbers that set them.
+- **off**: greyed out, and does nothing: values pass through it unchanged, and a generator outputs nothing. Its inputs still work, so a value on its `mode` input can turn it back on. Useful for conditional logic.
+- **thru** (outputs only): outlined in dashes, and sends as usual, but lets every value carry on unchanged instead of absorbing it.
 
-Shift+Enter moves the selected objects on to the mode after the one under the cursor has, among its own modes, wrapping around. An object selected along with it that doesn't have that mode turns on. An object turns back on when its square is given a different object.
+Press Enter on an object to set its arguments. Press Enter or Esc to return to the main view. 
 
-Cmd/Ctrl+Z undoes the last change to the objects (typing, deleting, cutting, pasting, moving, changing the mode of or expanding them, or editing their arguments, which counts as one change from opening them to closing them), and Cmd/Ctrl+Shift+Z or Cmd/Ctrl+Y redoes it. The last 4 changes can be undone. Undoing puts the selection back where it was before the change.
+Press Shift+Enter to step though an object's modes.
 
 ## Inputs
 
-Alt+Shift+arrow on an object with arguments reaches it out into an input square that way, one more each time, up to one per argument that takes an input; Alt+Shift with the opposite arrow draws one back, and Alt+Shift with an arrow to either side turns the inputs that way, starting again from one. The inputs run in a straight line from the object and stand for its arguments in order, so `W` reached out east twice has `type` then `freq` inputs to its right. Math's and logic's `operator` changes what the object is, so it has no input and is only set in the editor: `m` and `l` reach out to two inputs, for `num` and `mode`. `mode` is always the last input, so `b` reaches out to one, for `mode`, and `W` to five. Each input shows its argument (a number that isn't whole with 2 decimal places, such as `.50`), and the object itself shows its letter while it has inputs (`V` shows `V` rather than its value), apart from `m` and `l`, which still show their operator. The object and its inputs are outlined together in one border, in the object's colour (white for an operator). Inputs only reach onto empty squares, and an object typed, moved or pasted onto one cuts its line short. They move, copy and paste with their object, and go when its square is given a different object.
-
-A number arriving on an input is absorbed and sets that argument, without any output, showing on the input for the tick it arrives; only a value arriving on the object itself does what the object does. A chord gives its first number. A bang steps an argument that takes one of a list of options (a direction, a wave `type`, a harmony `root` or `type`, a `mode`, or a count's `reset`) on to the next, wrapping around, and is absorbed; on any other input it is ignored, passing over. A number argument takes the number, rounded when it only takes whole numbers, and ignores one it can't take (such as a `channel` of 17). An argument that takes a name takes a number as the name's index in its list, rounded and wrapped: a direction from `0` (n) to `6` (xy), a wave `type` from `0` (saw) to `5` (noi), a harmony `root` as semitones above c, from `0` (c) to `11` (b), and harmony `type` by its order in the code. A name typed as a whole number in the editor is kept as the name too, which math's and logic's `operator` take as well, by their order in the code. An argument set this way stays set, and the object carries on from what it remembers, as a count carries on counting. The inputs of an object that's off still take values, so one object can turn another on and off by sending `0` (on) or `1` (off) to its `mode` input, which works from that tick, the number wrapped to the object's modes. A bang moves it on to its next mode, so it toggles an operator or generator on and off.
+Alt+Shift+arrow expands the object to show its arguments on the grid. These can be set by sending values to those squares. Bangs and are ignored and pass through. Arguments with options - e.g. waveforms or directions - are set using an index number.
 
 ## Generators
 
-Shown as a green outlined square. A generator puts each value it outputs on the square next to it in `direction`, where the object on that square (or the input) acts on it on the same tick, so a generator beside an output plays as it fires. A value that would go past the edge of the grid isn't output. Values arriving on a generator pass through.
-
-* **B** `bang(rate, direction)`: output a bang `rate` times per cycle, in `direction`, so `1` is once a cycle, `2` twice and `.5` every other cycle. Defaults: `rate = 1`, `direction = e`. Displayed as `B`.
-* **V** `value(value, rate, direction)`: output `value` `rate` times per cycle, in `direction`. Defaults: `value = 0`, `rate = 1`, `direction = e`. Displayed as the number.
-* **W** `wave(type, freq, rate, direction)`: output the value of a waveform, from 0 to 1, `rate` times per cycle, in `direction`. `type` is `saw`, `sin`, `cos`, `tri`, `sqr` or `noi` (ignoring case), or its number, from `0` (`saw`) to `5` (`noi`), kept as its name, and `freq` is waveform cycles per cycle, so `1` is one complete waveform per cycle and `2` is two. `noi` (noise) is smoothed randomness: a new random value at the start of each of its cycles, eased into the next, different for each square and each run. The waveform is in phase with the transport, starting at the top of the first cycle. Defaults: `type = sin`, `freq = 1`, `rate = 1`, `direction = e`. Displayed as `W`.
+* **B** `bang(rate, direction)`: Emit bangs at a given rate and direction. Defaults: `rate = 1`, `direction = e`. Displayed as `B`.
+* **V** `value(value, rate, direction)`: Emit values at a given rate and direction. Defaults: `value = 0`, `rate = 1`, `direction = e`. Displayed as the number.
+* **W** `wave(type, freq, rate, direction)`: Emit time varying values between 0 and 1, at a given rate and direction. `type` is `saw`, `sin`, `cos`, `tri`, `sqr` or `noi`, or a number, from `0` (`saw`) to `5` (`noi`). `freq` is waveform cycles per cycle. The waveform is in phase with the transport, starting at the top of the first cycle. Defaults: `type = sin`, `freq = 1`, `rate = 1`, `direction = e`. Displayed as `W`.
 
 ## Operators
 
 * **b** `bang()`: convert any incoming value into a bang.
-* **c** `count(reset)`: count each value received, outputting the count so far, so the first outputs `1`. `reset` is `0` or `1`: while it's `1` the count is held at `0`, and values received output `0`. A bang on a `reset` input toggles it. Default: `reset = 0`. Displayed as `c`.
+* **c** `count(reset)`: count each value received, outputting the count so far. `reset` is `0` or `1`: while it's `1` the count is held at `0`, and values received output `0`. Default: `reset = 0`. Displayed as `c`.
 * **d** `die()`: nullify incoming values.
 * **g** `gate(match)`: let through values equal to `match`, unchanged, and nullify everything else. Bangs are 1, and an array passes only when every one of its numbers matches. Default: `match = 1`. Displayed as `g`.
-* **h** `harmony(root, type, octaves)`: populate `values()` with the notes of a chord or scale. `root` can be given as semitones above c, from `0` to `11`. A bang outputs all notes; a number outputs the note at that index, wrapped. The root sits in the octave from middle C, and `octaves` repeats the notes in each octave above. Defaults: `root = c`, `type = ma`, `octaves = 1`. Displayed as root and type, cut to 3 letters, e.g. `Cma` or `F#d`.
+* **h** `harmony(root, type, octaves)`: creates a list of notes of a chord or scale. `root` can be given as semitones above c, from `0` to `11`. A bang outputs all notes; a number outputs the note at that index. Defaults: `root = c`, `type = ma`, `octaves = 1`. Displayed as root and type, cut to 3 letters, e.g. `Cma` or `F#d`.
 * **m** `math(operator, num)`: transform incoming values using math operators. Bangs are 1. Defaults: `operator = +`, `num` empty (the value is left alone). Displayed as the operator.
 * **l** `logic(operator, num)`: transform incoming values using logical operators. Bangs are true. Passing values become `1`, failing ones `0`. Defaults: `operator = ==`, `num = 0`. Displayed as the operator.
 * **p** `print()`: print to console.
 * **r** `rotate(direction)`: turn the incoming value in `direction`. Default: `direction = x`. Displayed as the unicode direction.
 * **s** `scale(lo, hi, inLo, inHi)`: map incoming values from `inLo` to `inHi` onto `lo` to `hi`. Bangs are 1, and each number of an array is scaled. Values outside the incoming range carry on past the ends. Defaults: `lo = 0`, `hi = 127`, `inLo = 0`, `inHi = 1`. Displayed as `s`.
-* **v** `value(value)`: uses `values()`. Any incoming number or bang outputs the value. Default: `value = 0`. Displayed as the number.
+* **v** `value(value)`: Any incoming number or bang outputs the value. Default: `value = 0`. Displayed as the number.
 * **w** `wave(type, freq)`: transform any bang or non-zero value into the value of a waveform, from 0 to 1, at that point in time, as **W** does. Zero passes unchanged. Defaults: `type = sin`, `freq = 1`. Displayed as the type, by name.
 
 ## Outputs
 
 * **n** `note(vel, dur, device, channel)`: send incoming numbers as MIDI notes at velocity `vel` (0 to 127), lasting `dur` seconds, absorbing every value unless thru. Bangs are ignored; numbers are rounded and wrapped to 0 to 127. Defaults: `vel = 100`, `dur = .5`, `device = 0`, `channel = 1`. Displayed as `n`.
-* **k** `knob(cc, device, channel)`: send incoming numbers as CC messages, absorbing every value unless thru. Bangs are ignored; numbers are rounded and wrapped to 0 to 127, and a chord sends its first number. Defaults: `cc = 1`, `device = 0`, `channel = 1`. Displayed as `cc<number>`, e.g. `cc7`.
+* **k** `knob(cc, device, channel)`: send incoming numbers as CC messages, absorbing every value unless thru. Bangs are ignored; numbers are rounded and wrapped to 0 to 127, and a list sends its first number. Defaults: `cc = 1`, `device = 0`, `channel = 1`. Displayed as `cc<number>`, e.g. `cc7`.

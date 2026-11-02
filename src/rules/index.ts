@@ -1,6 +1,6 @@
 import type { Operation, GridRule, CellRule, Kind, Input, Param } from "./types"
 import type { Cell } from "../stores/cells"
-import { argFrom, isModeParam, isMoving, modeParam, outputModeParam, stepOption } from "./shared"
+import { argFrom, isModeParam, isMoving, modeParam, outputModeParam } from "./shared"
 import { BANG, step } from "../lib/utils"
 import { emit } from "./events"
 import { move } from "./move"
@@ -134,25 +134,20 @@ export const labelFor = (i: number, letter: string, size: number, given?: string
 
 // Takes the moving cells with numbers on the inputs of every operation, whatever
 // its mode, so one that's off can be turned back on, each setting its input's
-// argument to the number it brings, when the param takes it. A bang steps a
-// param with options to the next one, and passes over any other input. Gives
-// the cells left and the arguments, queueing each one set for the store, and
-// each cell taken to show for the tick
+// argument to the number it brings, when the param takes it. Bangs pass over
+// every input, setting nothing. Gives the cells left and the arguments,
+// queueing each one set for the store, and each cell taken to show for the tick
 const takeInputs = (
     cells: Cell[], size: number, letters: string[], given: string[][], inputs: Map<number, Input>,
 ) => {
     const args = [...given]
     const left = cells.map((cell, i) => {
         const input = inputs.get(i)
-        if (!input || !isMoving(cell)) return cell
+        if (!input || !isMoving(cell) || cell.value === BANG) return cell
         const { owner, k } = input
         const param = paramsFor(letters[owner], size)[k]
-        if (!param || (cell.value === BANG && !param.options)) return cell
-        const value = cell.value!
-        const current = argsFor(letters[owner], size, args[owner])[k]
-        const text = value === BANG
-            ? stepOption(param.options!, param.settle?.(current) ?? current, 1)
-            : argFrom(param, value)
+        if (!param) return cell
+        const text = argFrom(param, cell.value!)
         if (text !== undefined) {
             args[owner] = argsFor(letters[owner], size, args[owner])
             args[owner][k] = text

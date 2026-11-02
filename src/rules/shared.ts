@@ -27,13 +27,6 @@ export const named = (list: string[]) => {
     }
 }
 
-// The option the given number of places on from the argument, wrapping around
-// at either end. An argument that isn't one of them steps to the first or last
-export const stepOption = (options: string[], text: string, by: 1 | -1) => {
-    const at = options.indexOf(text.toLowerCase())
-    return options[at < 0 ? (by > 0 ? 0 : options.length - 1) : (at + by + options.length) % options.length]
-}
-
 // The argument a number arriving on a param's input gives it, or undefined
 // when the param doesn't take it. An array gives its first number
 export const argFrom = (param: Param, value: number | number[]) => {

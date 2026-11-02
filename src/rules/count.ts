@@ -24,8 +24,7 @@ const reset: Param = {
     about: about.c.params.reset,
     fallback: "0",
     accepts: text => text === "0" || text === "1",
-    options: ["0", "1"],
-}
+    options: ["0", "1"],}
 
 export const count: Operation = {
     name: "count",

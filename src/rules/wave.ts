@@ -75,8 +75,6 @@ const typeParam = (about: string): Param => ({
 
 const freqParam = (about: string): Param => ({ name: "freq", about, fallback: "1", accepts: isNumber })
 
-// Puts out a new cell with the waveform's value heading in the given direction,
-// rate times per cycle, for applyRules to put on the neighbouring square
 const createWaveGenerator = (type: string, freq: number, rate: number, to: heading): CellRule => {
     const wave = createWave(type, freq)
     const rule: CellRule = (_, tick) =>

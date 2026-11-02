@@ -1,29 +1,24 @@
-// The text shown for each operation and its params in the instructions,
-// gathered here so it can be edited as a whole. It is keyed by letter, as a
-// generator and an operator can share a name. Each operation's file takes its
-// text from here, by its params' names
-
 const direction = "n, e, s or w. x, y or xy randomly choose a direction on the axis/axes. Or a number from 0 (n) to 6 (xy)."
-const rate = "Outputs per cycle. 1 outputs once per cycle, 2 twice per cycle, 0.5 every other cycle, etc."
+const rate = "Number of values emitted per cycle."
 const device = "The MIDI output by its number, counting from 0."
 const channel = "A MIDI channel from 1 to 16."
 const type = "saw, sin, cos, tri, sqr, or noi, or a number from 0 (saw) to 5 (noi)."
-const freq = "Waveform frequency relative to cps."
+const freq = "Waveform frequency, relative to global cps."
 export const mode = "on or off, or a number, 0 (on) or 1 (off). Off lets values pass unchanged. Shift+Enter toggles the mode."
 export const outputMode = "on, off or thru, or a number from 0 (on) to 2 (thru). Off sends no output. Thru sends as usual, but lets values through. Shift+Enter steps through the modes."
 
 export const about = {
     // Generators
     B: {
-        about: "Output a bang rate times per cycle, in a given direction. Values arriving pass through.",
+        about: "Emit bangs at a given rate and direction.",
         params: { rate, direction },
     },
     V: {
-        about: "Output a value rate times per cycle, in a given direction. Values arriving pass through.",
+        about: "Emit values at a given rate and direction.",
         params: { value: "Any number.", rate, direction },
     },
     W: {
-        about: "Output the current position of a waveform, from 0 to 1, rate times per cycle, in a given direction. Values arriving pass through.",
+        about: "Emit time varying values between 0 and 1, at a given rate and direction.",
         params: { type, freq, rate, direction },
     },
     // Operators
