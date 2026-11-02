@@ -27,7 +27,7 @@
         <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
         <dd class="about" onmousedown={(e) => e.preventDefault()}>
           <p>{@html about}</p>
-          {#each rest ? [...params, rest] : params as param (param.name)}
+          {#each rest ? [...signature(params), rest, ...params.filter(isModeParam)] : params as param (param.name)}
             <p><span class="param">{param.name}</span>: {@html param.about}</p>
           {/each}
         </dd>

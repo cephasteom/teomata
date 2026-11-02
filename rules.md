@@ -4,7 +4,7 @@ A formal specification of Teomata's rules.
 
 ## Overview
 
-Objects accept and emit values: either bangs, numbers, or lists of numbers.
+Objects accept and emit values: either bangs, numbers, or arrays (lists) of numbers.
 
 Objects can be `Generators`, `Operators`, or `Outputs`. `Generators` emit values, `Operators` transform them, and `Outputs` send them as MIDI notes and control changes.
 
@@ -42,11 +42,12 @@ Alt+Shift+arrow expands the object to show its arguments on the grid. These can 
 
 ## Operators
 
+* **a** `array(...values)`: creates an array of the values, each any number, one per argument; empty ones are left out. A bang or an array outputs all the values; a number outputs the value at that index, rounded and wrapped. A single value is output as it is. Its inputs expand to one per value given, then `mode`. Default: no values (values pass unchanged). Displayed as `a`.
 * **b** `bang()`: convert any incoming value into a bang.
 * **c** `count(reset)`: count each value received, outputting the count so far. `reset` is `0` or `1`: while it's `1` the count is held at `0`, and values received output `0`. Default: `reset = 0`. Displayed as `c`.
 * **d** `die()`: nullify incoming values.
 * **g** `gate(match)`: let through values equal to `match`, unchanged, and nullify everything else. Bangs are 1, and an array passes only when every one of its numbers matches. Default: `match = 1`. Displayed as `g`.
-* **h** `harmony(root, type, octaves)`: creates a list of notes of a chord or scale. `root` can be given as semitones above c, from `0` to `11`. A bang outputs all notes; a number outputs the note at that index. Defaults: `root = c`, `type = ma`, `octaves = 1`. Displayed as root and type, cut to 3 letters, e.g. `Cma` or `F#d`.
+* **h** `harmony(root, type, octaves)`: creates an array of notes of a chord or scale. `root` can be given as semitones above c, from `0` to `11`. A bang outputs all notes; a number outputs the note at that index. Defaults: `root = c`, `type = ma`, `octaves = 1`. Displayed as root and type, cut to 3 letters, e.g. `Cma` or `F#d`.
 * **m** `math(operator, num)`: transform incoming values using math operators. Bangs are 1. Defaults: `operator = +`, `num` empty (the value is left alone). Displayed as the operator.
 * **l** `logic(operator, num)`: transform incoming values using logical operators. Bangs are true. Passing values become `1`, failing ones `0`. Defaults: `operator = ==`, `num = 0`. Displayed as the operator.
 * **p** `print()`: print to console.
@@ -58,4 +59,4 @@ Alt+Shift+arrow expands the object to show its arguments on the grid. These can 
 ## Outputs
 
 * **n** `note(vel, dur, device, channel)`: send incoming numbers as MIDI notes at velocity `vel` (0 to 127), lasting `dur` seconds, absorbing every value unless thru. Bangs are ignored; numbers are rounded and wrapped to 0 to 127. Defaults: `vel = 100`, `dur = .5`, `device = 0`, `channel = 1`. Displayed as `n`.
-* **k** `knob(cc, device, channel)`: send incoming numbers as CC messages, absorbing every value unless thru. Bangs are ignored; numbers are rounded and wrapped to 0 to 127, and a list sends its first number. Defaults: `cc = 1`, `device = 0`, `channel = 1`. Displayed as `cc<number>`, e.g. `cc7`.
+* **k** `knob(cc, device, channel)`: send incoming numbers as CC messages, absorbing every value unless thru. Bangs are ignored; numbers are rounded and wrapped to 0 to 127, and an array sends its first number. Defaults: `cc = 1`, `device = 0`, `channel = 1`. Displayed as `cc<number>`, e.g. `cc7`.

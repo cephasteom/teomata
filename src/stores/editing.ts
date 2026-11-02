@@ -1,7 +1,7 @@
 import { writable, derived, get } from "svelte/store"
 import type { direction } from "./cells"
 import { SIZE } from "./global"
-import { operations, args, setArg, holdOperations, releaseOperations } from "./operations"
+import { operations, args, setArg, holdOperations, releaseOperations, fitExpansions } from "./operations"
 import { cursor, anchor, placeCursor } from "./cursor"
 import { snapshot, record, type Snapshot } from "./history"
 import { argsFor, paramsFor, shownArgsFor } from "../rules"
@@ -129,6 +129,8 @@ export const closeArgs = () => {
     const square = get(editing)
     editing.set(null)
     releaseOperations()
+    // Erasing an array's values takes their inputs with them, in the same change
+    fitExpansions()
     if (beforeEdit) record(beforeEdit)
     beforeEdit = null
     if (square === null) return

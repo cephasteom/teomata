@@ -22,6 +22,10 @@ export const about = {
         params: { type, freq, rate, direction },
     },
     // Operators
+    a: {
+        about: "Store an array of values. A bang outputs all the values, a number outputs the value at that index.",
+        params: { values: "Any numbers, one per square. Empty ones are left out." },
+    },
     b: {
         about: "Convert any incoming value into a bang.",
         params: {},

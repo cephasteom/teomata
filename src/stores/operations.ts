@@ -47,11 +47,11 @@ export const inputSquares = (i: number, { direction, length }: Expansion) => {
 }
 
 // The operation and param each input square belongs to, keyed by square
-export const inputs = derived([expansions, operations], ([$expansions, $operations]) => {
+export const inputs = derived([expansions, operations, args], ([$expansions, $operations, $args]) => {
     const map = new Map<number, Input>()
     $expansions.forEach((expansion, owner) => {
         if (!expansion) return
-        const params = inputParamsFor($operations[owner], SIZE)
+        const params = inputParamsFor($operations[owner], SIZE, $args[owner])
         inputSquares(owner, expansion).forEach((square, j) => {
             if (params[j] !== undefined) map.set(square, { owner, k: params[j] })
         })
@@ -61,14 +61,15 @@ export const inputs = derived([expansions, operations], ([$expansions, $operatio
 
 // Cuts every expansion short where its inputs would run past the edge, onto
 // an operation, or onto another operation's inputs, the operation nearer the
-// grid's top left keeping them, or past the operation's params. Drops those
-// left with none, or on a square without an operation
+// grid's top left keeping them, or past the operation's params, such as an
+// array's values once some are erased. Drops those left with none, or on a
+// square without an operation
 export const fitExpansions = () => {
-    const $operations = get(operations)
+    const [$operations, $args] = [get(operations), get(args)]
     const taken = new Set<number>()
     const fitted = get(expansions).map((expansion, i) => {
         if (!expansion) return null
-        const most = Math.min(expansion.length, inputParamsFor($operations[i], SIZE).length)
+        const most = Math.min(expansion.length, inputParamsFor($operations[i], SIZE, $args[i]).length)
         const squares = inputSquares(i, { ...expansion, length: most })
         const free = squares.findIndex(square => $operations[square] || taken.has(square))
         const length = free < 0 ? squares.length : free
@@ -85,10 +86,11 @@ export const fitExpansions = () => {
 // Reaches the operation on the square out one more input towards the
 // direction, or draws it back one when the direction is the opposite of its
 // own. Turning to either side starts its inputs afresh that way, with one.
-// It only grows onto a free square, up to one input for each param that takes one
+// It only grows onto a free square, up to one input for each param that takes
+// one, which for an array is each value given and its mode
 export const expand = (square: number, direction: direction) => {
     const $operations = get(operations)
-    const most = inputParamsFor($operations[square], SIZE).length
+    const most = inputParamsFor($operations[square], SIZE, get(args)[square]).length
     const current = get(expansions)[square]
     const own = new Set(current ? inputSquares(square, current) : [])
     let next: Expansion | null

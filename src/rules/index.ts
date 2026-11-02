@@ -9,6 +9,7 @@ import { die } from "./die"
 import { bang, bangGenerator } from "./bang"
 import { value, valueGenerator } from "./value"
 import { harmony } from "./harmony"
+import { array } from "./array"
 import { count } from "./count"
 import { gate } from "./gate"
 import { math } from "./math"
@@ -31,6 +32,7 @@ const operations: Record<string, Operation> = Object.fromEntries(Object.entries(
     B: bangGenerator,
     V: valueGenerator,
     W: waveGenerator,
+    a: array,
     b: bang,
     c: count,
     d: die,
@@ -64,12 +66,14 @@ export const kindOf = (letter: string) => operationFor(letter)?.kind
 
 // The params an operation takes on a grid of the given size, which is none for
 // operations without a rule. A rest param repeats after the others to fill
-// the rest of the row beside the operation
+// the rest of the row beside the operation, before the mode, which stays last
 export const paramsFor = (letter: string, size: number): Param[] => {
     const operation = operationFor(letter)
     if (!operation) return []
     const { params, rest } = operation
-    return rest ? [...params, ...Array(Math.max(0, size - 1 - params.length)).fill(rest)] : params
+    if (!rest) return params
+    const [own, mode] = [params.slice(0, -1), params[params.length - 1]]
+    return [...own, ...Array(Math.max(0, size - 1 - params.length)).fill(rest), mode]
 }
 
 // The indices of the params the argument editor shows for the arguments: those
@@ -80,9 +84,14 @@ export const shownArgsFor = (letter: string, size: number, given: string[] = [])
 }
 
 // The indices of the params an operation's inputs set, in order: every param
-// but those only set in the argument editor
-export const inputParamsFor = (letter: string, size: number) =>
-    paramsFor(letter, size).flatMap((param, k) => param.editorOnly ? [] : [k])
+// but those only set in the argument editor, and of a rest param, only as far
+// as the last one given, so the mode's input comes straight after them
+export const inputParamsFor = (letter: string, size: number, given: string[] = []) => {
+    const params = paramsFor(letter, size)
+    const rest = operationFor(letter)?.rest
+    const last = params.findLastIndex((param, k) => param === rest && (given[k] ?? "") !== "")
+    return params.flatMap((param, k) => param.editorOnly || (param === rest && k > last) ? [] : [k])
+}
 
 // The given arguments for an operation, with defaults standing in for any
 // missing or invalid ones, such as an argument that was erased
