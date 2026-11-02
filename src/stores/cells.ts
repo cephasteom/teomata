@@ -14,6 +14,8 @@ export interface Cell {
     // A cell without a value is empty
     value?: Value
     direction?: direction
+    // The other directions it splits off in, as copies of itself, on its next step
+    split?: direction[]
 }
 
 const randomCell = (): Cell => ({

@@ -160,16 +160,19 @@ const takeInputs = (
 }
 
 // Puts each cell the generators that aren't off put out on the square next to them in
-// its direction, over any cell there, so the operation there acts on it on
+// its direction, and a copy of it on the square next to them in each direction
+// it splits off in, over any cell there, so the operation there acts on it on
 // the tick it's put out. One that would go past the edge isn't put out
 const generate = (cells: Cell[], size: number, letters: string[], args: string[][], tick: number) => {
     const next = [...cells]
     letters.forEach((letter, i) => {
         if (kindOf(letter) !== "generator" || modeOf(letter, size, args[i]) === "off") return
-        const cell = ruleFor(i, letter, size, args[i])({}, tick)
+        const { split, ...cell } = ruleFor(i, letter, size, args[i])({}, tick)
         if (!isMoving(cell)) return
-        const to = step(i, cell.direction!, size)
-        if (to !== undefined) next[to] = cell
+        for (const direction of [cell.direction!, ...split ?? []]) {
+            const to = step(i, direction, size)
+            if (to !== undefined) next[to] = { ...cell, direction }
+        }
     })
     return next
 }

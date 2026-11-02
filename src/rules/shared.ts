@@ -39,8 +39,8 @@ export const argFrom = (param: Param, value: number | number[]) => {
 
 // The params several operations share, each with its own about text
 
-// A direction: n, e, s or w, or x, y or xy for a random one along that axis or
-// either, or its number from 0 to 6
+// A direction: n, e, s or w, or x, y or xy for every one along that axis or
+// both, or with a ? for a random one of them, or its number from 0 to 9
 export const directionParam = (about: string, fallback = "e"): Param => ({
     name: "direction",
     about,

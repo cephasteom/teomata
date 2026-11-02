@@ -1,4 +1,4 @@
-import { BANG, headingOf, pickDirection, type heading } from "../lib/utils"
+import { BANG, headingOf, aim, type heading } from "../lib/utils"
 import type { CellRule, Operation, Param } from "./types"
 import { rateParam, directionParam, fires, isMoving, isNumber } from "./shared"
 import { about } from "./instructions"
@@ -20,7 +20,7 @@ const valueParam = (about: string): Param => ({ name: "value", about, fallback: 
 // Puts out a new cell with the value heading in the given direction, rate times
 // per cycle, for applyRules to put on the neighbouring square
 const createValueGenerator = (value: number, rate: number, to: heading): CellRule => (_, tick) =>
-    fires(rate, tick) ? { value, direction: pickDirection(to) } : {}
+    fires(rate, tick) ? { value, ...aim(to) } : {}
 
 export const valueGenerator: Operation = {
     name: "value",

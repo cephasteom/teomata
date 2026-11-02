@@ -1,4 +1,4 @@
-const direction = "n, e, s or w. x, y or xy randomly choose a direction on the axis/axes. Or a number from 0 (n) to 6 (xy)."
+const direction = "n, e, s, w, x, y, xy, x?, y? or xy?. Or a number from 0 (n) to 9 (xy?)."
 const rate = "Number of values emitted per cycle."
 const device = "The MIDI output by its number, counting from 0."
 const channel = "A MIDI channel from 1 to 16."
@@ -66,7 +66,7 @@ export const about = {
         params: {},
     },
     r: {
-        about: "Turn incoming values to travel in a given direction.",
+        about: "Turn incoming values to travel in a given direction, splitting them along an axis.",
         params: { direction },
     },
     s: {

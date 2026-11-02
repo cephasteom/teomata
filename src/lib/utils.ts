@@ -11,28 +11,40 @@ export const opposite: Record<direction, direction> = { n: 's', s: 'n', e: 'w', 
 
 export const isDirection = (letter: string): letter is direction => Object.hasOwn(offsets, letter)
 
-// A direction as given to an operation: a compass point, or x, y or xy for a
-// random direction along that axis, or along either
-export type heading = direction | 'x' | 'y' | 'xy'
-const headings: Record<heading, direction[]> = {
+// A direction as given to an operation: a compass point, or x, y or xy for
+// every direction along that axis, or along both, or with a ? for one of them
+// picked at random
+export type heading = direction | 'x' | 'y' | 'xy' | 'x?' | 'y?' | 'xy?'
+const axes: Record<string, direction[]> = {
     n: ['n'], e: ['e'], s: ['s'], w: ['w'],
     x: ['e', 'w'], y: ['n', 's'], xy: ['n', 'e', 's', 'w'],
 }
-export const isHeading = (text: string): text is heading => Object.hasOwn(headings, text)
-
-// A heading as typed, ignoring case, or by its number, from 0 (n) to 6 (xy),
-// in the order n, e, s, w, x, y, xy
-export const headingOf = (text: string) =>
-    /^\d+$/.test(text) ? Object.keys(headings)[Number(text)] ?? text : text.toLowerCase()
-
-// A direction from the heading, picked at random for an axis
-export const pickDirection = (to: heading): direction => {
-    const ways = headings[to]
-    return ways[Math.floor(Math.random() * ways.length)]
-}
 
 // How each heading is shown on the grid
-export const arrows: Record<heading, string> = { n: '↑', e: '→', s: '↓', w: '←', x: '↔', y: '↕', xy: '⤡' }
+export const arrows: Record<heading, string> = {
+    n: '↑', e: '→', s: '↓', w: '←', x: '↔', y: '↕', xy: '⤡', 'x?': '↔?', 'y?': '↕?', 'xy?': '⤡?',
+}
+
+export const isHeading = (text: string): text is heading => Object.hasOwn(arrows, text)
+
+// A heading as typed, ignoring case, or by its number, from 0 (n) to 9 (xy?),
+// in the order n, e, s, w, x, y, xy, x?, y?, xy?
+export const headingOf = (text: string) =>
+    /^\d+$/.test(text) ? Object.keys(arrows)[Number(text)] ?? text : text.toLowerCase()
+
+// The directions a heading sends a cell in: every one along its axis or axes,
+// or with a ?, one of them picked at random
+export const directionsOf = (to: heading): direction[] => {
+    const ways = axes[to.replace('?', '')]
+    return to.endsWith('?') ? [ways[Math.floor(Math.random() * ways.length)]] : ways
+}
+
+// A cell's direction for the heading, with the others it splits off in, as
+// copies of itself, on its next step
+export const aim = (to: heading): { direction: direction, split?: direction[] } => {
+    const [direction, ...split] = directionsOf(to)
+    return split.length ? { direction, split } : { direction }
+}
 
 // Cells hold a number, usually whole, which can go past MIDI's 0 to 127, or below 0
 // Random cells start inside that range
@@ -47,7 +59,7 @@ export const toNumber = (value: number | Bang) => value === BANG ? 1 : value
 
 export const randomValue = () => Math.floor(Math.random() * (MAX_VALUE + 1))
 
-export const randomDirection = () => pickDirection('xy')
+export const randomDirection = () => directionsOf('xy?')[0]
 
 // Index of the square one step from i in the given direction, or undefined
 // when that would go past the edge of the grid

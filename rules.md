@@ -50,7 +50,7 @@ Alt+Shift+arrow expands the object to show its arguments on the grid. These can 
 * **m** `math(operator, num)`: transform incoming values using math operators. Bangs are 1. Defaults: `operator = +`, `num` empty (the value is left alone). Displayed as the operator.
 * **l** `logic(operator, num)`: transform incoming values using logical operators. Bangs are true. Passing values become `1`, failing ones `0`. Defaults: `operator = ==`, `num = 0`. Displayed as the operator.
 * **p** `print()`: print to console.
-* **r** `rotate(direction)`: turn the incoming value in `direction`. Default: `direction = x`. Displayed as the unicode direction.
+* **r** `rotate(direction)`: turn the incoming value in `direction`. An axis splits it into a copy for each of its directions. Default: `direction = x`. Displayed as the unicode direction.
 * **s** `scale(lo, hi, inLo, inHi)`: map incoming values from `inLo` to `inHi` onto `lo` to `hi`. Bangs are 1, and each number of an array is scaled. Values outside the incoming range carry on past the ends. Defaults: `lo = 0`, `hi = 127`, `inLo = 0`, `inHi = 1`. Displayed as `s`.
 * **v** `value(value)`: Any incoming number or bang outputs the value. Default: `value = 0`. Displayed as the number.
 * **w** `wave(type, freq)`: transform any bang or non-zero value into the value of a waveform, from 0 to 1, at that point in time, as **W** does. Zero passes unchanged. Defaults: `type = sin`, `freq = 1`. Displayed as the type, by name.
