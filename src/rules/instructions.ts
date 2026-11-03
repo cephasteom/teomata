@@ -68,8 +68,8 @@ export const about = {
     o: {
         about: "Loop incoming values. Plays back the values recorded on the ticks they arrived on, letting nothing else through while not recording.",
         params: {
-            record: "0 or 1. While 1, incoming values pass through and are recorded.",
-            reset: "How many cycles between clears of the loop, on the first division of the cycle, or 0 for none. A bang on its input clears the loop at once.",
+            record: "0 or 1. While 1, incoming values pass through and are recorded. A bang on its input records for one loop length.",
+            reset: "Clear the loop every n cycles. A bang on its input clears the loop.",
             length: "The length of the loop, in cycles.",
         },
     },

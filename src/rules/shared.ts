@@ -3,7 +3,7 @@ import { q } from "../stores/global"
 import { arrows, headingOf, isHeading } from "../lib/utils"
 import { formatArg } from "../lib/arithmetic"
 import { mode, outputMode } from "./instructions"
-import type { Param } from "./types"
+import type { Context, Param } from "./types"
 
 export const isNumber = (text: string) => text !== "" && Number.isFinite(Number(text))
 
@@ -85,7 +85,7 @@ export const resetParam = (about: string): Param => ({
 
 // Whether a rule resets on the tick, every so many cycles from the first
 // division of the cycle, or when a bang arrives on its reset input
-export const resets = (every: number, tick: number, bangs: Set<string>) =>
+export const resets = (every: number, tick: number, { bangs }: Context) =>
     bangs.has("reset") || (every > 0 && tick % Math.max(1, Math.round(every * get(q))) === 0)
 
 // The final param of every operation, for how it treats the values that

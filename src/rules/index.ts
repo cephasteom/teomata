@@ -1,4 +1,4 @@
-import type { Operation, GridRule, CellRule, Kind, Input, Param } from "./types"
+import type { Operation, GridRule, CellRule, Context, Kind, Input, Param } from "./types"
 import type { Cell } from "../stores/cells"
 import { argFrom, isModeParam, isMoving, modeParam, outputModeParam } from "./shared"
 import { BANG, step } from "../lib/utils"
@@ -153,7 +153,8 @@ export const labelFor = (i: number, letter: string, size: number, given?: string
 // its mode, so one that's off can be turned back on, each setting its input's
 // argument to the number it brings, when the param takes it. Bangs pass over
 // every input, setting nothing, apart from those of params that take a bang,
-// which are taken and added to the names of the params banged on the square.
+// which are taken and added to the names of the params banged on the square,
+// setting the argument the param's fromBang gives, if any.
 // Gives the cells left and the arguments, queueing each one set for the
 // store, and each cell taken to show for the tick
 const takeInputs = (
@@ -167,13 +168,9 @@ const takeInputs = (
         const { owner, k } = input
         const param = paramsFor(letters[owner], size)[k]
         if (!param) return cell
-        if (cell.value === BANG) {
-            if (!param.bang) return cell
-            bangs.set(owner, (bangs.get(owner) ?? new Set()).add(param.name))
-            emit({ type: "absorb", square: i, cell })
-            return {}
-        }
-        const text = argFrom(param, cell.value!)
+        if (cell.value === BANG && !param.bang) return cell
+        if (cell.value === BANG) bangs.set(owner, (bangs.get(owner) ?? new Set()).add(param.name))
+        const text = cell.value === BANG ? param.fromBang : argFrom(param, cell.value!)
         if (text !== undefined) {
             args[owner] = argsFor(letters[owner], size, args[owner])
             args[owner][k] = text
@@ -185,6 +182,17 @@ const takeInputs = (
     return { cells: left, args }
 }
 
+// What the rule on a square is given beside its cell: the params banged on the
+// tick, and a way to set its own arguments by param name, queued for the
+// store as an input's are, so they show and take effect from the next tick
+const contextFor = (i: number, letter: string, size: number, bangs = new Set<string>()): Context => ({
+    bangs,
+    set: (name, text) => {
+        const k = paramsFor(letter, size).findIndex(param => param.name === name)
+        if (k >= 0) emit({ type: "arg", square: i, k, text })
+    },
+})
+
 // Puts each cell the generators that aren't off put out on the square next to them in
 // its direction, and a copy of it on the square next to them in each direction
 // it splits off in, over any cell there, so the operation there acts on it on
@@ -193,7 +201,7 @@ const generate = (cells: Cell[], size: number, letters: string[], args: string[]
     const next = [...cells]
     letters.forEach((letter, i) => {
         if (kindOf(letter) !== "generator" || modeOf(letter, size, args[i]) === "off") return
-        const { split, ...cell } = ruleFor(i, letter, size, args[i])({}, tick, new Set())
+        const { split, ...cell } = ruleFor(i, letter, size, args[i])({}, tick, contextFor(i, letter, size))
         if (!isMoving(cell)) return
         for (const direction of [cell.direction!, ...split ?? []]) {
             const to = step(i, direction, size)
@@ -222,7 +230,7 @@ const applyRules: GridRule = (given, size, letters, givenArgs, inputs, tick) => 
         }
         const mode = modeOf(letters[i], size, args[i])
         if (mode === "off" || kindOf(letters[i]) === "generator") return cell
-        const next = ruleFor(i, letters[i], size, args[i])(cell, tick, bangs.get(i) ?? new Set())
+        const next = ruleFor(i, letters[i], size, args[i])(cell, tick, contextFor(i, letters[i], size, bangs.get(i)))
         // A thru output does what it does, but lets through what it would absorb
         if (mode === "thru" && cell.value !== undefined && next.value === undefined) return cell
         // An output's cells still show on it for the tick they're absorbed

@@ -9,8 +9,8 @@ import { about } from "./instructions"
 // goes back to 0 when the transport stops
 const createCount = (every: number): CellRule => {
     let count = 0
-    const rule: CellRule = (cell, tick, bangs) => {
-        if (resets(every, tick, bangs)) count = 0
+    const rule: CellRule = (cell, tick, context) => {
+        if (resets(every, tick, context)) count = 0
         if (!isMoving(cell)) return cell
         return { ...cell, value: ++count }
     }
