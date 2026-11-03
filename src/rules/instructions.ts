@@ -32,7 +32,7 @@ export const about = {
     },
     c: {
         about: "Count each incoming value, outputting the count so far.",
-        params: { reset: "0 or 1. While 1, the count is held at 0." },
+        params: { reset: "How many cycles between resets of the count to 0, on the first division of the cycle, or 0 for none. A bang on its input resets the count at once." },
     },
     d: {
         about: "Nullify incoming values.",
@@ -63,6 +63,14 @@ export const about = {
         params: {
             operator: "+, -, *, /, %, ^, & or |, or any function from the JS Math object, such as min or sqrt.",
             num: "Any number.",
+        },
+    },
+    o: {
+        about: "Loop incoming values. Plays back the values recorded on the ticks they arrived on, letting nothing else through while not recording.",
+        params: {
+            record: "0 or 1. While 1, incoming values pass through and are recorded.",
+            reset: "How many cycles between clears of the loop, on the first division of the cycle, or 0 for none. A bang on its input clears the loop at once.",
+            length: "The length of the loop, in cycles.",
         },
     },
     p: {

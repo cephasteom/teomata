@@ -1,16 +1,18 @@
-import type { CellRule, Operation, Param } from "./types"
-import { isMoving } from "./shared"
+import type { CellRule, Operation } from "./types"
+import { isMoving, resetParam, resets } from "./shared"
 import { about } from "./instructions"
 
-// Counts each value arriving and gives it the count so far. While reset is on
-// the count is held at 0. It carries on from the count built before it when
-// reset changes, and goes back to 0 when the transport stops
-const createCount = (reset: boolean): CellRule => {
+// Counts each value arriving and gives it the count so far. The count goes
+// back to 0 every reset cycles, on the first division of the cycle, and when
+// a bang arrives on its reset input, before it counts what arrives. It
+// carries on from the count built before it when its arguments change, and
+// goes back to 0 when the transport stops
+const createCount = (every: number): CellRule => {
     let count = 0
-    const rule: CellRule = cell => {
-        if (reset) count = 0
-        else if (isMoving(cell)) count++
-        return isMoving(cell) ? { ...cell, value: count } : cell
+    const rule: CellRule = (cell, tick, bangs) => {
+        if (resets(every, tick, bangs)) count = 0
+        if (!isMoving(cell)) return cell
+        return { ...cell, value: ++count }
     }
     rule.keep = () => count
     rule.carry = kept => {
@@ -23,17 +25,10 @@ const createCount = (reset: boolean): CellRule => {
     return rule
 }
 
-const reset: Param = {
-    name: "reset",
-    about: about.c.params.reset,
-    fallback: "0",
-    accepts: text => text === "0" || text === "1",
-    options: ["0", "1"],}
-
 export const count: Operation = {
     name: "count",
     kind: "operator",
     about: about.c.about,
-    params: [reset],
-    rule: reset => createCount(reset === "1"),
+    params: [resetParam(about.c.params.reset)],
+    rule: reset => createCount(Number(reset)),
 }

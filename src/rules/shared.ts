@@ -73,6 +73,21 @@ export const channelParam = (about: string): Param => ({
     accepts: text => isWhole(text) && Number(text) >= 1 && Number(text) <= 16,
 })
 
+// How many cycles between resets, from the first division of the cycle, or 0
+// for none. A bang on its input resets on the tick it arrives
+export const resetParam = (about: string): Param => ({
+    name: "reset",
+    about,
+    fallback: "0",
+    accepts: text => isNumber(text) && Number(text) >= 0,
+    bang: true,
+})
+
+// Whether a rule resets on the tick, every so many cycles from the first
+// division of the cycle, or when a bang arrives on its reset input
+export const resets = (every: number, tick: number, bangs: Set<string>) =>
+    bangs.has("reset") || (every > 0 && tick % Math.max(1, Math.round(every * get(q))) === 0)
+
 // The final param of every operation, for how it treats the values that
 // arrive. A number on its input picks by index, so one operation can turn
 // another on and off

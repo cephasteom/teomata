@@ -14,6 +14,7 @@ import { count } from "./count"
 import { gate } from "./gate"
 import { math } from "./math"
 import { logic } from "./logic"
+import { loop } from "./loop"
 import { print } from "./print"
 import { note } from "./note"
 import { knob } from "./knob"
@@ -40,6 +41,7 @@ const operations: Record<string, Operation> = Object.fromEntries(Object.entries(
     h: harmony,
     l: logic,
     m: math,
+    o: loop,
     p: print,
     r: rotate,
     s: scale,
@@ -150,18 +152,27 @@ export const labelFor = (i: number, letter: string, size: number, given?: string
 // Takes the moving cells with numbers on the inputs of every operation, whatever
 // its mode, so one that's off can be turned back on, each setting its input's
 // argument to the number it brings, when the param takes it. Bangs pass over
-// every input, setting nothing. Gives the cells left and the arguments,
-// queueing each one set for the store, and each cell taken to show for the tick
+// every input, setting nothing, apart from those of params that take a bang,
+// which are taken and added to the names of the params banged on the square.
+// Gives the cells left and the arguments, queueing each one set for the
+// store, and each cell taken to show for the tick
 const takeInputs = (
     cells: Cell[], size: number, letters: string[], given: string[][], inputs: Map<number, Input>,
+    bangs: Map<number, Set<string>>,
 ) => {
     const args = [...given]
     const left = cells.map((cell, i) => {
         const input = inputs.get(i)
-        if (!input || !isMoving(cell) || cell.value === BANG) return cell
+        if (!input || !isMoving(cell)) return cell
         const { owner, k } = input
         const param = paramsFor(letters[owner], size)[k]
         if (!param) return cell
+        if (cell.value === BANG) {
+            if (!param.bang) return cell
+            bangs.set(owner, (bangs.get(owner) ?? new Set()).add(param.name))
+            emit({ type: "absorb", square: i, cell })
+            return {}
+        }
         const text = argFrom(param, cell.value!)
         if (text !== undefined) {
             args[owner] = argsFor(letters[owner], size, args[owner])
@@ -182,7 +193,7 @@ const generate = (cells: Cell[], size: number, letters: string[], args: string[]
     const next = [...cells]
     letters.forEach((letter, i) => {
         if (kindOf(letter) !== "generator" || modeOf(letter, size, args[i]) === "off") return
-        const { split, ...cell } = ruleFor(i, letter, size, args[i])({}, tick)
+        const { split, ...cell } = ruleFor(i, letter, size, args[i])({}, tick, new Set())
         if (!isMoving(cell)) return
         for (const direction of [cell.direction!, ...split ?? []]) {
             const to = step(i, direction, size)
@@ -200,9 +211,10 @@ const generate = (cells: Cell[], size: number, letters: string[], args: string[]
 // is kept, so it carries on from where it was when it's on again
 const applyRules: GridRule = (given, size, letters, givenArgs, inputs, tick) => {
     if (tick === 0) built = new Map()
-    const taken = takeInputs(given, size, letters, givenArgs, inputs)
+    const bangs = new Map<number, Set<string>>()
+    const taken = takeInputs(given, size, letters, givenArgs, inputs, bangs)
     const generated = generate(taken.cells, size, letters, taken.args, tick)
-    const { cells, args } = takeInputs(generated, size, letters, taken.args, inputs)
+    const { cells, args } = takeInputs(generated, size, letters, taken.args, inputs, bangs)
     return cells.map((cell, i) => {
         if (!operationFor(letters[i])) {
             built.delete(i)
@@ -210,7 +222,7 @@ const applyRules: GridRule = (given, size, letters, givenArgs, inputs, tick) => 
         }
         const mode = modeOf(letters[i], size, args[i])
         if (mode === "off" || kindOf(letters[i]) === "generator") return cell
-        const next = ruleFor(i, letters[i], size, args[i])(cell, tick)
+        const next = ruleFor(i, letters[i], size, args[i])(cell, tick, bangs.get(i) ?? new Set())
         // A thru output does what it does, but lets through what it would absorb
         if (mode === "thru" && cell.value !== undefined && next.value === undefined) return cell
         // An output's cells still show on it for the tick they're absorbed

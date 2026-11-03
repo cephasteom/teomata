@@ -11,10 +11,11 @@ export type GridRule = (
 ) => Cell[]
 
 // A square's rule, which can say how its square shows on the grid from what
-// it remembers, such as a count. When its arguments change, the
+// it remembers, such as a count. It's given the names of its params whose
+// inputs took a bang on the tick. When its arguments change, the
 // rule built in its place carries on from what the old one kept. A
 // generator's rule is given an empty cell and gives the cell it puts out
-export type CellRule = ((cell: Cell, tick: number) => Cell) & {
+export type CellRule = ((cell: Cell, tick: number, bangs: Set<string>) => Cell) & {
     label?: () => string
     keep?: () => unknown
     carry?: (kept: unknown) => void
@@ -37,6 +38,9 @@ export interface Param {
     // The names it takes, in order, which up and down step through in the
     // argument editor
     options?: string[]
+    // Whether its input takes a bang, which the rule is told of on the tick
+    // it arrives, rather than letting it pass over
+    bang?: boolean
     // Set only in the argument editor, without an input square of its own,
     // such as math's operator
     editorOnly?: boolean
