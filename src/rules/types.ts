@@ -18,6 +18,8 @@ export type CellRule = ((cell: Cell, tick: number) => Cell) & {
     label?: () => string
     keep?: () => unknown
     carry?: (kept: unknown) => void
+    // Called when the transport stops, to put back what the rule remembers
+    stop?: () => void
 }
 
 export interface Param {

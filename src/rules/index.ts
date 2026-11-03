@@ -114,6 +114,12 @@ export const modeOf = (letter: string, size: number, given?: string[]) => {
 // transport starts
 let built = new Map<number, { key: string, rule: CellRule }>()
 
+// Tells every built rule the transport has stopped, so those that remember
+// something, such as c's count, can put it back
+export const stopRules = () => {
+    for (const { rule } of built.values()) rule.stop?.()
+}
+
 const keyFor = (letter: string, args: string[]) => [letter, ...args].join("\n")
 
 const ruleFor = (i: number, letter: string, size: number, given?: string[]) => {

@@ -4,7 +4,7 @@ import { about } from "./instructions"
 
 // Counts each value arriving and gives it the count so far. While reset is on
 // the count is held at 0. It carries on from the count built before it when
-// reset changes
+// reset changes, and goes back to 0 when the transport stops
 const createCount = (reset: boolean): CellRule => {
     let count = 0
     const rule: CellRule = cell => {
@@ -15,6 +15,10 @@ const createCount = (reset: boolean): CellRule => {
     rule.keep = () => count
     rule.carry = kept => {
         if (typeof kept === "number") count = kept
+    }
+    // The count goes back to 0 when the transport stops
+    rule.stop = () => {
+        count = 0
     }
     return rule
 }

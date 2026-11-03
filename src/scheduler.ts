@@ -3,6 +3,7 @@ import { Loop, getDraw, getTransport, start } from 'tone'
 import { cps, isPlaying, q } from './stores/global';
 import { showCells, stepCells } from './stores/cells';
 import { clearConsole, printLine } from './stores/console';
+import { stopRules } from './rules';
 import { midiTime, playNote, sendControl } from './lib/midi';
 
 const loop = new Loop((time) => {
@@ -44,6 +45,8 @@ export const toggle = async () => {
     await start()
     if (get(isPlaying)) {
         getTransport().stop()
+        // Counts start again from 0
+        stopRules()
     } else {
         // Each run starts with an empty console
         clearConsole()
