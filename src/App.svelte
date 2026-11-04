@@ -45,11 +45,11 @@
   }
 
   /* The devices and then the console, a square apart, starting a square
-     below the controls' seven squares and reaching down to the grid's bottom
+     below the controls' eight squares and reaching down to the grid's bottom
      edge. Their right edge lines up with the controls' */
   .side {
     position: absolute;
-    top: calc(8 * var(--square) + 8 * var(--line));
+    top: calc(9 * var(--square) + 9 * var(--line));
     bottom: 0;
     right: calc(100% + var(--square));
     display: flex;

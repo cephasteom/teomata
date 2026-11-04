@@ -2,10 +2,13 @@
   import { toggle } from "../scheduler";
   import { MAX_CPS, MAX_Q, MIN_CPS, MIN_Q, cps, isPlaying, q, showConsole, showInstructions } from "../stores/global";
   import NumberSquare from "./NumberSquare.svelte";
+  import Modal from "./Modal.svelte";
+  import Help from "./Help.svelte";
   import { clearCells, randomizeCells } from "../stores/cells";
   import { clearConsole } from "../stores/console";
 
   let focused = $state<number | null>(null)
+  let showHelp = $state(false)
 
   const onplaykeydown = (event: KeyboardEvent) => {
     if (event.key === 'Tab' && event.shiftKey) {
@@ -45,12 +48,19 @@
   >
     <i class="fa-solid fa-book"></i>
   </button>
-  <NumberSquare id="cps" label="cps" value={cps} min={MIN_CPS} max={MAX_CPS} step={0.05} places={2} row={6} />
-  <NumberSquare id="q" label="q" value={q} min={MIN_Q} max={MAX_Q} step={1} places={0} row={7} />
+  <button onclick={() => showHelp = true} title="Help" aria-label="Help" aria-haspopup="dialog">
+    <i class="fa-solid fa-question"></i>
+  </button>
+  <NumberSquare id="cps" label="cps" value={cps} min={MIN_CPS} max={MAX_CPS} step={0.05} places={2} row={7} />
+  <NumberSquare id="q" label="q" value={q} min={MIN_Q} max={MAX_Q} step={1} places={0} row={8} />
   {#if focused !== null}
     <div class="focus" style:grid-row="{focused + 1} / {focused + 2}"></div>
   {/if}
 </div>
+
+<Modal bind:open={showHelp} label="Help">
+  <Help />
+</Modal>
 
 <style>
   .controls {
@@ -58,7 +68,7 @@
     top: 0;
     right: calc(100% + var(--square));
     display: grid;
-    grid-template-rows: repeat(7, var(--square));
+    grid-template-rows: repeat(8, var(--square));
     width: calc(var(--square) + 2 * var(--line));
     border: var(--line) solid var(--grid-line);
     gap: var(--line);
