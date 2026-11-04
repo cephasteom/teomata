@@ -21,6 +21,7 @@ export const about = {
         about: "Emit time varying values between 0 and 1, at a given rate and direction.",
         params: { type, freq, rate, direction },
     },
+
     // Operators
     a: {
         about: "Store an array of values. A bang outputs all the values, a number outputs the value at that index.",
@@ -32,22 +33,24 @@ export const about = {
     },
     c: {
         about: "Count each incoming value, outputting the count so far.",
-        params: { reset: "How many cycles between resets of the count to 0, on the first division of the cycle, or 0 for none. A bang on its input resets the count at once." },
+        params: { 
+            reset: "Reset the count every n cycles. A bang on its input resets the count." 
+        },
     },
     d: {
         about: "Nullify incoming values.",
         params: {},
     },
     g: {
-        about: "Only let through values that match. Nullifies everything else. Bangs are 1.",
+        about: "Let through values that match a given value, nullify everything else. Bangs are 1.",
         params: { match: "Any number." },
     },
     h: {
         about: "Output the notes of a chord or scale. A bang outputs all the notes, a number outputs the note at that index.",
         params: {
-            root: "A note from a to g, with an optional # or b, such as c#, in the octave from middle C.",
-            type: "A chord (ma, mi, au or di, for major, minor, augmented or diminished) or a scale or mode by its three letter alias, such as dor for dorian. See the <a href=\"https://raw.githubusercontent.com/cephasteom/teomata/refs/heads/main/src/lib/harmony.ts\" target=\"_blank\" rel=\"noopener\">full list</a>.",
-            octaves: "How many octaves the notes span upwards, from 1 to 8.",
+            root: "A note from a to g, with an optional # or b, e.g. c#.",
+            type: "A chord by its two letter alias (ma, mi, au or di) or a scale or mode by its three letter alias (ion, dor, phrm lyd...). See the <a href=\"https://raw.githubusercontent.com/cephasteom/teomata/refs/heads/main/src/lib/harmony.ts\" target=\"_blank\" rel=\"noopener\">full list</a>.",
+            octaves: "Number of octaves from 1 to 8.",
         },
     },
     l: {
@@ -66,7 +69,7 @@ export const about = {
         },
     },
     o: {
-        about: "Loop incoming values. Plays back the values recorded on the ticks they arrived on, letting nothing else through while not recording.",
+        about: "Loop incoming values.",
         params: {
             record: "0 or 1. While 1, incoming values pass through and are recorded. A bang on its input records for one loop length.",
             reset: "Clear the loop every n cycles. A bang on its input clears the loop.",
@@ -78,7 +81,7 @@ export const about = {
         params: {},
     },
     r: {
-        about: "Turn incoming values to travel in a given direction, splitting them along an axis.",
+        about: "Turn incoming values to travel in a given direction or directions.",
         params: { direction },
     },
     s: {
@@ -98,13 +101,14 @@ export const about = {
         about: "Output the current position of a waveform, from 0 to 1.",
         params: { type, freq },
     },
+    
     // Outputs
     k: {
-        about: "Send incoming numbers as MIDI CC messages, rounded and wrapped to 0 to 127, or the first of several. Bangs are ignored. Absorbs every value, unless thru.",
+        about: "Send incoming value as MIDI CC messages. Bangs are ignored.",
         params: { cc: "The controller number, from 0 to 127.", device, channel },
     },
     n: {
-        about: "Send incoming numbers as MIDI notes, rounded and wrapped to 0 to 127, or several as a chord. Bangs are ignored. Absorbs every value, unless thru.",
+        about: "Send incoming values as MIDI notes. Bangs are ignored.",
         params: {
             vel: "The velocity, from 0 to 127.",
             dur: "How long each note lasts, in seconds.",
