@@ -96,11 +96,11 @@ export const waveGenerator: Operation = {
         createWaveGenerator(typeOf(type), Number(freq), Number(rate), headingOf(to) as heading),
 }
 
-// Gives each bang or non zero value arriving the waveform's value on the tick
+// Gives each value arriving the waveform's value on the tick
 const createWaveform = (type: string, freq: number): CellRule => {
     const wave = createWave(type, freq)
     const rule: CellRule = (cell, tick) =>
-        isMoving(cell) && cell.value !== 0 ? { ...cell, value: wave.value(tick) } : cell
+        isMoving(cell) ? { ...cell, value: wave.value(tick) } : cell
     return Object.assign(rule, wave.remembered)
 }
 

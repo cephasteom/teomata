@@ -72,7 +72,7 @@ export const about = {
         about: "Loop incoming values.",
         params: {
             record: "0 or 1. While 1, incoming values pass through and are recorded. A bang on its input records for one loop length.",
-            reset: "Clear the loop every n cycles. A bang on its input clears the loop.",
+            reset: "Clear the loop every n cycles. A bang on its input clears the loop immediately.",
             length: "The length of the loop, in cycles.",
         },
     },
