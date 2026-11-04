@@ -1,6 +1,6 @@
 # Teomata
 
-Teomata is a grid of single-letter functions. On each step, these functions are run to determine the grid's next state, generating cellular automata for outputting MIDI.
+Teomata is a grid of single-letter functions. On each step, each functions is run to determine the grid's next state, generating cellular automata for MIDI.
 
 ## Overview
 
@@ -26,7 +26,7 @@ Press Enter on a function to set its arguments. Arguments with fixed options can
 
 ## Inputs
 
-Alt+Shift+arrow expands a function to reveal its arguments on the grid. Set an argument by sending a value to its square.
+Alt+Shift+arrow expands a function to reveal its arguments on the grid. Set an argument by sending a value to its input.
 
 ## Generators
 
