@@ -1,6 +1,6 @@
 import type { Writable } from "svelte/store"
 import { cps, q, zoom, showConsole, showInstructions, SIZE, MIN_CPS, MAX_CPS, MIN_Q, MAX_Q, MIN_ZOOM, MAX_ZOOM } from "./global"
-import { operations, args, expansions, fitExpansions } from "./operations"
+import { operations, args, expansions, fitExpansions, type Expansion } from "./operations"
 import { isDirection } from "../lib/utils"
 
 const PREFIX = "teomata:"
@@ -27,8 +27,15 @@ const save = <T>(key: string, store: Writable<T>) => {
     })
 }
 
-const inRange = (value: unknown, min: number, max: number): value is number =>
+export const inRange = (value: unknown, min: number, max: number): value is number =>
     typeof value === "number" && Number.isFinite(value) && value >= min && value <= max
+
+// Whether a saved value is an operation's inputs, or null for none
+export const isExpansion = (e: unknown): e is Expansion | null => e === null || (
+    typeof e === "object" && "direction" in e && "length" in e &&
+    typeof e.direction === "string" && isDirection(e.direction) &&
+    typeof e.length === "number" && Number.isInteger(e.length) && e.length > 0
+)
 
 // Puts back what was saved last time. Operations and arguments are only
 // restored when they fit the grid
@@ -58,13 +65,8 @@ const restore = () => {
             args.set(savedArgs as string[][])
         }
         const savedExpansions = load("expansions")
-        const isExpansion = (e: unknown) => e === null || (
-            typeof e === "object" && "direction" in e && "length" in e &&
-            typeof e.direction === "string" && isDirection(e.direction) &&
-            typeof e.length === "number" && Number.isInteger(e.length) && e.length > 0
-        )
         if (fits(savedExpansions) && savedExpansions.every(isExpansion)) {
-            expansions.set(savedExpansions as Parameters<typeof expansions.set>[0])
+            expansions.set(savedExpansions as (Expansion | null)[])
             fitExpansions()
         }
     }

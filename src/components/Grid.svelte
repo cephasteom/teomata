@@ -19,6 +19,7 @@
   import { arrows } from "../lib/utils";
   import { shortened } from "../lib/arithmetic";
   import { toggle } from "../scheduler";
+  import { savePatch, openPatch } from "../stores/patch";
 
   const keys: Record<string, direction> = {
     ArrowUp: 'n',
@@ -308,6 +309,14 @@
     if (event.key === ' ' && !(event.metaKey || event.ctrlKey || event.altKey)) {
       event.preventDefault()
       if ($editing === null && !event.repeat) toggle()
+      return
+    }
+    // Save and open work on the patch instead of the page, from anywhere,
+    // apart from while an operation's arguments are open
+    const patching = ({ s: savePatch, o: openPatch } as Record<string, () => void>)[event.key.toLowerCase()]
+    if ((event.metaKey || event.ctrlKey) && !event.altKey && !event.shiftKey && patching) {
+      event.preventDefault()
+      if ($editing === null && !event.repeat) patching()
       return
     }
     if (event.target === grid || event.target instanceof HTMLInputElement) return

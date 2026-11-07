@@ -28,6 +28,10 @@ Press Enter on a function to set its arguments. Arguments with fixed options can
 
 Alt+Shift+arrow expands a function to reveal its arguments on the grid. Set an argument by sending a value to its input.
 
+## Saving
+
+Ctrl/Cmd+S saves the patch (its functions, arguments, inputs, cps and q) as a `.txt` file, and Ctrl/Cmd+O opens one. Opening replaces the grid's functions and empties its cells, and can be undone.
+
 ## Generators
 
 - **B** `bang(rate, direction)`: Emit bangs at a given rate and direction. Displayed as `B`.

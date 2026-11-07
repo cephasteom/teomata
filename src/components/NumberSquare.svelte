@@ -18,6 +18,11 @@
   // Empty or not a number comes through as null
   let typed = $state<number | null>($value)
 
+  // Shows the value when it's set from elsewhere, such as by opening a patch
+  $effect(() => {
+    typed = $value
+  })
+
   const commit = () => {
     if (typed !== null && Number.isFinite(typed)) {
       const rounded = Math.round(typed * 10 ** places) / 10 ** places
