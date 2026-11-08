@@ -50,7 +50,7 @@ Ctrl/Cmd+S saves the patch (its functions, arguments, inputs, cps and q) as a `.
 * **l** `logic(operator, num)`: Test incoming values using logical operators. Outputs 1 if true, 0 if false. Bangs are true. Displayed as the operator.
 * **o** `loop(record, reset, length)`: Loop incoming values. Each value recorded plays back on the tick of the loop it arrived on, over `length` cycles. `record` is `0` or `1`: While 1, incoming values pass through and are recorded. A bang on its input records for one loop length. `reset` clears the loop every n cycles. A bang on its input clears the loop immediately. The recording is kept when the arguments change, and cleared when the transport stops. Displayed as `o`.
 * **p** `print()`: Print incoming values to the console.
-* **r** `rotate(direction)`: Turn incoming values to travel in a given direction or directions. An axis splits each value into a copy for each of its directions. Displayed as the unicode direction.
+* **r** `rotate(direction)`: Turn incoming values to travel in a given direction or directions. An axis splits each value into a copy for each of its directions. Displayed as the direction, e.g. `n` or `x?`.
 * **s** `scale(outLo, outHi, inLo, inHi)`: Scale incoming values from one range to another. Bangs are 1. Values are mapped from `inLo` to `inHi` onto `outLo` to `outHi`, and each number of an array is scaled. Displayed as `s`.
 * **v** `value(value)`: Output a fixed value. Displayed as the number.
 * **w** `wave(type, freq)`: Output the current position of a waveform, from 0 to 1. Any incoming value outputs the waveform's value at that point in time. Displayed as the type, by name.

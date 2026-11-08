@@ -1,6 +1,6 @@
 import { get } from "svelte/store"
 import { q } from "../stores/global"
-import { arrows, headingOf, isHeading } from "../lib/utils"
+import { headings, headingOf, isHeading } from "../lib/utils"
 import { formatArg } from "../lib/arithmetic"
 import { mode, outputMode } from "./instructions"
 import type { Context, Param } from "./types"
@@ -47,8 +47,8 @@ export const directionParam = (about: string, fallback = "e"): Param => ({
     fallback,
     accepts: text => isHeading(headingOf(text)),
     settle: headingOf,
-    fromNumber: n => wrapped(Object.keys(arrows), n),
-    options: Object.keys(arrows),
+    fromNumber: n => wrapped(headings, n),
+    options: headings,
 })
 
 // How many times a generator outputs per cycle, so 1 is once a cycle and 2 twice

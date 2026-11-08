@@ -20,17 +20,15 @@ const axes: Record<string, direction[]> = {
     x: ['e', 'w'], y: ['n', 's'], xy: ['n', 'e', 's', 'w'],
 }
 
-// How each heading is shown on the grid
-export const arrows: Record<heading, string> = {
-    n: '↑', e: '→', s: '↓', w: '←', x: '↔', y: '↕', xy: '⤡', 'x?': '↔?', 'y?': '↕?', 'xy?': '⤡?',
-}
+// Every heading, in the order their numbers pick them
+export const headings: heading[] = ['n', 'e', 's', 'w', 'x', 'y', 'xy', 'x?', 'y?', 'xy?']
 
-export const isHeading = (text: string): text is heading => Object.hasOwn(arrows, text)
+export const isHeading = (text: string): text is heading => (headings as string[]).includes(text)
 
 // A heading as typed, ignoring case, or by its number, from 0 (n) to 9 (xy?),
 // in the order n, e, s, w, x, y, xy, x?, y?, xy?
 export const headingOf = (text: string) =>
-    /^\d+$/.test(text) ? Object.keys(arrows)[Number(text)] ?? text : text.toLowerCase()
+    /^\d+$/.test(text) ? headings[Number(text)] ?? text : text.toLowerCase()
 
 // The directions a heading sends a cell in: every one along its axis or axes,
 // or with a ?, one of them picked at random

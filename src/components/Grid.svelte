@@ -16,7 +16,6 @@
   import { snapshot, record, change, undo, redo } from "../stores/history";
   import { paramsFor, argsFor, kindOf, labelFor } from "../rules";
   import { isModeParam } from "../rules/shared";
-  import { arrows } from "../lib/utils";
   import { shortened } from "../lib/arithmetic";
   import { toggle } from "../scheduler";
   import { savePatch, openPatch } from "../stores/patch";
@@ -291,9 +290,6 @@
     })
     : [])
 
-  // A label that is a lone arrow, as a rotate's is, shows bigger, as arrows
-  // are small beside letters
-  const arrowLabels = new Set(Object.values(arrows))
   let borderColors = $derived(new Map(bordered.map(({ i, color }) => [i, color])))
 
   // The page starts on the grid, and tabbing from there carries on round to the controls
@@ -382,7 +378,7 @@
       // Up and down step through the names an argument takes, such as a direction
       else if (direction === 'n' || direction === 's') stepArg(direction === 'n' ? 1 : -1)
       else if (direction) moveArgCursor(direction)
-      else if (/^[a-zA-Z0-9.#~+\-*/%^<>=!&|()]$/.test(event.key)) {
+      else if (/^[a-zA-Z0-9.#~+\-*/%^<>=!&|()?]$/.test(event.key)) {
         // Stop / opening the browser's quick find
         event.preventDefault()
         typeArg(event.key)
@@ -450,7 +446,7 @@
         <span class="letter" class:off={$modes[$editing] === 'off'} style:--length={1}>{$operations[$editing]}</span>
       {:else if $operations[i]}
         <!-- A cell passing over its square inverts the label -->
-        <span class="letter" class:arrow={arrowLabels.has(labels[i])} class:off={$modes[i] === 'off'} style:--length={labels[i].length}>{labels[i]}</span>
+        <span class="letter" class:off={$modes[i] === 'off'} style:--length={labels[i].length}>{labels[i]}</span>
       {:else if input}
         <span class="arg" class:off={input.off} style:--length={Math.max(1, input.text.length)}>{input.text}</span>
       {/if}
@@ -608,14 +604,9 @@
     font-size: calc(var(--text-size) * min(1, 3 / var(--length)));
   }
 
-  /* Operations show in bold, apart from arrows */
+  /* Operations show in bold */
   .letter {
     font-weight: bold;
-  }
-
-  .letter.arrow {
-    font-size: calc(var(--text-size) * 2);
-    font-weight: normal;
   }
 
   /* An operation that's off greys out, over an empty square or a cell alike, and
