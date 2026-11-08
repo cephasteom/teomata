@@ -42,10 +42,10 @@ export const about = {
         params: {},
     },
     e: {
-        about: "Copy whatever is happening at another square.",
+        about: "Entangle one square with another.",
         params: {
-            x: "The square's column, counting from 0 at the left.",
-            y: "The square's row, counting from 0 at the top.",
+            x: "The square's column.",
+            y: "The square's row.",
         },
     },
     g: {
