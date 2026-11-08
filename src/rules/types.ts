@@ -28,6 +28,9 @@ export type CellRule = ((cell: Cell, tick: number, context: Context) => Cell) & 
     carry?: (kept: unknown) => void
     // Called when the transport stops, to put back what the rule remembers
     stop?: () => void
+    // The square whose cell is copied onto this one each tick, once every
+    // other square's rule has run, given the grid's size
+    entangled?: (size: number) => number
 }
 
 export interface Param {

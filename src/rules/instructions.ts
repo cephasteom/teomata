@@ -41,6 +41,13 @@ export const about = {
         about: "Nullify incoming values.",
         params: {},
     },
+    e: {
+        about: "Copy whatever is happening at another square.",
+        params: {
+            x: "The square's column, counting from 0 at the left.",
+            y: "The square's row, counting from 0 at the top.",
+        },
+    },
     g: {
         about: "Let through values that match a given value, nullify everything else. Bangs are 1.",
         params: { match: "Any number." },

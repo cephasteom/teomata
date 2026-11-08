@@ -4,7 +4,8 @@
   import Instructions from "./components/Instructions.svelte";
   import Console from "./components/Console.svelte";
   import Devices from "./components/Devices.svelte";
-  import { DEFAULT_ZOOM, zoom, showConsole, showInstructions } from "./stores/global";
+  import { DEFAULT_ZOOM, SIZE, zoom, showConsole, showInstructions } from "./stores/global";
+  import { cursor } from "./stores/cursor";
 
   // The squares the grid's window shows per side, on the root, so the grid
   // and the controls can both size against it
@@ -27,6 +28,8 @@
       </div>
     {/if}
     <Grid />
+    <!-- The cursor's column and row, as entangle takes them -->
+    <div class="position">{$cursor % SIZE},{Math.floor($cursor / SIZE)}</div>
     {#if $showInstructions}
       <Instructions />
     {/if}
@@ -58,5 +61,16 @@
     width: 20ch;
     font-family: ui-monospace, monospace;
     font-size: var(--text-size);
+  }
+
+  /* Under the grid's bottom right corner, off the grid so it stays centred */
+  .position {
+    position: absolute;
+    top: calc(100% + var(--text-size) * 0.5);
+    right: 0;
+    font-family: ui-monospace, monospace;
+    font-size: var(--text-size);
+    line-height: 1;
+    color: var(--grid-line);
   }
 </style>

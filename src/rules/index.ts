@@ -6,6 +6,7 @@ import { emit } from "./events"
 import { move } from "./move"
 import { rotate } from "./rotate"
 import { die } from "./die"
+import { entangle } from "./entangle"
 import { bang, bangGenerator } from "./bang"
 import { value, valueGenerator } from "./value"
 import { harmony } from "./harmony"
@@ -37,6 +38,7 @@ const operations: Record<string, Operation> = Object.fromEntries(Object.entries(
     b: bang,
     c: count,
     d: die,
+    e: entangle,
     g: gate,
     h: harmony,
     l: logic,
@@ -223,7 +225,7 @@ const applyRules: GridRule = (given, size, letters, givenArgs, inputs, tick) => 
     const taken = takeInputs(given, size, letters, givenArgs, inputs, bangs)
     const generated = generate(taken.cells, size, letters, taken.args, tick)
     const { cells, args } = takeInputs(generated, size, letters, taken.args, inputs, bangs)
-    return cells.map((cell, i) => {
+    const next = cells.map((cell, i) => {
         if (!operationFor(letters[i])) {
             built.delete(i)
             return cell
@@ -239,6 +241,22 @@ const applyRules: GridRule = (given, size, letters, givenArgs, inputs, tick) => 
         }
         return next
     })
+    return copyEntangled(next, size, letters, args)
+}
+
+// Copies onto each entangled square that's on the cell on the square it's
+// entangled with, as it is once every other square's rule has run, so the
+// copy carries on from there, heading the same way. One entangled with an
+// empty square lets what arrives on it pass
+const copyEntangled = (cells: Cell[], size: number, letters: string[], args: string[][]) => {
+    const next = [...cells]
+    letters.forEach((letter, i) => {
+        if (!operationFor(letter) || modeOf(letter, size, args[i]) === "off") return
+        const from = built.get(i)?.rule.entangled?.(size)
+        if (from === undefined || cells[from]?.value === undefined) return
+        next[i] = { ...cells[from] }
+    })
+    return next
 }
 
 // Chain or rules to apply on each division of the cycle
