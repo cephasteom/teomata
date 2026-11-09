@@ -151,6 +151,13 @@ export const labelFor = (i: number, letter: string, size: number, given?: string
     return remembered ?? label?.(...args) ?? letter
 }
 
+// The square an entangled square is entangled with, if it is one
+export const entangledWith = (letter: string, size: number, given?: string[]) => {
+    if (operationFor(letter) !== operations.e) return undefined
+    const [x, y] = argsFor(letter, size, given).map(Number)
+    return y * size + x
+}
+
 // Takes the moving cells with numbers on the inputs of every operation, whatever
 // its mode, so one that's off can be turned back on, each setting its input's
 // argument to the number it brings, when the param takes it. Bangs pass over

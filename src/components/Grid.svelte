@@ -14,7 +14,7 @@
     stepArg,
   } from "../stores/editing";
   import { snapshot, record, change, undo, redo } from "../stores/history";
-  import { paramsFor, argsFor, kindOf, labelFor } from "../rules";
+  import { paramsFor, argsFor, kindOf, labelFor, entangledWith } from "../rules";
   import { isModeParam } from "../rules/shared";
   import { shortened } from "../lib/arithmetic";
   import { toggle } from "../scheduler";
@@ -265,7 +265,20 @@
   // they are worked out again each time the cells change
   let labels = $derived.by(() => {
     void $cells
-    return $operations.map((letter, i) => letter ? labelFor(i, letter, SIZE, $args[i], !!$expansions[i]) : "")
+    const own = $operations.map((letter, i) => letter ? labelFor(i, letter, SIZE, $args[i], !!$expansions[i]) : "")
+    // An entangled square shows what the square it's entangled with shows,
+    // following entangled squares along, unless that's empty or loops back
+    return own.map((label, i) => {
+      const seen = new Set([i])
+      let to = entangledWith($operations[i], SIZE, $args[i])
+      while (to !== undefined && !seen.has(to) && $operations[to]) {
+        seen.add(to)
+        const next = entangledWith($operations[to], SIZE, $args[to])
+        if (next === undefined) return own[to]
+        to = next
+      }
+      return label
+    })
   })
 
   // Each input square shows the argument it sets, greyed while its operation
