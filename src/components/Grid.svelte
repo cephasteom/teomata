@@ -459,7 +459,7 @@
         <span class="letter" class:off={$modes[$editing] === 'off'} style:--length={1}>{$operations[$editing]}</span>
       {:else if $operations[i]}
         <!-- A cell passing over its square inverts the label -->
-        <span class="letter" class:off={$modes[i] === 'off'} style:--length={labels[i].length}>{labels[i]}</span>
+        <span class="letter" class:direction={$operations[i] === 'r'} class:off={$modes[i] === 'off'} style:--length={labels[i].length}>{labels[i]}</span>
       {:else if input}
         <span class="arg" class:off={input.off} style:--length={Math.max(1, input.text.length)}>{input.text}</span>
       {/if}
@@ -620,6 +620,11 @@
   /* Operations show in bold */
   .letter {
     font-weight: bold;
+  }
+
+  /* A rotate's direction shows in italics */
+  .letter.direction {
+    font-style: italic;
   }
 
   /* An operation that's off greys out, over an empty square or a cell alike, and
