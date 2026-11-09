@@ -5,9 +5,9 @@
   --cell-empty: black;
   --cell-alive: white;
   --cell-cursor: #ff6b6b;
-  /* The border round an output's square, and the messages it prints */
-  --cell-output: #4dabf7;
-  /* The border round a generator's square, the same lightness as the cursor's red and the output's blue */
+  /* The border round a destination's square, and the messages it prints */
+  --cell-destination: #4dabf7;
+  /* The border round a generator's square, the same lightness as the cursor's red and the destination's blue */
   --cell-generator: #51cf66;
   /* The label and border of an operation that's off */
   --cell-off: #868e96;

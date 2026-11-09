@@ -26,6 +26,8 @@ const loop = new Loop((time) => {
 		showCells(shown, version)
 		for (const event of events) {
 			if (event.type === "print") printLine(event.text)
+			if (event.type === "q") q.set(event.value)
+			if (event.type === "cps") cps.set(event.value)
 		}
 	}, time)
 }, `${get(q)}n`).start(0);

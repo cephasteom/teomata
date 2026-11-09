@@ -26,7 +26,7 @@ const controller: Param = {
 
 export const knob: Operation = {
     name: "knob",
-    kind: "output",
+    kind: "destination",
     about: about.k.about,
     params: [controller, deviceParam(about.k.params.device), channelParam(about.k.params.channel)],
     label: controller => `cc${controller}`,

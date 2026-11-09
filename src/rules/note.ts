@@ -35,7 +35,7 @@ const duration: Param = {
 
 export const note: Operation = {
     name: "note",
-    kind: "output",
+    kind: "destination",
     about: about.n.about,
     params: [velocity, duration, deviceParam(about.n.params.device), channelParam(about.n.params.channel)],
     rule: (vel, dur, device, channel) =>

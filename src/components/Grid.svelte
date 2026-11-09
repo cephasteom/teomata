@@ -245,12 +245,12 @@
     dragged = false
   }
 
-  // Generators and outputs are bordered in their own colours, outputs in the
-  // one their messages print in, or grey while off, and a thru output's
+  // Generators and destinations are bordered in their own colours, destinations in the
+  // one their messages print in, or grey while off, and a thru destination's
   // is dashed. The borders all go while an operation's arguments are open
   const borders: Partial<Record<string, string>> = {
     generator: 'var(--cell-generator)',
-    output: 'var(--cell-output)',
+    destination: 'var(--cell-destination)',
   }
   let bordered = $derived($editing === null
     ? $operations.flatMap((letter, i) => {
@@ -412,7 +412,7 @@
       // Shift stretches the selection out to the cursor's new square
       moveCursor(direction, event.shiftKey)
     } else if (kindOf(event.key)) {
-      // Only the letters of generators, operators and outputs can be typed
+      // Only the letters of generators, operators and destinations can be typed
       event.preventDefault()
       const before = snapshot()
       setOperations($selection, event.key)
@@ -665,7 +665,7 @@
     box-shadow: inset 0 0 0 2px var(--border);
   }
 
-  /* A thru output's border is dashed, as values carry on through it. An
+  /* A thru destination's border is dashed, as values carry on through it. An
      outline can be dashed where a box shadow can't, and its gridlines keep
      their colour so the gaps show */
   .bordered.thru,

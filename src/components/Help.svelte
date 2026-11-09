@@ -50,6 +50,6 @@
   }
 
   .help :global(code) {
-    color: var(--cell-output);
+    color: var(--cell-destination);
   }
 </style>

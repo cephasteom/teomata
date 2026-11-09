@@ -2,7 +2,7 @@ import { get } from "svelte/store"
 import { q } from "../stores/global"
 import { headings, headingOf, isHeading } from "../lib/utils"
 import { formatArg } from "../lib/arithmetic"
-import { mode, outputMode } from "./instructions"
+import { mode, destinationMode } from "./instructions"
 import type { Context, Param } from "./types"
 
 export const isNumber = (text: string) => text !== "" && Number.isFinite(Number(text))
@@ -99,11 +99,11 @@ const createModeParam = (modes: string[], about: string): Param => {
 // On does what it does, and off lets values pass without running
 export const modeParam = createModeParam(["on", "off"], mode)
 
-// Only an output absorbs what arrives, so only it has thru, which does what it
+// Only a destination absorbs what arrives, so only it has thru, which does what it
 // does but lets the values carry on
-export const outputModeParam = createModeParam(["on", "off", "thru"], outputMode)
+export const destinationModeParam = createModeParam(["on", "off", "thru"], destinationMode)
 
-export const isModeParam = (param: Param) => param === modeParam || param === outputModeParam
+export const isModeParam = (param: Param) => param === modeParam || param === destinationModeParam
 
 // Whether a generator fires on the tick, given its outputs per cycle
 // It fires on the first tick at or after each trigger, and at most once a tick
@@ -114,6 +114,6 @@ export const fires = (rate: number, tick: number) => {
     return triggers(tick) > triggers(tick - 1)
 }
 
-// Whether a cell is moving with a value, which is what operators and outputs act on
+// Whether a cell is moving with a value, which is what operators and destinations act on
 export const isMoving = (cell: { direction?: unknown, value?: unknown }) =>
     cell.direction !== undefined && cell.value !== undefined

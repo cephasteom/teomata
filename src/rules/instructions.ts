@@ -5,7 +5,7 @@ const channel = "A MIDI channel from 1 to 16."
 const type = "saw, sin, cos, tri, sqr, or noi, or a number from 0 (saw) to 5 (noi)."
 const freq = "Waveform frequency, relative to global cps."
 export const mode = "on or off, or a number, 0 (on) or 1 (off). Off lets values pass unchanged. Shift+Enter toggles the mode."
-export const outputMode = "on, off or thru, or a number from 0 (on) to 2 (thru). Off sends no output. Thru sends as usual, but lets values through. Shift+Enter steps through the modes."
+export const destinationMode = "on, off or thru, or a number from 0 (on) to 2 (thru). Off sends no output. Thru sends as usual, but lets values through. Shift+Enter steps through the modes."
 
 export const about = {
     // Generators
@@ -110,7 +110,7 @@ export const about = {
         params: { type, freq },
     },
     
-    // Outputs
+    // Destinations
     k: {
         about: "Send incoming value as MIDI CC messages. Bangs are ignored.",
         params: { cc: "The controller number, from 0 to 127.", device, channel },
@@ -123,5 +123,13 @@ export const about = {
             device,
             channel,
         },
+    },
+    q: {
+        about: "Set the global q (divisions per cycle) to incoming values, rounded and clamped from 1 to 64. Bangs are ignored.",
+        params: {},
+    },
+    t: {
+        about: "Set the global tempo (cps) to incoming values, clamped from 0.05 to 2. Bangs are ignored.",
+        params: {},
     },
 }

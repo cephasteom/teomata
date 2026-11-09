@@ -64,8 +64,8 @@
     color: var(--cell-generator);
   }
 
-  dt.output {
-    color: var(--cell-output);
+  dt.destination {
+    color: var(--cell-destination);
   }
 
   dd {

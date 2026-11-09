@@ -1,6 +1,6 @@
 import type { Operation, GridRule, CellRule, Context, Kind, Input, Param } from "./types"
 import type { Cell } from "../stores/cells"
-import { argFrom, isModeParam, isMoving, modeParam, outputModeParam } from "./shared"
+import { argFrom, isModeParam, isMoving, modeParam, destinationModeParam } from "./shared"
 import { BANG, step } from "../lib/utils"
 import { emit } from "./events"
 import { move } from "./move"
@@ -21,11 +21,13 @@ import { note } from "./note"
 import { knob } from "./knob"
 import { wave, waveGenerator } from "./wave"
 import { scale } from "./scale"
+import { quantize } from "./quantize"
+import { tempo } from "./tempo"
 
 // Every operation takes a mode after its own params
 const withMode = (operation: Operation): Operation => ({
     ...operation,
-    params: [...operation.params, operation.kind === "output" ? outputModeParam : modeParam],
+    params: [...operation.params, operation.kind === "destination" ? destinationModeParam : modeParam],
 })
 
 // Every operation by its letter. Case matters: generators are uppercase, and
@@ -45,8 +47,10 @@ const operations: Record<string, Operation> = Object.fromEntries(Object.entries(
     m: math,
     o: loop,
     p: print,
+    q: quantize,
     r: rotate,
     s: scale,
+    t: tempo,
     v: value,
     w: wave,
     k: knob,
@@ -56,15 +60,15 @@ const operations: Record<string, Operation> = Object.fromEntries(Object.entries(
 const operationFor = (letter: string): Operation | undefined =>
     Object.hasOwn(operations, letter) ? operations[letter] : undefined
 
-const kinds: Kind[] = ["generator", "operator", "output"]
+const kinds: Kind[] = ["generator", "operator", "destination"]
 
 // Every operation by its letter, for the instructions: the generators, then
-// the operators, then the outputs, each alphabetically
+// the operators, then the destinations, each alphabetically
 export const instructions = Object.entries(operations)
     .sort(([a, x], [b, y]) => kinds.indexOf(x.kind) - kinds.indexOf(y.kind) || a.localeCompare(b))
     .map(([letter, { name, kind, about, params, rest }]) => ({ letter, name, kind, about, params, rest }))
 
-// Whether the letter is a generator, operator or output, or undefined when it
+// Whether the letter is a generator, operator or destination, or undefined when it
 // isn't an operation
 export const kindOf = (letter: string) => operationFor(letter)?.kind
 
@@ -251,10 +255,10 @@ const applyRules: GridRule = (given, size, letters, givenArgs, inputs, tick) => 
         const mode = modeOf(letters[i], size, args[i])
         if (mode === "off" || kindOf(letters[i]) === "generator") return cell
         const next = ruleFor(i, letters[i], size, args[i])(cell, tick, contextFor(i, letters[i], size, bangs.get(i)))
-        // A thru output does what it does, but lets through what it would absorb
+        // A thru destination does what it does, but lets through what it would absorb
         if (mode === "thru" && cell.value !== undefined && next.value === undefined) return cell
-        // An output's cells still show on it for the tick they're absorbed
-        if (kindOf(letters[i]) === "output" && isMoving(cell) && next.value === undefined) {
+        // A destination's cells still show on it for the tick they're absorbed
+        if (kindOf(letters[i]) === "destination" && isMoving(cell) && next.value === undefined) {
             emit({ type: "absorb", square: i, cell })
         }
         return next

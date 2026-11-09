@@ -14,13 +14,17 @@
 
   let { id, label, value, min, max, step, places, row }: Props = $props()
 
+  // The value as the square shows it, cut to its places, such as a cps set
+  // by t. Rounded to 12 significant digits first, so 0.29 doesn't show as 0.28
+  const shown = (n: number) => Math.trunc(Number((n * 10 ** places).toPrecision(12))) / 10 ** places
+
   // What's typed in the square, only set once it's committed.
   // Empty or not a number comes through as null
-  let typed = $state<number | null>($value)
+  let typed = $state<number | null>(shown($value))
 
   // Shows the value when it's set from elsewhere, such as by opening a patch
   $effect(() => {
-    typed = $value
+    typed = shown($value)
   })
 
   const commit = () => {
@@ -29,7 +33,7 @@
       value.set(Math.min(max, Math.max(min, rounded)))
     }
     // Shows the clamped value, or puts back the old one if it wasn't a number
-    typed = $value
+    typed = shown($value)
   }
 
   // Enter commits the value and stays in the square, Escape drops what was typed and leaves it
@@ -38,8 +42,8 @@
     if (event.key === 'Enter') commit()
     if (event.key === 'Escape') {
       // Straight on the input, so leaving it doesn't fire a change with what was typed
-      input.value = String($value)
-      typed = $value
+      input.value = String(shown($value))
+      typed = shown($value)
       input.blur()
     }
   }

@@ -7,9 +7,12 @@ export type Event =
     | { type: "note", device: number, channel: number, notes: number[], amp: number, dur: number }
     | { type: "cc", device: number, channel: number, controller: number, value: number }
     | { type: "print", text: string }
+    // Sets the global q or cps when the tick is heard
+    | { type: "q", value: number }
+    | { type: "cps", value: number }
     // A value arrived on an input, setting the kth argument of the operation on the square
     | { type: "arg", square: number, k: number, text: string }
-    // An input or output on the square absorbed the cell, which still shows there for the tick
+    // An input or destination on the square absorbed the cell, which still shows there for the tick
     | { type: "absorb", square: number, cell: Cell }
 
 let queue: Event[] = []

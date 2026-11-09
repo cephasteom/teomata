@@ -52,7 +52,7 @@ export const setCells = (next: Cell[]) => {
 
 // Runs the grid through each rule in order, giving the new grid and the
 // events the rules queued, for the scheduler to send and show in time, and
-// the grid to show, which also has the cells absorbed by inputs and outputs
+// the grid to show, which also has the cells absorbed by inputs and destinations
 // on the tick, so they flash there before they go
 // Tick is the number of ticks since the transport started. Arguments set by
 // values arriving on inputs are kept at once, so the next tick runs on them

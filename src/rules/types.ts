@@ -60,9 +60,9 @@ export interface Param {
 }
 
 // Generators (uppercase) put out values on their own schedule, operators
-// (lowercase) change the values that arrive, and outputs (lowercase) send
+// (lowercase) change the values that arrive, and destinations (lowercase) send
 // them on as MIDI
-export type Kind = "generator" | "operator" | "output"
+export type Kind = "generator" | "operator" | "destination"
 
 // An operation's params, and how to build its rule from their arguments
 export interface Operation {

@@ -34,7 +34,7 @@ State lives in Svelte stores under `src/stores/`, shared by components and the s
 ## Rules (`src/rules/`)
 
 - `types.ts`: `Operation`, `Param`, `CellRule`, `GridRule`, `Context`, `Input`. `shared.ts`: param builders and helpers (`named`, `directionParam`, `rateParam`, `resetParam`, `argFrom`, `fires`, `isMoving`, mode params). `events.ts`: `emit` for `note`, `cc`, `print`, `arg`, `absorb` events (rules never send MIDI or print directly).
-- `index.ts`: the `operations` table (**case matters**: generators uppercase, operators/outputs lowercase), `withMode` (every operation gets a final `mode` param: `on`/`off`, outputs also `thru`), `paramsFor`, `labelFor`, `instructions`, and `rules = [move, applyRules]`.
+- `index.ts`: the `operations` table (**case matters**: generators uppercase, operators/destinations lowercase), `withMode` (every operation gets a final `mode` param: `on`/`off`, destinations also `thru`), `paramsFor`, `labelFor`, `instructions`, and `rules = [move, applyRules]`.
 - `applyRules` per tick: inputs take moving cells and set args, generators emit, then each square's built `CellRule` runs. Built rules persist until their operation or args change (rebuilt on tick 0), so they can keep state in closures; `keep`/`carry` hand state to a rebuilt rule, `stop` resets on transport stop.
 - `instructions.ts`: all `about` text (shown as HTML), keyed by letter.
 

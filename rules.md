@@ -4,7 +4,7 @@ Teomata is a grid of single-letter functions. On each step, each functions is ru
 
 ## Overview
 
-There are three types of functions: `Generators` emit values, `Operators` transform them, and `Outputs` send them as MIDI notes and control changes. Values can be bangs, numbers, or lists of numbers.
+There are three types of functions: `Generators` emit values, `Operators` transform them, and `Destinations` send them as MIDI notes and control changes. Values can be bangs, numbers, or lists of numbers.
 
 `Generators` emit values at a set rate and direction. Directions are compass points (`n`, `e`, `s`, `w`) or axes (`x`, `y`, `xy` for all directions), and a `?` after an axis picks a direction at random.
 
@@ -14,9 +14,9 @@ A `cycle` is one musical bar. Tempo is set in cycles per second (cps) using the 
 
 - **Generators** (uppercase, green outline)
 - **Operators** (lowercase, no outline)
-- **Outputs** (lowercase, blue outline)
+- **Destinations** (lowercase, blue outline)
 
-Every function takes `mode` as its final argument. Generators and operators can be `on` or `off`, while outputs can also be `thru`.
+Every function takes `mode` as its final argument. Generators and operators can be `on` or `off`, while destinations can also be `thru`.
 
 - **on**: the function works normally.
 - **off**: the function is greyed out and inactive. Values pass through unchanged, and a generator emits nothing.
@@ -56,7 +56,9 @@ Ctrl/Cmd+S saves the patch (its functions, arguments, inputs, cps and q) as a `.
 * **v** `value(value)`: Output a fixed value. Displayed as the number.
 * **w** `wave(type, freq)`: Output the current position of a waveform, from 0 to 1. Any incoming value outputs the waveform's value at that point in time. Displayed as the type, by name.
 
-## Outputs
+## Destinations
 
 * **n** `note(vel, dur, device, channel)`: Send incoming values as MIDI notes. Bangs are ignored. Notes play at velocity `vel` (0 to 127) for `dur` seconds, absorbing every value unless `mode` is thru. Numbers are rounded and wrapped to 0 to 127. Displayed as `n`.
 * **k** `knob(cc, device, channel)`: Send incoming value as MIDI CC messages. Bangs are ignored. Absorbs every value unless `mode` is thru. Numbers are rounded and wrapped to 0 to 127, and an array sends its first number. Displayed as `cc<number>`, e.g. `cc7`.
+* **q** `q()`: Set the global q to incoming values, rounded and clamped from 1 to 64. Bangs are ignored, and an array sets its first number. Absorbs every value unless `mode` is thru.
+* **t** `tempo()`: Set the global tempo (cps) to incoming values, clamped from 0.05 to 2. Bangs are ignored, and an array sets its first number. Absorbs every value unless `mode` is thru.
