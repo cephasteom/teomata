@@ -1,6 +1,6 @@
 import { writable, derived, get } from "svelte/store"
 import type { direction } from "./cells"
-import { SIZE } from "./global"
+import { SIZE, q } from "./global"
 import { operations, args, setArg, holdOperations, releaseOperations, fitExpansions } from "./operations"
 import { cursor, anchor, placeCursor } from "./cursor"
 import { snapshot, record, type Snapshot } from "./history"
@@ -41,17 +41,17 @@ export const openArea = derived([shownSquare, argSquares], ([$shown, $squares]):
 
 // An argument as it's kept, which is the result when it is arithmetic, such
 // as 1/8 for .125, giving a number the param takes, and as typed otherwise,
-// settled by the param when it takes it
+// settled by the param when it takes it. q stands for the ticks per bar
 const settled = (param: Param, text: string) => {
     const settle = param.settle ?? (text => text)
     if (param.accepts(text)) return settle(text)
-    const value = calculate(text)
+    const value = calculate(text, { q: get(q) })
     return value !== null && param.accepts(formatArg(value)) ? settle(formatArg(value)) : text
 }
 
 // What each argument square shows, keyed by square: a number with 2 decimal
 // places, apart from the one under the cursor, which shows as typed
-export const argCells = derived([editing, argSquares, operations, args, cursor], ([$editing, $squares, $operations, $args, $cursor]) => {
+export const argCells = derived([editing, argSquares, operations, args, cursor, q], ([$editing, $squares, $operations, $args, $cursor]) => {
     const shown = new Map<number, { text: string, valid: boolean }>()
     if ($editing === null) return shown
     const params = paramsFor($operations[$editing], SIZE)

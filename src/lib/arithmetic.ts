@@ -1,8 +1,9 @@
 // Works out arithmetic typed into an argument, such as 1/8 or (3+1)*2, with
-// +, -, *, /, % and ^ (power), brackets and signs, the usual way round.
-// Null when the text isn't arithmetic or doesn't come out a finite number
-export const calculate = (text: string): number | null => {
-    const tokens = text.match(/\d*\.?\d+(?:e[+-]?\d+)?|\d+\.|[-+*/%^()]|\S/gi) ?? []
+// +, -, *, /, % and ^ (power), brackets and signs, the usual way round, and
+// named variables, such as q/2 with q given. Null when the text isn't
+// arithmetic or doesn't come out a finite number
+export const calculate = (text: string, variables: Record<string, number> = {}): number | null => {
+    const tokens = text.match(/\d*\.?\d+(?:e[+-]?\d+)?|\d+\.|[a-z]\w*|[-+*/%^()]|\S/gi) ?? []
     let at = 0
     const peek = () => tokens[at]
     const take = () => tokens[at++]
@@ -28,7 +29,7 @@ export const calculate = (text: string): number | null => {
         const base = sign()
         return peek() === "^" ? (take(), base ** power()) : base
     }
-    // sign: ("+" | "-") sign | number | "(" sum ")"
+    // sign: ("+" | "-") sign | number | variable | "(" sum ")"
     const sign = (): number => {
         const token = take()
         if (token === "-") return -sign()
@@ -38,6 +39,7 @@ export const calculate = (text: string): number | null => {
             if (take() !== ")") throw new Error("unclosed bracket")
             return value
         }
+        if (token !== undefined && Object.hasOwn(variables, token)) return variables[token]
         if (token === undefined || !/^[\d.]/.test(token)) throw new Error("not a number")
         return Number(token)
     }
