@@ -57,6 +57,7 @@ export const about = {
         params: {
             root: "A note from a to g, with an optional # or b, e.g. c#.",
             type: "A chord by its two letter alias (ma, mi, au or di) or a scale or mode by its three letter alias (ion, dor, phrm lyd...). See the <a href=\"https://raw.githubusercontent.com/cephasteom/teomata/refs/heads/main/src/lib/harmony.ts\" target=\"_blank\" rel=\"noopener\">full list</a>.",
+            octave: "The octave to start in, from 0 to 8, so 3 starts at C3.",
             octaves: "Number of octaves from 1 to 8.",
         },
     },
