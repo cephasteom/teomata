@@ -26,7 +26,7 @@ Press Enter on a function to set its arguments. Arguments with fixed options can
 
 ## Inputs
 
-Alt+Shift+arrow expands a function to reveal its arguments on the grid. Set an argument by sending a value to its input.
+Alt+Shift+arrow expands a function to reveal its arguments on the grid. Set an argument by sending a value to its input. A bang on the input of an argument with fixed options steps it to the next option, wrapping around.
 
 ## Saving
 
@@ -44,7 +44,7 @@ Ctrl/Cmd+S saves the patch (its functions, arguments, inputs, cps and q) as a `.
 * **b** `bang()`: Convert any incoming value into a bang.
 * **c** `count(reset)`: Count each incoming value, outputting the count so far. `reset` clears the count every n cycles. `0` never resets; a bang on its input resets the count immediately. Displayed as `c`.
 * **d** `die()`: Nullify incoming values.
-* **e** `entangle(x, y)`: Entangle one square with another. Values arriving pass unchanged while the square is empty. Displayed as the entangled square if populated, or `e` while it's empty.
+* **e** `entangle(x, y)`: Entangle one square with another. Values arriving pass unchanged while the square is empty. Displayed as the entangled square if populated (in italics if that is a direction), or `e` while it's empty.
 * **g** `gate(match)`: Let through values that match a given value, nullify everything else. Bangs are 1. Values equal to `match` pass unchanged, and an array passes only when every one of its numbers matches. Displayed as `g`.
 * **h** `harmony(root, type, octaves)`: Output the notes of a chord or scale. A bang outputs all the notes, a number outputs the note at that index. `root` can be given as semitones above c, from `0` to `11`. Displayed as root and type, cut to 3 letters, e.g. `Cma` or `F#d`.
 * **m** `math(operator, num)`: Transform incoming values using math operators. Bangs are 1. Displayed as the operator.

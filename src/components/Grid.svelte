@@ -263,22 +263,25 @@
   // How each square's operation shows, such as Cma for a harmony or the next
   // number for a count. Some come from what the rules remember, so
   // they are worked out again each time the cells change
+  // An entangled square shows what the square it's entangled with shows,
+  // following entangled squares along, unless that's empty or loops back.
+  // Every other square shows its own
+  let shownFrom = $derived($operations.map((_, i) => {
+    const seen = new Set([i])
+    let to = entangledWith($operations[i], SIZE, $args[i])
+    while (to !== undefined && !seen.has(to) && $operations[to]) {
+      seen.add(to)
+      const next = entangledWith($operations[to], SIZE, $args[to])
+      if (next === undefined) return to
+      to = next
+    }
+    return i
+  }))
+
   let labels = $derived.by(() => {
     void $cells
     const own = $operations.map((letter, i) => letter ? labelFor(i, letter, SIZE, $args[i], !!$expansions[i]) : "")
-    // An entangled square shows what the square it's entangled with shows,
-    // following entangled squares along, unless that's empty or loops back
-    return own.map((label, i) => {
-      const seen = new Set([i])
-      let to = entangledWith($operations[i], SIZE, $args[i])
-      while (to !== undefined && !seen.has(to) && $operations[to]) {
-        seen.add(to)
-        const next = entangledWith($operations[to], SIZE, $args[to])
-        if (next === undefined) return own[to]
-        to = next
-      }
-      return label
-    })
+    return shownFrom.map(from => own[from])
   })
 
   // Each input square shows the argument it sets, greyed while its operation
@@ -459,7 +462,7 @@
         <span class="letter" class:off={$modes[$editing] === 'off'} style:--length={1}>{$operations[$editing]}</span>
       {:else if $operations[i]}
         <!-- A cell passing over its square inverts the label -->
-        <span class="letter" class:direction={$operations[i] === 'r'} class:off={$modes[i] === 'off'} style:--length={labels[i].length}>{labels[i]}</span>
+        <span class="letter" class:direction={$operations[shownFrom[i]] === 'r'} class:off={$modes[i] === 'off'} style:--length={labels[i].length}>{labels[i]}</span>
       {:else if input}
         <span class="arg" class:off={input.off} style:--length={Math.max(1, input.text.length)}>{input.text}</span>
       {/if}
@@ -622,7 +625,7 @@
     font-weight: bold;
   }
 
-  /* A rotate's direction shows in italics */
+  /* A rotate's direction shows in italics, and so does a square entangled with one */
   .letter.direction {
     font-style: italic;
   }

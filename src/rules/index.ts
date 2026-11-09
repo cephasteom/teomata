@@ -160,10 +160,12 @@ export const entangledWith = (letter: string, size: number, given?: string[]) =>
 
 // Takes the moving cells with numbers on the inputs of every operation, whatever
 // its mode, so one that's off can be turned back on, each setting its input's
-// argument to the number it brings, when the param takes it. Bangs pass over
-// every input, setting nothing, apart from those of params that take a bang,
-// which are taken and added to the names of the params banged on the square,
-// setting the argument the param's fromBang gives, if any.
+// argument to the number it brings, when the param takes it. Bangs on the
+// inputs of params that take a bang are taken and added to the names of the
+// params banged on the square, setting the argument the param's fromBang
+// gives, if any. Bangs on the inputs of other params with options are taken,
+// stepping the argument on to the next option, wrapped. Bangs pass over every
+// other input, setting nothing.
 // Gives the cells left and the arguments, queueing each one set for the
 // store, and each cell taken to show for the tick
 const takeInputs = (
@@ -177,9 +179,11 @@ const takeInputs = (
         const { owner, k } = input
         const param = paramsFor(letters[owner], size)[k]
         if (!param) return cell
-        if (cell.value === BANG && !param.bang) return cell
-        if (cell.value === BANG) bangs.set(owner, (bangs.get(owner) ?? new Set()).add(param.name))
-        const text = cell.value === BANG ? param.fromBang : argFrom(param, cell.value!)
+        if (cell.value === BANG && !param.bang && !param.options) return cell
+        if (cell.value === BANG && param.bang) bangs.set(owner, (bangs.get(owner) ?? new Set()).add(param.name))
+        const text = cell.value !== BANG ? argFrom(param, cell.value!)
+            : param.bang ? param.fromBang
+            : nextOption(param, argsFor(letters[owner], size, args[owner])[k])
         if (text !== undefined) {
             args[owner] = argsFor(letters[owner], size, args[owner])
             args[owner][k] = text
@@ -189,6 +193,13 @@ const takeInputs = (
         return {}
     })
     return { cells: left, args }
+}
+
+// The option after the argument a param has, wrapped to the first after the last
+const nextOption = (param: Param, text: string) => {
+    const options = param.options!
+    const at = options.indexOf(param.settle?.(text) ?? text)
+    return options[(at + 1) % options.length]
 }
 
 // What the rule on a square is given beside its cell: the params banged on the
