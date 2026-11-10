@@ -1,6 +1,5 @@
 import { mount } from 'svelte'
 import './reset.css'
-import '@fortawesome/fontawesome-free/css/all.min.css'
 import './app.css'
 import './stores/persist'
 import App from './App.svelte'

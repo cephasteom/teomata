@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
+  import Icon from "./Icon.svelte";
 
   interface Props {
     open: boolean
@@ -27,7 +28,7 @@
 <dialog bind:this={dialog} aria-label={label} onclose={() => open = false} {onclick}>
   <div class="content">
     <button class="close" onclick={() => open = false} title="Close" aria-label="Close">
-      <i class="fa-solid fa-xmark"></i>
+      <Icon name="xmark" />
     </button>
     {#if open}
       {@render children()}

@@ -4,6 +4,7 @@
   import NumberSquare from "./NumberSquare.svelte";
   import Modal from "./Modal.svelte";
   import Help from "./Help.svelte";
+  import Icon from "./Icon.svelte";
   import { clearCells, randomizeCells } from "../stores/cells";
   import { clearConsole } from "../stores/console";
   import { focusGrid } from "../lib/focus";
@@ -31,26 +32,26 @@
   {onfocusin} onfocusout={() => focused = null}
 >
   <button onclick={toggle} onkeydown={onplaykeydown} title={$isPlaying ? 'Stop' : 'Play'} aria-label={$isPlaying ? 'Stop' : 'Play'}>
-    <i class={['fa-solid', $isPlaying ? 'fa-stop' : 'fa-play']}></i>
+    <Icon name={$isPlaying ? 'stop' : 'play'} />
   </button>
   <button onclick={() => { clearCells(); clearConsole() }} title="Clear" aria-label="Clear">
-    <i class="fa-solid fa-eraser"></i>
+    <Icon name="eraser" />
   </button>
   <button onclick={randomizeCells} title="Random" aria-label="Random">
-    <i class="fa-solid fa-shuffle"></i>
+    <Icon name="shuffle" />
   </button>
   <button class:off={!$showConsole} onclick={() => showConsole.update(shown => !shown)}
     title={$showConsole ? 'Hide console' : 'Show console'} aria-label="Console" aria-pressed={$showConsole}
   >
-    <i class="fa-solid fa-terminal"></i>
+    <Icon name="terminal" />
   </button>
   <button class:off={!$showInstructions} onclick={() => showInstructions.update(shown => !shown)}
     title={$showInstructions ? 'Hide instructions' : 'Show instructions'} aria-label="Instructions" aria-pressed={$showInstructions}
   >
-    <i class="fa-solid fa-book"></i>
+    <Icon name="book" />
   </button>
   <button onclick={() => showHelp = true} title="Help" aria-label="Help" aria-haspopup="dialog">
-    <i class="fa-solid fa-question"></i>
+    <Icon name="question" />
   </button>
   <NumberSquare id="cps" label="cps" value={cps} min={MIN_CPS} max={MAX_CPS} step={0.05} places={2} row={7} />
   <NumberSquare id="q" label="q" value={q} min={MIN_Q} max={MAX_Q} step={1} places={0} row={8} />

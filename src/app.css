@@ -62,10 +62,6 @@ input {
   user-select: text;
 }
 
-.fa-solid {
-  font-size: var(--icon-size);
-}
-
 button {
   background: none;
   color: var(--page-text);
