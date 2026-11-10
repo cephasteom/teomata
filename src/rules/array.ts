@@ -1,7 +1,7 @@
 import { createValues } from "./value"
-import type { Operation, Param } from "./types"
-import { isNumber } from "./shared"
-import { about } from "./instructions"
+import type { Operation, Param } from "./_types"
+import { isNumber } from "./_shared"
+import { about } from "./_instructions"
 
 // One of the values, which may be left empty, when it's left out of the array
 const values: Param = {

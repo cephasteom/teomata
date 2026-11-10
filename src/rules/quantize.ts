@@ -1,9 +1,9 @@
-import type { CellRule, Operation } from "./types"
+import type { CellRule, Operation } from "./_types"
 import { BANG } from "../lib/utils"
 import { MAX_Q, MIN_Q } from "../stores/global"
-import { about } from "./instructions"
-import { emit } from "./events"
-import { isMoving } from "./shared"
+import { about } from "./_instructions"
+import { emit } from "./_events"
+import { isMoving } from "./_shared"
 
 // Sets the global q to each number that arrives, rounded and clamped. An
 // array sets its first number. Bangs are ignored, and every moving cell is absorbed

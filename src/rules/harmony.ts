@@ -1,7 +1,7 @@
 import { createValues } from "./value"
-import type { Operation, Param } from "./types"
-import { isWhole, named, wrapped } from "./shared"
-import { about } from "./instructions"
+import type { Operation, Param } from "./_types"
+import { isWhole, named, wrapped } from "./_shared"
+import { about } from "./_instructions"
 import { harmonies } from "../lib/harmony"
 
 // Semitones above C for each note name

@@ -1,9 +1,9 @@
 import { get } from "svelte/store"
 import { q } from "../stores/global"
 import type { Cell } from "../stores/cells"
-import type { CellRule, Operation, Param } from "./types"
-import { isMoving, isNumber, resetParam, resets } from "./shared"
-import { about } from "./instructions"
+import type { CellRule, Operation, Param } from "./_types"
+import { isMoving, isNumber, resetParam, resets } from "./_shared"
+import { about } from "./_instructions"
 
 // The cells recorded, by the tick of the loop they arrived on
 type Cache = Map<number, Cell>

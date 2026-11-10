@@ -5,7 +5,7 @@ import { operations, args, setArg, holdOperations, releaseOperations, fitExpansi
 import { cursor, anchor, placeCursor } from "./cursor"
 import { snapshot, record, type Snapshot } from "./history"
 import { argsFor, paramsFor, shownArgsFor } from "../rules"
-import type { Param } from "../rules/types"
+import type { Param } from "../rules/_types"
 import { calculate, formatArg, shortened } from "../lib/arithmetic"
 
 // The square whose operation has its arguments open for editing, or null
@@ -16,7 +16,7 @@ export const editing = writable<number | null>(null)
 // off the end, so they always fit to its right
 export const shownSquare = derived([editing, operations, args], ([$editing, $operations, $args]) => {
     if ($editing === null) return null
-    const count = shownArgsFor($operations[$editing], SIZE, $args[$editing]).length
+    const count = shownArgsFor($operations[$editing], $args[$editing]).length
     return $editing - Math.max(0, $editing % SIZE + count - (SIZE - 1))
 })
 
@@ -25,7 +25,7 @@ export const shownSquare = derived([editing, operations, args], ([$editing, $ope
 // fewer of them depending on what their arguments are
 export const argSquares = derived([editing, shownSquare, operations, args], ([$editing, $shown, $operations, $args]) => {
     if ($editing === null || $shown === null) return []
-    return shownArgsFor($operations[$editing], SIZE, $args[$editing]).map((_, at) => $shown + at + 1)
+    return shownArgsFor($operations[$editing], $args[$editing]).map((_, at) => $shown + at + 1)
 })
 
 type Area = { x1: number, x2: number, y1: number, y2: number }
@@ -54,8 +54,8 @@ const settled = (param: Param, text: string) => {
 export const argCells = derived([editing, argSquares, operations, args, cursor, q], ([$editing, $squares, $operations, $args, $cursor]) => {
     const shown = new Map<number, { text: string, valid: boolean }>()
     if ($editing === null) return shown
-    const params = paramsFor($operations[$editing], SIZE)
-    const shownArgs = shownArgsFor($operations[$editing], SIZE, $args[$editing])
+    const params = paramsFor($operations[$editing])
+    const shownArgs = shownArgsFor($operations[$editing], $args[$editing])
     $squares.forEach((square, at) => {
         const k = shownArgs[at]
         const text = $args[$editing][k] ?? params[k].fallback
@@ -102,7 +102,7 @@ export const openArgs = (
     beforeEdit = before
     args.update(args => {
         const next = [...args]
-        for (const i of targets) next[i] = argsFor(operation, SIZE, args[i])
+        for (const i of targets) next[i] = argsFor(operation, args[i])
         return next
     })
     selectedFrom = get(anchor)
@@ -117,7 +117,7 @@ const settleArg = () => {
     const square = get(editing)
     const k = cursorArg()
     if (square === null || k < 0) return
-    const param = paramsFor(get(operations)[square], SIZE)[k]
+    const param = paramsFor(get(operations)[square])[k]
     const text = get(args)[square][k]
     if (param && text !== undefined && settled(param, text) !== text) setArg(targets, k, settled(param, text))
 }
@@ -169,7 +169,7 @@ export const stepArg = (by: 1 | -1) => {
     const square = get(editing)
     const k = cursorArg()
     if (square === null || k < 0) return
-    const param = paramsFor(get(operations)[square], SIZE)[k]
+    const param = paramsFor(get(operations)[square])[k]
     const options = param?.options
     if (!options) return
     const at = options.indexOf(settled(param, get(args)[square][k] ?? param.fallback).toLowerCase())
@@ -183,7 +183,7 @@ export const stepArg = (by: 1 | -1) => {
 export const cursorArg = () => {
     const square = get(editing)
     const at = get(argSquares).indexOf(get(cursor))
-    return square === null || at < 0 ? -1 : shownArgsFor(get(operations)[square], SIZE, get(args)[square])[at]
+    return square === null || at < 0 ? -1 : shownArgsFor(get(operations)[square], get(args)[square])[at]
 }
 
 // Types a key into the argument under the cursor

@@ -3,8 +3,8 @@ import { SIZE } from "./global"
 import type { direction } from "./cells"
 import { opposite, step } from "../lib/utils"
 import { argsFor, inputParamsFor, modeOf, paramsFor } from "../rules"
-import { isModeParam } from "../rules/shared"
-import type { Input } from "../rules/types"
+import { isModeParam } from "../rules/_shared"
+import type { Input } from "../rules/_types"
 
 // One operation per square, or "" for none. Operations belong to the square rather
 // than the cell on it, so they stay put while cells move over them.
@@ -22,7 +22,7 @@ export const args = writable<string[][]>(
 // that's off stays on its square but does nothing, and keeps what it remembers,
 // until it is on again
 export const modes = derived([operations, args], ([$operations, $args]) =>
-    $operations.map((letter, i) => modeOf(letter, SIZE, $args[i]))
+    $operations.map((letter, i) => modeOf(letter, $args[i]))
 )
 
 // How far each square's operation reaches out into inputs, in a line from its
@@ -51,7 +51,7 @@ export const inputs = derived([expansions, operations, args], ([$expansions, $op
     const map = new Map<number, Input>()
     $expansions.forEach((expansion, owner) => {
         if (!expansion) return
-        const params = inputParamsFor($operations[owner], SIZE, $args[owner])
+        const params = inputParamsFor($operations[owner], $args[owner])
         inputSquares(owner, expansion).forEach((square, j) => {
             if (params[j] !== undefined) map.set(square, { owner, k: params[j] })
         })
@@ -69,7 +69,7 @@ export const fitExpansions = () => {
     const taken = new Set<number>()
     const fitted = get(expansions).map((expansion, i) => {
         if (!expansion) return null
-        const most = Math.min(expansion.length, inputParamsFor($operations[i], SIZE, $args[i]).length)
+        const most = Math.min(expansion.length, inputParamsFor($operations[i], $args[i]).length)
         const squares = inputSquares(i, { ...expansion, length: most })
         const free = squares.findIndex(square => $operations[square] || taken.has(square))
         const length = free < 0 ? squares.length : free
@@ -90,7 +90,7 @@ export const fitExpansions = () => {
 // one, which for an array is each value given and its mode
 export const expand = (square: number, direction: direction) => {
     const $operations = get(operations)
-    const most = inputParamsFor($operations[square], SIZE, get(args)[square]).length
+    const most = inputParamsFor($operations[square], get(args)[square]).length
     const current = get(expansions)[square]
     const own = new Set(current ? inputSquares(square, current) : [])
     let next: Expansion | null
@@ -115,7 +115,7 @@ export const expand = (square: number, direction: direction) => {
 export const setInputArg = (square: number, k: number, text: string) => {
     args.update(args => {
         const next = [...args]
-        next[square] = argsFor(get(operations)[square], SIZE, next[square])
+        next[square] = argsFor(get(operations)[square], next[square])
         next[square][k] = text
         return next
     })
@@ -130,14 +130,14 @@ export const stepModes = (squares: Iterable<number>, from: number) => {
     const list = [...squares].filter(i => $operations[i])
     if (!list.length) return
     const at = $operations[from] ? from : list[0]
-    const options = paramsFor($operations[at], SIZE).find(isModeParam)!.options!
+    const options = paramsFor($operations[at]).find(isModeParam)!.options!
     const mode = options[(options.indexOf(get(modes)[at]) + 1) % options.length]
     args.update(args => {
         const next = [...args]
         for (const i of list) {
-            const params = paramsFor($operations[i], SIZE)
+            const params = paramsFor($operations[i])
             const k = params.findIndex(isModeParam)
-            next[i] = argsFor($operations[i], SIZE, next[i])
+            next[i] = argsFor($operations[i], next[i])
             next[i][k] = params[k].accepts(mode) ? mode : params[k].fallback
         }
         return next

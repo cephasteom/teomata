@@ -15,7 +15,7 @@
   } from "../stores/editing";
   import { snapshot, record, change, undo, redo } from "../stores/history";
   import { paramsFor, argsFor, kindOf, labelFor, entangledWith } from "../rules";
-  import { isModeParam } from "../rules/shared";
+  import { isModeParam } from "../rules/_shared";
   import { shortened } from "../lib/arithmetic";
   import { toggle } from "../scheduler";
   import { savePatch, openPatch } from "../stores/patch";
@@ -268,10 +268,10 @@
   // Every other square shows its own
   let shownFrom = $derived($operations.map((_, i) => {
     const seen = new Set([i])
-    let to = entangledWith($operations[i], SIZE, $args[i])
+    let to = entangledWith($operations[i], $args[i])
     while (to !== undefined && !seen.has(to) && $operations[to]) {
       seen.add(to)
-      const next = entangledWith($operations[to], SIZE, $args[to])
+      const next = entangledWith($operations[to], $args[to])
       if (next === undefined) return to
       to = next
     }
@@ -280,7 +280,7 @@
 
   let labels = $derived.by(() => {
     void $cells
-    const own = $operations.map((letter, i) => letter ? labelFor(i, letter, SIZE, $args[i], !!$expansions[i]) : "")
+    const own = $operations.map((letter, i) => letter ? labelFor(i, letter, $args[i], !!$expansions[i]) : "")
     return shownFrom.map(from => own[from])
   })
 
@@ -288,7 +288,7 @@
   // is off. They go while arguments are open
   let inputLabels = $derived($editing === null
     ? new Map([...$inputs].map(([square, { owner, k }]) => {
-      const text = shortened(argsFor($operations[owner], SIZE, $args[owner])[k] ?? '')
+      const text = shortened(argsFor($operations[owner], $args[owner])[k] ?? '')
       return [square, { text, off: $modes[owner] === 'off' }]
     }))
     : new Map<number, { text: string, off: boolean }>())
@@ -405,7 +405,7 @@
       change(() => stepModes($selection, $cursor))
     } else if (event.key === 'Enter') {
       // Only an operation with params has arguments to open
-      if (paramsFor($operations[$cursor], SIZE).length) openArgs($cursor, $selection)
+      if (paramsFor($operations[$cursor]).length) openArgs($cursor, $selection)
     } else if (direction) {
       // Stop the arrow keys from scrolling the page
       event.preventDefault()
@@ -419,7 +419,7 @@
       // A typed operation opens its arguments, when it has any besides its
       // mode, and only starts running once they close, when it can be undone
       // along with them
-      if (paramsFor(event.key, SIZE).some(param => !isModeParam(param))) openArgs($cursor, $selection, before)
+      if (paramsFor(event.key).some(param => !isModeParam(param))) openArgs($cursor, $selection, before)
       else record(before)
     } else if (event.key === 'Backspace' || event.key === 'Delete') {
       change(() => setOperations($selection, ""))

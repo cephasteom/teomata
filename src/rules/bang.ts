@@ -1,7 +1,7 @@
 import { BANG, headingOf, aim, type heading } from "../lib/utils"
-import type { Operation, CellRule } from "./types"
-import { rateParam, directionParam, fires, isMoving } from "./shared"
-import { about } from "./instructions"
+import type { Operation, CellRule } from "./_types"
+import { rateParam, directionParam, fires, isMoving } from "./_shared"
+import { about } from "./_instructions"
 
 // Puts out a new cell with a bang heading in the given direction, rate times
 // per cycle, for applyRules to put on the neighbouring square

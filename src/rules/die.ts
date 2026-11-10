@@ -1,5 +1,5 @@
-import type { CellRule, Operation } from "./types"
-import { about } from "./instructions"
+import type { CellRule, Operation } from "./_types"
+import { about } from "./_instructions"
 
 // Nullifies whatever cell is on the square
 const createDie = (): CellRule => () => ({})

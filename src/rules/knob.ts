@@ -1,9 +1,9 @@
-import type { CellRule, Operation, Param } from "./types"
+import type { CellRule, Operation, Param } from "./_types"
 import { BANG } from "../lib/utils"
-import { emit } from "./events"
-import { channelParam, deviceParam, isMoving, isWhole } from "./shared"
+import { emit } from "./_events"
+import { channelParam, deviceParam, isMoving, isWhole } from "./_shared"
 import { toMidi } from "./note"
-import { about } from "./instructions"
+import { about } from "./_instructions"
 
 // Sends each number that arrives as a MIDI CC message on the device, channel
 // and controller. An array sends its first number. Bangs are ignored, and

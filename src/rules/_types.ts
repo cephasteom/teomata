@@ -6,7 +6,7 @@ export type Input = { owner: number, k: number }
 
 // Inputs are keyed by the square they sit on
 export type GridRule = (
-    cells: Cell[], size: number, operations: string[], args: string[][],
+    cells: Cell[], operations: string[], args: string[][],
     inputs: Map<number, Input>, tick: number,
 ) => Cell[]
 
@@ -29,8 +29,8 @@ export type CellRule = ((cell: Cell, tick: number, context: Context) => Cell) & 
     // Called when the transport stops, to put back what the rule remembers
     stop?: () => void
     // The square whose cell is copied onto this one each tick, once every
-    // other square's rule has run, given the grid's size
-    entangled?: (size: number) => number
+    // other square's rule has run
+    entangled?: () => number
 }
 
 export interface Param {

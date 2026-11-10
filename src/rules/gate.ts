@@ -1,7 +1,7 @@
 import { toNumber } from "../lib/utils"
-import type { CellRule, Operation, Param } from "./types"
-import { isMoving, isNumber } from "./shared"
-import { about } from "./instructions"
+import type { CellRule, Operation, Param } from "./_types"
+import { isMoving, isNumber } from "./_shared"
+import { about } from "./_instructions"
 
 // Lets through a moving cell whose value matches, and empties the cell when it
 // doesn't. An array value matches when every one of its numbers does, and a

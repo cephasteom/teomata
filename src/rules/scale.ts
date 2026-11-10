@@ -1,7 +1,7 @@
 import { toNumber } from "../lib/utils"
-import type { CellRule, Operation, Param } from "./types"
-import { isMoving, isNumber } from "./shared"
-import { about } from "./instructions"
+import type { CellRule, Operation, Param } from "./_types"
+import { isMoving, isNumber } from "./_shared"
+import { about } from "./_instructions"
 
 const rangeParam = (name: string, about: string, fallback: string): Param => ({ name, about, fallback, accepts: isNumber })
 

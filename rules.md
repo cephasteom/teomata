@@ -1,14 +1,14 @@
 # Teomata
 
-Teomata is a grid of single-letter functions. On each step, each functions is run to determine the grid's next state, generating cellular automata for MIDI.
+Teomata is a grid of single-letter functions. On each step, each function is run to determine the grid's next state.
 
 ## Overview
 
-There are three types of functions: `Generators` emit values, `Operators` transform them, and `Destinations` send them as MIDI notes and control changes. Values can be bangs, numbers, or lists of numbers.
+There are three types of functions: `Generators` emit values, `Operators` transform them, and `Destinations` are MIDI devices and global parameters. Values can be bangs, numbers, or lists of numbers.
 
 `Generators` emit values at a set rate and direction. Directions are compass points (`n`, `e`, `s`, `w`) or axes (`x`, `y`, `xy` for all directions), and a `?` after an axis picks a direction at random.
 
-A `cycle` is one musical bar. Tempo is set in cycles per second (cps) using the control on the left, and `q` (quantize) sets the number of divisions per cycle.
+A `cycle` is one musical bar. `cps` sets the number of cycles per second (cps), and `q` (quantize) sets the number of divisions per cycle.
 
 ## Functions
 
@@ -24,11 +24,9 @@ Every function takes `mode` as its final argument. Generators and operators can 
 
 Press Enter on a function to set its arguments. Arguments with fixed options can be cycled through using the cursor keys. Press Enter or Esc to return to the main view. Press Shift+Enter to cycle through a functions's modes.
 
-## Inputs
+Alt+Shift+arrow expands a function to reveal its arguments on the grid. Set an argument by sending a value to its input. Some arguments also accepts bangs.
 
-Alt+Shift+arrow expands a function to reveal its arguments on the grid. Set an argument by sending a value to its input. A bang on the input of an argument with fixed options steps it to the next option, wrapping around.
-
-## Saving
+## Save and Load
 
 Ctrl/Cmd+S saves the patch (its functions, arguments, inputs, cps and q) as a `.txt` file, and Ctrl/Cmd+O opens one. Opening replaces the grid's functions and empties its cells, and can be undone.
 
@@ -58,7 +56,7 @@ Ctrl/Cmd+S saves the patch (its functions, arguments, inputs, cps and q) as a `.
 
 ## Destinations
 
-* **n** `note(vel, dur, device, channel)`: Send incoming values as MIDI notes. Bangs are ignored. Notes play at velocity `vel` (0 to 127) for `dur` seconds, absorbing every value unless `mode` is thru. Numbers are rounded and wrapped to 0 to 127. Displayed as `n`.
-* **k** `knob(cc, device, channel)`: Send incoming value as MIDI CC messages. Bangs are ignored. Absorbs every value unless `mode` is thru. Numbers are rounded and wrapped to 0 to 127, and an array sends its first number. Displayed as `cc<number>`, e.g. `cc7`.
-* **q** `q()`: Set the global q to incoming values, rounded and clamped from 1 to 64. Bangs are ignored, and an array sets its first number. Absorbs every value unless `mode` is thru.
-* **t** `tempo()`: Set the global tempo (cps) to incoming values, clamped from 0.05 to 2. Bangs are ignored, and an array sets its first number. Absorbs every value unless `mode` is thru.
+* **n** `note(vel, dur, device, channel)`: Send incoming values as MIDI notes. Bangs are ignored. Notes play at velocity `vel` (0 to 127) for `dur` seconds. Numbers are rounded and wrapped to 0 to 127. Displayed as `n`.
+* **k** `knob(cc, device, channel)`: Send incoming value as MIDI CC messages. Bangs are ignored. Numbers are rounded and wrapped to 0 to 127, and an array sends its first number. Displayed as `cc<number>`, e.g. `cc7`.
+* **q** `q()`: Set the global q, rounded and clamped from 1 to 64.
+* **t** `tempo()`: Set the global tempo (cps), clamped from 0.05 to 2. Bangs are ignored, and an array sets its first number.

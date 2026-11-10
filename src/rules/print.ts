@@ -1,8 +1,8 @@
-import type { CellRule, Operation } from "./types"
-import { about } from "./instructions"
+import type { CellRule, Operation } from "./_types"
+import { about } from "./_instructions"
 import { formatValue } from "../stores/console"
-import { emit } from "./events"
-import { isMoving } from "./shared"
+import { emit } from "./_events"
+import { isMoving } from "./_shared"
 
 // Prints the value of each moving cell that arrives to the console, leaving the cell alone
 const createPrint = (): CellRule => cell => {

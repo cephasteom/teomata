@@ -2,8 +2,8 @@ import { get } from "svelte/store"
 import { q } from "../stores/global"
 import { headings, headingOf, isHeading } from "../lib/utils"
 import { formatArg } from "../lib/arithmetic"
-import { mode, destinationMode } from "./instructions"
-import type { Context, Param } from "./types"
+import { mode, destinationMode } from "./_instructions"
+import type { Context, Param } from "./_types"
 
 export const isNumber = (text: string) => text !== "" && Number.isFinite(Number(text))
 

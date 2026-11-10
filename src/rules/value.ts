@@ -1,7 +1,7 @@
 import { BANG, headingOf, aim, type heading } from "../lib/utils"
-import type { CellRule, Operation, Param } from "./types"
-import { rateParam, directionParam, fires, isMoving, isNumber } from "./shared"
-import { about } from "./instructions"
+import type { CellRule, Operation, Param } from "./_types"
+import { rateParam, directionParam, fires, isMoving, isNumber } from "./_shared"
+import { about } from "./_instructions"
 
 // values(): gives each value arriving one of the given values, keeping its
 // direction. A single value is given as it is. With more than one, a bang or

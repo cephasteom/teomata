@@ -1,6 +1,6 @@
-import type { CellRule, Operation } from "./types"
-import { isMoving, resetParam, resets } from "./shared"
-import { about } from "./instructions"
+import type { CellRule, Operation } from "./_types"
+import { isMoving, resetParam, resets } from "./_shared"
+import { about } from "./_instructions"
 
 // Counts each value arriving and gives it the count so far. The count goes
 // back to 0 every reset cycles, on the first division of the cycle, and when

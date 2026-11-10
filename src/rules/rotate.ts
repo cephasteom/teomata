@@ -1,7 +1,7 @@
 import { aim, headingOf, type heading } from "../lib/utils"
-import type { CellRule, Operation } from "./types"
-import { directionParam } from "./shared"
-import { about } from "./instructions"
+import type { CellRule, Operation } from "./_types"
+import { directionParam } from "./_shared"
+import { about } from "./_instructions"
 
 // Turns a moving cell to face the given direction, or every one along an
 // axis, splitting it on its next step, or a random one along an axis with a ?

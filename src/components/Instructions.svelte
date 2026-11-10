@@ -1,10 +1,10 @@
 <script lang="ts">
   import { instructions } from "../rules";
-  import { isModeParam } from "../rules/shared";
+  import { isModeParam } from "../rules/_shared";
   import { gridFocused, cursor } from "../stores/cursor";
   import { editing } from "../stores/editing";
   import { operations, inputs } from "../stores/operations";
-  import type { Param } from "../rules/types";
+  import type { Param } from "../rules/_types";
 
   let focused = $derived($gridFocused 
     ? $operations[$editing ?? $inputs.get($cursor)?.owner ?? $cursor] ?? "" 

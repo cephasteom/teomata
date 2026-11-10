@@ -3,7 +3,7 @@ import { SIZE } from "./global"
 import { rules } from "../rules"
 import { appliedOperations, setInputArg } from "./operations"
 import { randomDirection, randomValue } from "../lib/utils"
-import { drain } from "../rules/events"
+import { drain } from "../rules/_events"
 
 export type direction = 'n' | 's' | 'e' | 'w' 
 // A bang, which for now counts as a 1 wherever a number is needed
@@ -59,7 +59,7 @@ export const setCells = (next: Cell[]) => {
 export const stepCells = (tick: number) => {
     // The operations being edited run as they were until their arguments close
     const { operations: letters, args: given, inputs } = appliedOperations()
-    grid = rules.reduce((cells, rule) => rule(cells, SIZE, letters, given, inputs, tick), grid)
+    grid = rules.reduce((cells, rule) => rule(cells, letters, given, inputs, tick), grid)
     const events = drain()
     const shown = [...grid]
     for (const event of events) {

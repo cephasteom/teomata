@@ -1,7 +1,7 @@
 import { toNumber } from "../lib/utils"
-import type { CellRule, Operation, Param } from "./types"
-import { isMoving, isNumber, named } from "./shared"
-import { about } from "./instructions"
+import type { CellRule, Operation, Param } from "./_types"
+import { isMoving, isNumber, named } from "./_shared"
+import { about } from "./_instructions"
 
 // Tests a number against num, which only ! goes without
 type Test = (value: number, num: number) => boolean

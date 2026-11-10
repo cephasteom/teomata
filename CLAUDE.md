@@ -33,9 +33,12 @@ State lives in Svelte stores under `src/stores/`, shared by components and the s
 
 ## Rules (`src/rules/`)
 
-- `types.ts`: `Operation`, `Param`, `CellRule`, `GridRule`, `Context`, `Input`. `shared.ts`: param builders and helpers (`named`, `directionParam`, `rateParam`, `resetParam`, `argFrom`, `fires`, `isMoving`, mode params). `events.ts`: `emit` for `note`, `cc`, `print`, `arg`, `absorb` events (rules never send MIDI or print directly).
-- `index.ts`: the `operations` table (**case matters**: generators uppercase, operators/destinations lowercase), `withMode` (every operation gets a final `mode` param: `on`/`off`, destinations also `thru`), `paramsFor`, `labelFor`, `instructions`, and `rules = [move, applyRules]`.
-- `applyRules` per tick: inputs take moving cells and set args, generators emit, then each square's built `CellRule` runs. Built rules persist until their operation or args change (rebuilt on tick 0), so they can keep state in closures; `keep`/`carry` hand state to a rebuilt rule, `stop` resets on transport stop.
-- `instructions.ts`: all `about` text (shown as HTML), keyed by letter.
+- `_types.ts`: `Operation`, `Param`, `CellRule`, `GridRule`, `Context`, `Input`. `_shared.ts`: param builders and helpers (`named`, `directionParam`, `rateParam`, `resetParam`, `argFrom`, `fires`, `isMoving`, mode params). `_events.ts`: `emit` for `note`, `cc`, `print`, `arg`, `absorb` events (rules never send MIDI or print directly).
+- `index.ts`: re-exports only, plus `rules = [move, step]`.
+- `_registry.ts`: the `operations` table (**case matters**: generators uppercase, operators/destinations lowercase), `withMode` (every operation gets a final `mode` param: `on`/`off`, destinations also `thru`), `kindOf`, `instructions`.
+- `_args.ts`: pure param/arg helpers (`paramsFor`, `argsFor`, `modeOf`, ...). `typed` is what the user entered; `args` has defaults filled in.
+- `_ruleCache.ts`: each square's built `CellRule`, kept until its operation or args change (cleared on tick 0), so rules can keep state in closures; `keep`/`carry` hand state to a rebuilt rule, `stop` resets on transport stop. Also `labelFor`.
+- `_tick.ts`: `step` per tick: inputs take moving cells and set args, generators emit, inputs again, each square's rule runs, then entangled squares copy.
+- `_instructions.ts`: all `about` text (shown as HTML), keyed by letter.
 
-To add an operation: write it in its own file exporting an `Operation`, add its `about` text to `instructions.ts`, register it in `operations` in `index.ts`, and add a short entry to `rules.md`.
+To add an operation: write it in its own file exporting an `Operation`, add its `about` text to `_instructions.ts`, register it in `operations` in `_registry.ts`, and add a short entry to `rules.md`.

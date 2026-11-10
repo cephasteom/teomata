@@ -1,8 +1,8 @@
-import type { CellRule, Operation, Param } from "./types"
+import type { CellRule, Operation, Param } from "./_types"
 import { BANG } from "../lib/utils"
-import { emit } from "./events"
-import { channelParam, deviceParam, isMoving, isNumber } from "./shared"
-import { about } from "./instructions"
+import { emit } from "./_events"
+import { channelParam, deviceParam, isMoving, isNumber } from "./_shared"
+import { about } from "./_instructions"
 
 // Rounds a number and wraps it into MIDI's 0 to 127, so 128 is 0 and -1 is 127
 export const toMidi = (n: number) => ((Math.round(n) % 128) + 128) % 128
