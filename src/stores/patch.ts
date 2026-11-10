@@ -6,6 +6,7 @@ import { clearCells } from "./cells"
 import { printLine } from "./console"
 import { inRange, isExpansion } from "./persist"
 import { kindOf } from "../rules"
+import { toIndex, toXY } from "../lib/utils"
 
 // A patch is the grid's operations, their arguments and inputs, with the tempo
 // and quantize, saved as a text file of JSON. Only squares with an operation
@@ -27,7 +28,7 @@ const write = () => {
     const squares: Square[] = []
     $operations.forEach((operation, i) => {
         if (!operation) return
-        const square: Square = { x: i % SIZE, y: Math.floor(i / SIZE), operation }
+        const square: Square = { ...toXY(i), operation }
         if ($args[i].length) square.args = $args[i]
         if ($expansions[i]) square.inputs = $expansions[i]!
         squares.push(square)
@@ -83,7 +84,7 @@ const load = (patch: Patch) => {
         const $args: string[][] = Array.from({ length: SIZE * SIZE }, () => [])
         const $expansions: (Expansion | null)[] = Array.from({ length: SIZE * SIZE }, () => null)
         for (const square of patch.squares) {
-            const i = square.y * SIZE + square.x
+            const i = toIndex(square.x, square.y)
             $operations[i] = square.operation
             $args[i] = square.args ?? []
             $expansions[i] = square.inputs ?? null

@@ -1,7 +1,7 @@
 import { writable, derived, get } from "svelte/store"
 import { SIZE } from "./global"
 import type { direction } from "./cells"
-import { step, stepAround } from "../lib/utils"
+import { step, stepAround, boundsOf, toIndex } from "../lib/utils"
 
 // Whether the grid has focus. The cursor and selection only show while it does
 export const gridFocused = writable<boolean>(false)
@@ -14,17 +14,13 @@ export const cursor = writable<number>(0)
 export const anchor = writable<number>(0)
 
 // The selected rectangle's corners, as inclusive columns and rows
-export const bounds = derived([cursor, anchor], ([$cursor, $anchor]) => {
-    const [x1, x2] = [$cursor % SIZE, $anchor % SIZE].sort((a, b) => a - b)
-    const [y1, y2] = [Math.floor($cursor / SIZE), Math.floor($anchor / SIZE)].sort((a, b) => a - b)
-    return { x1, x2, y1, y2 }
-})
+export const bounds = derived([cursor, anchor], ([$cursor, $anchor]) => boundsOf([$cursor, $anchor]))
 
 // Indices of every selected square
 export const selection = derived(bounds, ({ x1, x2, y1, y2 }) => {
     const squares = new Set<number>()
     for (let y = y1; y <= y2; y++) {
-        for (let x = x1; x <= x2; x++) squares.add(y * SIZE + x)
+        for (let x = x1; x <= x2; x++) squares.add(toIndex(x, y))
     }
     return squares
 })

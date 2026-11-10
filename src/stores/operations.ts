@@ -1,7 +1,7 @@
 import { writable, derived, get } from "svelte/store"
 import { SIZE } from "./global"
 import type { direction } from "./cells"
-import { opposite, step } from "../lib/utils"
+import { opposite, step, type Rect } from "../lib/utils"
 import { argsFor, inputParamsFor, modeOf, paramsFor } from "../rules"
 import { isModeParam } from "../rules/_shared"
 import type { Input } from "../rules/_types"
@@ -234,10 +234,8 @@ type Copied = {
 }
 let clipboard: Copied | null = null
 
-type Rectangle = { x1: number, x2: number, y1: number, y2: number }
-
 // Copies the operations, arguments and inputs in the rectangle, empty squares included
-export const copyOperations = ({ x1, x2, y1, y2 }: Rectangle) => {
+export const copyOperations = ({ x1, x2, y1, y2 }: Rect) => {
     const [$operations, $args, $expansions] = [get(operations), get(args), get(expansions)]
     const squares: number[] = []
     for (let y = y1; y <= y2; y++) {
@@ -255,7 +253,7 @@ export const copyOperations = ({ x1, x2, y1, y2 }: Rectangle) => {
 // Pastes the copied rectangle with its top left corner on the square, over
 // whatever is there. Whatever would reach past the edge is cut off. Returns
 // the rectangle it pasted into, or null when nothing has been copied
-export const pasteOperations = (x: number, y: number): Rectangle | null => {
+export const pasteOperations = (x: number, y: number): Rect | null => {
     if (!clipboard) return null
     const { width, height } = clipboard
     const pasted = { x1: x, x2: Math.min(x + width, SIZE) - 1, y1: y, y2: Math.min(y + height, SIZE) - 1 }

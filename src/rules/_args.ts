@@ -50,3 +50,17 @@ export const entangledWith = (letter: string, typed?: string[]) => {
     const [x, y] = argsFor(letter, typed).map(Number)
     return y * SIZE + x
 }
+
+// The square at the end of i's chain of entanglements, or i itself when the
+// chain is empty, reaches an empty square, or loops back
+export const resolveEntangled = (i: number, operations: string[], args: string[][]) => {
+    const seen = new Set([i])
+    let to = entangledWith(operations[i], args[i])
+    while (to !== undefined && !seen.has(to) && operations[to]) {
+        seen.add(to)
+        const next = entangledWith(operations[to], args[to])
+        if (next === undefined) return to
+        to = next
+    }
+    return i
+}

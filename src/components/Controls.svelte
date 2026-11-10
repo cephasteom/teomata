@@ -6,6 +6,7 @@
   import Help from "./Help.svelte";
   import { clearCells, randomizeCells } from "../stores/cells";
   import { clearConsole } from "../stores/console";
+  import { focusGrid } from "../lib/focus";
 
   let focused = $state<number | null>(null)
   let showHelp = $state(false)
@@ -13,7 +14,7 @@
   const onplaykeydown = (event: KeyboardEvent) => {
     if (event.key === 'Tab' && event.shiftKey) {
       event.preventDefault()
-      document.querySelector<HTMLElement>('[aria-label="Grid"]')?.focus({ preventScroll: true })
+      focusGrid()
     }
   }
 

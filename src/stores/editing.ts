@@ -7,6 +7,7 @@ import { snapshot, record, type Snapshot } from "./history"
 import { argsFor, paramsFor, shownArgsFor } from "../rules"
 import type { Param } from "../rules/_types"
 import { calculate, formatArg, shortened } from "../lib/arithmetic"
+import { boundsOf, type Rect } from "../lib/utils"
 
 // The square whose operation has its arguments open for editing, or null
 export const editing = writable<number | null>(null)
@@ -28,16 +29,10 @@ export const argSquares = derived([editing, shownSquare, operations, args], ([$e
     return shownArgsFor($operations[$editing], $args[$editing]).map((_, at) => $shown + at + 1)
 })
 
-type Area = { x1: number, x2: number, y1: number, y2: number }
-
 // The open row of squares, the operation's with its arguments', as an
 // inclusive rectangle. Null when no arguments are open
-export const openArea = derived([shownSquare, argSquares], ([$shown, $squares]): Area | null => {
-    if ($shown === null) return null
-    const columns = [$shown, ...$squares].map(square => square % SIZE)
-    const y = Math.floor($shown / SIZE)
-    return { x1: Math.min(...columns), x2: Math.max(...columns), y1: y, y2: y }
-})
+export const openArea = derived([shownSquare, argSquares], ([$shown, $squares]): Rect | null =>
+    $shown === null ? null : boundsOf([$shown, ...$squares]))
 
 // An argument as it's kept, which is the result when it is arithmetic, such
 // as 1/8 for .125, giving a number the param takes, and as typed otherwise,

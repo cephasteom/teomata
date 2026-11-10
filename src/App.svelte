@@ -1,11 +1,12 @@
 <script>
   import Controls from "./components/Controls.svelte";
-  import Grid from "./components/Grid.svelte";
+  import Grid from "./components/Grid/Grid.svelte";
   import Instructions from "./components/Instructions.svelte";
   import Console from "./components/Console.svelte";
   import Devices from "./components/Devices.svelte";
-  import { DEFAULT_ZOOM, SIZE, zoom, showConsole, showInstructions } from "./stores/global";
+  import { DEFAULT_ZOOM, zoom, showConsole, showInstructions } from "./stores/global";
   import { cursor } from "./stores/cursor";
+  import { toXY } from "./lib/utils";
 
   // The squares the grid's window shows per side, on the root, so the grid
   // and the controls can both size against it
@@ -29,7 +30,7 @@
     {/if}
     <Grid />
     <!-- The cursor's column and row, as entangle takes them -->
-    <div class="position">{$cursor % SIZE},{Math.floor($cursor / SIZE)}</div>
+    <div class="position">{toXY($cursor).x},{toXY($cursor).y}</div>
     {#if $showInstructions}
       <Instructions />
     {/if}

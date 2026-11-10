@@ -27,9 +27,9 @@ State lives in Svelte stores under `src/stores/`, shared by components and the s
 - `stores/history.ts`: undo/redo of operations, args and expansions, via `change(make)` or `snapshot()`/`record()`.
 - `stores/console.ts`: lines printed by `p`.
 - `stores/persist.ts`: restores and saves settings, operations, args and expansions in `localStorage` (`teomata:` keys). Imported by `main.ts` before mount.
-- `lib/midi.ts`: device stores, `playNote`, `sendControl`, `midiTime`. `lib/utils.ts`: directions/headings, `BANG`, `toNumber`, `step`. `lib/arithmetic.ts`: arg arithmetic and display formatting. `lib/harmony.ts`: chords and scales.
+- `lib/midi.ts`: device stores, `playNote`, `sendControl`, `midiTime`. `lib/utils.ts`: directions/headings, `BANG`, `toNumber`, `step`. `lib/arithmetic.ts`: arg arithmetic and display formatting. `lib/focus.ts`: `focusGrid`/`focusControls`. `lib/harmony.ts`: chords and scales.
 - `src/scheduler.ts`: a Tone `Loop` firing `q` times a bar at `cps`. Each tick runs `stepCells` in the lookahead, sends MIDI at `midiTime(time)`, and draws/prints via `getDraw().schedule`. `toggle()` starts/stops the transport (Space).
-- Components: `Grid.svelte` (grid, keyboard, zoom, labels, borders, input outlines), `Controls.svelte` + `NumberSquare.svelte`, `Devices.svelte`, `Console.svelte`, `Instructions.svelte`, `Modal.svelte` (reusable native `<dialog>`), `Help.svelte` (renders `rules.md` with `marked`).
+- Components: `Grid/` (`Grid.svelte` squares and wiring; `viewport.ts` scroll/zoom; `gestures.ts` wheel/pinch/touch; `keyboard.ts` key bindings; `decorations.ts` labels, borders, outlines; `Overlays.svelte` cursor, selection, outlines), `Controls.svelte` + `NumberSquare.svelte`, `Devices.svelte`, `Console.svelte`, `Instructions.svelte`, `Modal.svelte` (reusable native `<dialog>`), `Help.svelte` (renders `rules.md` with `marked`).
 
 ## Rules (`src/rules/`)
 

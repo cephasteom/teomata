@@ -1,4 +1,5 @@
 import type { Bang, direction } from "../stores/cells"
+import { SIZE } from "../stores/global"
 
 const offsets: Record<direction, [number, number]> = {
     n: [0, -1],
@@ -75,4 +76,18 @@ export const stepAround = (i: number, direction: direction, size: number) => {
     const x = (i % size + dx + size) % size
     const y = (Math.floor(i / size) + dy + size) % size
     return y * size + x
+}
+
+// A rectangle of squares, as inclusive columns and rows
+export type Rect = { x1: number, x2: number, y1: number, y2: number }
+
+export const toXY = (i: number) => ({ x: i % SIZE, y: Math.floor(i / SIZE) })
+
+export const toIndex = (x: number, y: number) => y * SIZE + x
+
+// The smallest rectangle holding every one of the squares
+export const boundsOf = (squares: number[]): Rect => {
+    const xs = squares.map(i => i % SIZE)
+    const ys = squares.map(i => Math.floor(i / SIZE))
+    return { x1: Math.min(...xs), x2: Math.max(...xs), y1: Math.min(...ys), y2: Math.max(...ys) }
 }
