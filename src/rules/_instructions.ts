@@ -42,7 +42,7 @@ export const about = {
         params: {},
     },
     e: {
-        about: "Clone another square: its operation, with its arguments, and the cells passing over it.",
+        about: "Clone another square: its functionality, its arguments, and the cells passing over it.",
         params: {
             x: "The square's column.",
             y: "The square's row.",
