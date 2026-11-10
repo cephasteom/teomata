@@ -5,8 +5,8 @@ import { BANG, step as stepFrom } from "../lib/utils"
 import { SIZE } from "../stores/global"
 import { emit } from "./_events"
 import { operationFor, kindOf } from "./_registry"
-import { argsFor, modeOf, paramsFor } from "./_args"
-import { cachedRule, clearRules, forgetRule, ruleFor } from "./_ruleCache"
+import { argsFor, entangledSource, modeOf, paramsFor } from "./_args"
+import { clearRules, forgetRule, ruleFor } from "./_ruleCache"
 
 type Bangs = Map<number, Set<string>>
 
@@ -71,14 +71,25 @@ const contextFor = (square: number, letter: string, bangs = new Set<string>()): 
 const isRunning = (letter: string, typed?: string[]) =>
     operationFor(letter) !== undefined && modeOf(letter, typed) !== "off"
 
+// An entangled square that's on acts as a clone of the operation at the end of
+// its chain, with that square's args and the bangs on its inputs, but a rule
+// (and so a count or a loop) of its own. Every other square acts as itself.
+const actingAs = (square: number, letters: string[], args: string[][]) => {
+    const source = entangledSource(square, letters, args)
+    const cloning = source !== undefined && letters[source] && isRunning(letters[square], args[square])
+    return cloning ? source : square
+}
+
 // Generators put their cell (and any split copies) on the neighbouring
 // squares, so those squares act on it this tick
 const generate = ({ cells, args }: TickState, letters: string[], tick: number): Cell[] => {
     const next = [...cells]
-    letters.forEach((letter, square) => {
-        if (kindOf(letter) !== "generator" || !isRunning(letter, args[square])) return
-        const rule = ruleFor(square, letter, argsFor(letter, args[square]))
-        const { split, ...cell } = rule({}, tick, contextFor(square, letter))
+    letters.forEach((_, square) => {
+        const from = actingAs(square, letters, args)
+        const letter = letters[from]
+        if (kindOf(letter) !== "generator" || !isRunning(letter, args[from])) return
+        const rule = ruleFor(square, letter, argsFor(letter, args[from]))
+        const { split, ...cell } = rule({}, tick, contextFor(from, letter))
         if (!isMoving(cell)) return
         for (const direction of [cell.direction!, ...split ?? []]) {
             const to = stepFrom(square, direction, SIZE)
@@ -89,16 +100,18 @@ const generate = ({ cells, args }: TickState, letters: string[], tick: number): 
 }
 
 // An "off" square keeps its rule, so it resumes where it was when back on
-const runSquare = (cell: Cell, square: number, letter: string, { args, bangs }: TickState, tick: number): Cell => {
+const runSquare = (cell: Cell, square: number, letters: string[], { args, bangs }: TickState, tick: number): Cell => {
+    const from = actingAs(square, letters, args)
+    const letter = letters[from]
     if (!operationFor(letter)) {
         forgetRule(square)
         return cell
     }
-    const mode = modeOf(letter, args[square])
+    const mode = modeOf(letter, args[from])
     if (mode === "off" || kindOf(letter) === "generator") return cell
 
-    const rule = ruleFor(square, letter, argsFor(letter, args[square]))
-    const result = rule(cell, tick, contextFor(square, letter, bangs.get(square)))
+    const rule = ruleFor(square, letter, argsFor(letter, args[from]))
+    const result = rule(cell, tick, contextFor(from, letter, bangs.get(from)))
     const absorbed = cell.value !== undefined && result.value === undefined
     if (mode === "thru" && absorbed) return cell
     // Show the absorbed cell on the destination for this tick
@@ -106,11 +119,12 @@ const runSquare = (cell: Cell, square: number, letter: string, { args, bangs }: 
     return result
 }
 
-// Runs after every other square, so the copy reflects this tick's result
+// Runs after every other square, so an entangled square also takes the cell
+// on the end of its chain as it is after this tick
 const copyEntangled = (cells: Cell[], letters: string[], args: string[][]): Cell[] =>
     cells.map((cell, square) => {
-        if (!isRunning(letters[square], args[square])) return cell
-        const from = cachedRule(square)?.entangled?.()
+        if (letters[square] !== "e" || !isRunning(letters[square], args[square])) return cell
+        const from = entangledSource(square, letters, args)
         if (from === undefined || cells[from]?.value === undefined) return cell
         return { ...cells[from] }
     })
@@ -122,6 +136,6 @@ export const step: GridRule = (cells, letters, typed, inputs, tick) => {
     const afterGenerators = { ...afterInputs, cells: generate(afterInputs, letters, tick) }
     // Inputs again, for cells the generators just put on them
     const final = absorbInputs(afterGenerators, letters, inputs)
-    const ran = final.cells.map((cell, square) => runSquare(cell, square, letters[square], final, tick))
+    const ran = final.cells.map((cell, square) => runSquare(cell, square, letters, final, tick))
     return copyEntangled(ran, letters, final.args)
 }

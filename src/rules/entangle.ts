@@ -11,15 +11,14 @@ const coordinateParam = (name: string, about: string): Param => ({
     accepts: text => isWhole(text) && Number(text) < SIZE,
 })
 
-// Lets what arrives pass, and names the square it's entangled with, whose
-// cell the tick copies onto it once every other square's rule has run
-const createEntangle = (x: number, y: number): CellRule =>
-    Object.assign((cell: Parameters<CellRule>[0]) => cell, { entangled: () => y * SIZE + x })
+// Lets what arrives pass. The tick runs a populated entangled square as a
+// clone of the square it's entangled with, and copies that square's cell onto it
+const createEntangle = (): CellRule => cell => cell
 
 export const entangle: Operation = {
     name: "entangle",
     kind: "operator",
     about: about.e.about,
     params: [coordinateParam("x", about.e.params.x), coordinateParam("y", about.e.params.y)],
-    rule: (x, y) => createEntangle(Number(x), Number(y)),
+    rule: createEntangle,
 }
