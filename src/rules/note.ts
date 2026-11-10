@@ -8,7 +8,7 @@ import { about } from "./_instructions"
 export const toMidi = (n: number) => ((Math.round(n) % 128) + 128) % 128
 
 // Plays each number that arrives as a MIDI note, or an array as a chord, at
-// the velocity for dur seconds, on the device and channel
+// the velocity for dur cycles, on the device and channel
 // Bangs are ignored, and every moving cell is absorbed
 const createNote = (amp: number, dur: number, device: number, channel: number): CellRule => cell => {
     const { value } = cell
@@ -29,7 +29,7 @@ const velocity: Param = {
 const duration: Param = {
     name: "dur",
     about: about.n.params.dur,
-    fallback: ".5",
+    fallback: ".25",
     accepts: text => isNumber(text) && Number(text) > 0,
 }
 

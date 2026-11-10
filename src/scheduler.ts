@@ -18,7 +18,8 @@ const loop = new Loop((time) => {
 	const at = midiTime(time)
 	const { shown, events, version } = stepCells(now)
 	for (const event of events) {
-		if (event.type === "note") playNote(event.device, event.channel, event.notes, event.amp, event.dur, at)
+		// A note's duration is in cycles, sent as seconds at the current tempo
+		if (event.type === "note") playNote(event.device, event.channel, event.notes, event.amp, event.dur / get(cps), at)
 		if (event.type === "cc") sendControl(event.device, event.channel, event.controller, event.value, at)
 	}
 	// The grid and console update when the tick is heard too

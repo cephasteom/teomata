@@ -119,7 +119,7 @@ export const about = {
         about: "Send incoming values as MIDI notes. Bangs are ignored.",
         params: {
             vel: "The velocity, from 0 to 127.",
-            dur: "How long each note lasts, in seconds.",
+            dur: "How long each note lasts, in cycles: 1 is a whole cycle, .25 a quarter.",
             device,
             channel,
         },
