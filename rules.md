@@ -1,14 +1,14 @@
 # Teomata
 
-Teomata is a grid of single-letter functions. On each step, each function is run to determine the grid's next state.
+Teomata is a grid of single-letter functions. On each tick, each function is run to determine the grid's next state.
 
-## Overview
+## Types
 
 There are three types of functions: `Generators` emit values, `Operators` transform them, and `Destinations` are MIDI devices and global parameters. Values can be bangs, numbers, or lists of numbers.
 
 `Generators` emit values at a set rate and direction. Directions are compass points (`n`, `e`, `s`, `w`) or axes (`x`, `y`, `xy` for all directions), and a `?` after an axis picks a direction at random.
 
-A `cycle` is one musical bar. `cps` sets the number of cycles per second (cps), and `q` (quantize) sets the number of divisions per cycle.
+A `cycle` is one musical bar. `cps` sets the cycles per second. `q`, or quantize, sets the number of divisions per cycle.
 
 ## Functions
 
@@ -22,19 +22,19 @@ Every function takes `mode` as its final argument. Generators and operators can 
 - **off**: the function is greyed out and inactive. Values pass through unchanged, and a generator emits nothing.
 - **thru**: the function is outlined in dashes. It sends as usual, and passes every value along unchanged.
 
-Press Enter on a function to set its arguments. Arguments with fixed options can be cycled through using the cursor keys. Press Enter or Esc to return to the main view. Press Shift+Enter to cycle through a functions's modes.
+Press Enter on a function to show its arguments. Press Enter or Esc to return to the grid. Press Shift+Enter to cycle through a functions's modes.
 
-Alt+Shift+arrow expands a function to reveal its arguments on the grid. Set an argument by sending a value to its input. Some arguments also accepts bangs.
+Alt+Shift+arrow expands a function to reveal and set its arguments on the grid.
 
 ## Save and Load
 
-Ctrl/Cmd+S saves the patch (its functions, arguments, inputs, cps and q) as a `.txt` file, and Ctrl/Cmd+O opens one. Opening replaces the grid's functions and empties its cells, and can be undone.
+Ctrl/Cmd+S saves the patch and Ctrl/Cmd+O opens one.
 
 ## Generators
 
 - **B** `bang(rate, direction)`: Emit bangs at a given rate and direction. Displayed as `B`.
 - **V** `value(value, rate, direction)`: Emit values at a given rate and direction. Displayed as the number.
-- **W** `wave(type, freq, rate, direction)`: Emit time varying values between 0 and 1, at a given rate and direction. `type` is a waveform name (`saw`, `sin`, `cos`, `tri`, `sqr`, or `noi`) or a number from `0` (`saw`) to `5` (`noi`). `freq` is the number of waveform cycles per musical cycle. The waveform stays in phase with the transport, starting at the top of the first cycle. Displayed as `W`.
+- **W** `wave(type, freq, rate, direction)`: Emit time varying values between 0 and 1, at a given rate and direction. `type` is a waveform name (`saw`, `sin`, `cos`, `tri`, `sqr`, or `noi`) or a number from `0` (`saw`) to `5` (`noi`). `freq` is the number of waveform cycles per bar. The waveform stays in phase with the transport, starting at the top of the first cycle. Displayed as `W`.
 
 ## Operators
 
