@@ -2,7 +2,7 @@
 // squares from the grid's top left, unless they're a `Point` in pixels
 import { flushSync } from "svelte"
 import { get } from "svelte/store"
-import { MIN_ZOOM, MAX_ZOOM, zoom } from "../../stores/global"
+import { MIN_ZOOM, MAX_ZOOM, SIZE, zoom } from "../../stores/global"
 import { cursor } from "../../stores/cursor"
 import { toXY } from "../../lib/utils"
 
@@ -15,11 +15,12 @@ const ZOOM_LEVELS = [4, 6, 8, 12, 16, 24, 32, 48, 64]
 export const clampZoom = (squares: number) => Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, squares))
 
 export const createViewport = (viewport: () => HTMLElement, grid: () => HTMLElement) => {
-  // Measured between the first two squares, as gridlines are fractions of a pixel
-  const squarePitch = () => {
-    const [a, b] = grid().children
-    return b.getBoundingClientRect().left - a.getBoundingClientRect().left
-  }
+  // Gridline thickness in pixels
+  const line = () => parseFloat(getComputedStyle(grid()).getPropertyValue('--line'))
+
+  // From one square to the next. The grid is its squares with a gridline
+  // between and round them; measured, as gridlines are fractions of a pixel
+  const squarePitch = () => (grid().getBoundingClientRect().width - line()) / SIZE
 
   // Fractional mid-drag
   const topLeftSquare = (): Point => {
@@ -90,5 +91,5 @@ export const createViewport = (viewport: () => HTMLElement, grid: () => HTMLElem
   const zoomIn = () => zoomTo(ZOOM_LEVELS.findLast(level => level < get(zoom)) ?? MIN_ZOOM)
   const zoomOut = () => zoomTo(ZOOM_LEVELS.find(level => level > get(zoom)) ?? MAX_ZOOM)
 
-  return { reveal, settle, toViewport, zoomTo, zoomIn, zoomOut }
+  return { line, squarePitch, reveal, settle, toViewport, zoomTo, zoomIn, zoomOut }
 }

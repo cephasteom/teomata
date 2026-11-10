@@ -5,7 +5,7 @@ import { inputSquares } from "../../stores/operations"
 import { argsFor, kindOf, labelFor, resolveEntangled } from "../../rules"
 import type { Input } from "../../rules/_types"
 import { shortened } from "../../lib/arithmetic"
-import { boundsOf, toXY, type Rect } from "../../lib/utils"
+import { boundsOf, type Rect } from "../../lib/utils"
 
 export type Border = { color: string, thru: boolean }
 export type Outline = Border & Rect & { i: number }
@@ -17,14 +17,6 @@ const KIND_COLORS: Partial<Record<string, string>> = {
   destination: 'var(--cell-destination)',
 }
 const kindColor = (letter: string) => KIND_COLORS[kindOf(letter) ?? '']
-
-// A CSS grid-area covering the rectangle of squares
-export const gridArea = ({ x1, x2, y1, y2 }: Rect) => `${y1 + 1} / ${x1 + 1} / ${y2 + 2} / ${x2 + 2}`
-
-export const squareArea = (i: number) => {
-  const { x, y } = toXY(i)
-  return gridArea({ x1: x, x2: x, y1: y, y2: y })
-}
 
 // The label each square shows. An entangled square shows its source's label,
 // so `labelSources[i]` is the square whose label i shows
