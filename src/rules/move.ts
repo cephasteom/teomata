@@ -3,8 +3,8 @@ import { opposite, step } from "../lib/utils"
 import type { GridRule } from "./_types"
 import { SIZE } from "../stores/global"
 
-// Moves every cell one step in its direction, and a copy of it one step in
-// each direction it splits off in
+// Moves every cell one step in its direction
+// Copies cells where axes used (x,y,xy)
 // Cells that would step past the edge of the grid die
 // Head on collisions reverse direction
 // Last cells wins multiple cell occupancy
