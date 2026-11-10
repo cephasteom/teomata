@@ -4,16 +4,16 @@ import { operations, args, expansions, fitExpansions, type Expansion } from "./o
 import { change } from "./history"
 import { clearCells } from "./cells"
 import { printLine } from "./console"
-import { inRange, isExpansion } from "./persist"
-import { kindOf } from "../rules"
+import { inRange, isExpansion, rulesToSave } from "./persist"
+import { kindOf, loadRules, type Saved } from "../rules"
 import { toIndex, toXY } from "../lib/utils"
 
 // A patch is the grid's operations, their arguments and inputs, with the tempo
 // and quantize, saved as a text file of JSON. Only squares with an operation
-// are written, each with its column and row. The cells moving over the grid
-// aren't part of it
+// are written, each with its column and row, and what its rule saved, such as
+// a loop's recording. The cells moving over the grid aren't part of it
 
-type Square = { x: number, y: number, operation: string, args?: string[], inputs?: Expansion }
+type Square = { x: number, y: number, operation: string, args?: string[], inputs?: Expansion, saved?: unknown }
 
 type Patch = { teomata: number, cps: number, q: number, squares: Square[] }
 
@@ -25,12 +25,14 @@ let name = "patch.txt"
 // The patch as text, a square to a line so it reads and diffs well
 const write = () => {
     const [$operations, $args, $expansions] = [get(operations), get(args), get(expansions)]
+    const saved = new Map(rulesToSave())
     const squares: Square[] = []
     $operations.forEach((operation, i) => {
         if (!operation) return
         const square: Square = { ...toXY(i), operation }
         if ($args[i].length) square.args = $args[i]
         if ($expansions[i]) square.inputs = $expansions[i]!
+        if (saved.has(i)) square.saved = saved.get(i)!.data
         squares.push(square)
     })
     const lines = squares.map(square => "    " + JSON.stringify(square))
@@ -83,12 +85,16 @@ const load = (patch: Patch) => {
         const $operations: string[] = Array.from({ length: SIZE * SIZE }, () => "")
         const $args: string[][] = Array.from({ length: SIZE * SIZE }, () => [])
         const $expansions: (Expansion | null)[] = Array.from({ length: SIZE * SIZE }, () => null)
+        const saved = new Map<number, Saved>()
         for (const square of patch.squares) {
             const i = toIndex(square.x, square.y)
             $operations[i] = square.operation
             $args[i] = square.args ?? []
             $expansions[i] = square.inputs ?? null
+            if (square.saved !== undefined) saved.set(i, { letter: square.operation, data: square.saved })
         }
+        // Not undone with the rest, which only covers operations, arguments and inputs
+        loadRules(saved)
         operations.set($operations)
         args.set($args)
         expansions.set($expansions)

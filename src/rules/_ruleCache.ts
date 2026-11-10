@@ -11,9 +11,40 @@ let cache = new Map<number, Cached>()
 
 const cacheKey = (letter: string, args: string[]) => [letter, ...args].join("\n")
 
-export const clearRules = () => { cache = new Map() }
+// What rules saved, by square, for the letter that saved it, which the next
+// rule built there for that letter loads. Outlasts the rules themselves
+export type Saved = { letter: string, data: unknown }
 
-export const forgetRule = (square: number) => { cache.delete(square) }
+let saved = new Map<number, Saved>()
+
+// Keeps what the square's rule saves before it's dropped
+const keepSaved = (square: number) => {
+    const cached = cache.get(square)
+    if (cached?.rule.save) saved.set(square, { letter: cached.letter, data: cached.rule.save() })
+}
+
+export const clearRules = () => {
+    for (const square of cache.keys()) keepSaved(square)
+    cache = new Map()
+}
+
+export const forgetRule = (square: number) => {
+    cache.delete(square)
+    saved.delete(square)
+}
+
+// What every square's rule has saved, as it is now
+export const savedRules = () => {
+    for (const square of cache.keys()) keepSaved(square)
+    return new Map(saved)
+}
+
+// Replaces what the rules have saved, such as from a patch. Rules that save
+// are rebuilt, loading it
+export const loadRules = (next: Map<number, Saved>) => {
+    saved = new Map(next)
+    for (const [square, { rule }] of cache) if (rule.load) cache.delete(square)
+}
 
 export const cachedRule = (square: number) => cache.get(square)?.rule
 
@@ -28,6 +59,11 @@ export const ruleFor = (square: number, letter: string, args: string[]): CellRul
     if (cached?.key === key) return cached.rule
     const rule = operationFor(letter)!.rule(...args)
     if (cached?.letter === letter) rule.carry?.(cached.rule.keep?.())
+    else {
+        const kept = saved.get(square)
+        if (kept?.letter === letter) rule.load?.(kept.data)
+        else saved.delete(square)
+    }
     cache.set(square, { letter, key, rule })
     return rule
 }

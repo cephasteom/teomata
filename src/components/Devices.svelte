@@ -1,12 +1,20 @@
 <script lang="ts">
-  import { outputs } from "../lib/midi";
+  import { inputs, outputs } from "../lib/midi";
 </script>
 
 <section class="devices" aria-label="MIDI devices">
-  <h2>MIDI devices:</h2>
+  <h2>MIDI outputs:</h2>
   <ol>
     {#each $outputs as output, k (output.id)}
       <li>{k} {output.name}</li>
+    {:else}
+      <li>none</li>
+    {/each}
+  </ol>
+  <h2>MIDI inputs:</h2>
+  <ol>
+    {#each $inputs as input, k (input.id)}
+      <li>{k} {input.name}</li>
     {:else}
       <li>none</li>
     {/each}

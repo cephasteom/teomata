@@ -2,6 +2,8 @@ const direction = "n, e, s, w, x, y, xy, x?, y? or xy?. Or a number from 0 (n) t
 const rate = "Number of values emitted per cycle."
 const device = "The MIDI output by its number, counting from 0."
 const channel = "A MIDI channel from 1 to 16."
+const input = "The MIDI input by its number, counting from 0."
+const lookahead = "Number of cycles to wait before outputting values. 0 is immediate so can only quantize to next tick. 1 is a full cycle but can quantize to nearest tick."
 const type = "saw, sin, cos, tri, sqr, or noi, or a number from 0 (saw) to 5 (noi)."
 const freq = "Waveform frequency, relative to global cps."
 export const mode = "on or off, or a number, 0 (on) or 1 (off). Off lets values pass unchanged. Shift+Enter toggles the mode."
@@ -12,6 +14,14 @@ export const about = {
     B: {
         about: "Emit bangs at a given rate and direction.",
         params: { rate, direction },
+    },
+    K: {
+        about: "Emit the value of a MIDI CC when it moves, at most once per tick.",
+        params: { cc: "The controller number, from 0 to 127.", device: input, channel, lookahead, direction },
+    },
+    N: {
+        about: "Emit MIDI notes played, on the next tick. Several notes in one tick are emitted as an array.",
+        params: { device: input, channel, lookahead, direction },
     },
     V: {
         about: "Emit values at a given rate and direction.",

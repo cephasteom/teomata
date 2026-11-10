@@ -1,7 +1,8 @@
-import type { Writable } from "svelte/store"
-import { cps, q, zoom, showConsole, showInstructions, SIZE, MIN_CPS, MAX_CPS, MIN_Q, MAX_Q, MIN_ZOOM, MAX_ZOOM } from "./global"
+import { get, type Writable } from "svelte/store"
+import { cps, q, zoom, isPlaying, showConsole, showInstructions, SIZE, MIN_CPS, MAX_CPS, MIN_Q, MAX_Q, MIN_ZOOM, MAX_ZOOM } from "./global"
 import { operations, args, expansions, fitExpansions, type Expansion } from "./operations"
 import { isDirection } from "../lib/utils"
+import { savedRules, loadRules, type Saved } from "../rules"
 
 const PREFIX = "teomata:"
 
@@ -37,6 +38,20 @@ export const isExpansion = (e: unknown): e is Expansion | null => e === null || 
     typeof e.length === "number" && Number.isInteger(e.length) && e.length > 0
 )
 
+// What the rules on squares saved, such as a loop's recording, by square, for
+// squares still holding the operation that saved it
+export const rulesToSave = () => {
+    const $operations = get(operations)
+    return [...savedRules()].filter(([square, { letter }]) => $operations[square] === letter)
+}
+
+const isSaved = (entry: unknown): entry is [number, Saved] => {
+    if (!Array.isArray(entry) || entry.length !== 2) return false
+    const [square, saved] = entry
+    return Number.isInteger(square) && square >= 0 && square < SIZE * SIZE &&
+        typeof saved === "object" && saved !== null && typeof (saved as Saved).letter === "string"
+}
+
 // Puts back what was saved last time. Operations and arguments are only
 // restored when they fit the grid
 const restore = () => {
@@ -69,6 +84,18 @@ const restore = () => {
             expansions.set(savedExpansions as (Expansion | null)[])
             fitExpansions()
         }
+        const savedRules = load("rules")
+        if (Array.isArray(savedRules)) loadRules(new Map(savedRules.filter(isSaved)))
+    }
+}
+
+// What the rules saved changes as they run, so it's kept when the transport
+// stops and when the page is hidden or closed, rather than on every tick
+const saveRules = () => {
+    try {
+        localStorage.setItem(PREFIX + "rules", JSON.stringify(rulesToSave()))
+    } catch {
+        // Storage is full or blocked, so it just isn't kept
     }
 }
 
@@ -81,3 +108,6 @@ save("args", args)
 save("expansions", expansions)
 save("console", showConsole)
 save("instructions", showInstructions)
+isPlaying.subscribe(playing => { if (!playing) saveRules() })
+addEventListener("pagehide", saveRules)
+document.addEventListener("visibilitychange", () => { if (document.hidden) saveRules() })

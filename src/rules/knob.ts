@@ -17,7 +17,7 @@ const createKnob = (device: number, channel: number, controller: number): CellRu
     return {}
 }
 
-const controller: Param = {
+export const controller: Param = {
     name: "cc",
     about: about.k.params.cc,
     fallback: "1",

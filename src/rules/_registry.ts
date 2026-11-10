@@ -19,6 +19,8 @@ import { wave, waveGenerator } from "./wave"
 import { scale } from "./scale"
 import { quantize } from "./quantize"
 import { tempo } from "./tempo"
+import { noteIn } from "./noteIn"
+import { knobIn } from "./knobIn"
 
 const withMode = (operation: Operation): Operation => ({
     ...operation,
@@ -31,6 +33,8 @@ const mapValues = <A, B>(record: Record<string, A>, f: (a: A) => B): Record<stri
 // Case matters: a generator may share its letter with an operator
 const operations = mapValues({
     B: bangGenerator,
+    K: knobIn,
+    N: noteIn,
     V: valueGenerator,
     W: waveGenerator,
     a: array,

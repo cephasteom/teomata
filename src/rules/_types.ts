@@ -28,6 +28,11 @@ export type CellRule = ((cell: Cell, tick: number, context: Context) => Cell) & 
     carry?: (kept: unknown) => void
     // Called when the transport stops, to put back what the rule remembers
     stop?: () => void
+    // What the rule remembers that outlasts the transport stopping, the page
+    // reloading and the patch being saved, as JSON. A rule built in its
+    // place on the same square, for the same letter, loads it
+    save?: () => unknown
+    load?: (saved: unknown) => void
 }
 
 export interface Param {

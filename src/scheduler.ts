@@ -1,10 +1,15 @@
 import { get } from 'svelte/store';
-import { Loop, getDraw, getTransport, start } from 'tone'
+import { Loop, getContext, getDraw, getTransport, start } from 'tone'
 import { cps, isPlaying, q } from './stores/global';
 import { showCells, stepCells } from './stores/cells';
 import { clearConsole, printLine } from './stores/console';
 import { stopRules } from './rules';
-import { midiTime, playNote, sendControl } from './lib/midi';
+import { clearMidiIn, midiTime, playNote, sendControl } from './lib/midi';
+
+// How far ahead of being heard each tick is worked out, which MIDI arriving
+// on the inputs waits on top of the tick. Tone's default is 0.1s; much
+// shorter risks late ticks when the page is busy. It polls at half this
+getContext().lookAhead = 0.1
 
 const loop = new Loop((time) => {
 	// Ticks since the transport last started, which time-based rules read.
@@ -46,6 +51,8 @@ cps.subscribe((value) => {
 
 export const toggle = async () => {
     await start()
+    // MIDI played while stopped isn't heard on the first tick
+    clearMidiIn()
     if (get(isPlaying)) {
         getTransport().stop()
         // Counts start again from 0
