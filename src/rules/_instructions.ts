@@ -3,7 +3,7 @@ const rate = "Number of values emitted per cycle."
 const device = "The MIDI output by its number, counting from 0."
 const channel = "A MIDI channel from 1 to 16."
 const input = "The MIDI input by its number, counting from 0."
-const lookahead = "Number of cycles to wait before outputting values. 0 is immediate so can only quantize to next tick. 1 is a full cycle but can quantize to nearest tick."
+const delay = "Delay output, in cycles. Useful for MIDI note and CC in as it make possible quantization to the nearest tick, rather than the next tick."
 const type = "saw, sin, cos, tri, sqr, or noi, or a number from 0 (saw) to 5 (noi)."
 const freq = "Waveform frequency, relative to global cps."
 export const mode = "on or off, or a number, 0 (on) or 1 (off). Off lets values pass unchanged. Shift+Enter toggles the mode."
@@ -17,11 +17,11 @@ export const about = {
     },
     K: {
         about: "Emit the value of a MIDI CC when it moves, at most once per tick.",
-        params: { cc: "The controller number, from 0 to 127.", device: input, channel, lookahead, direction },
+        params: { cc: "The controller number, from 0 to 127.", device: input, channel, delay, direction },
     },
     N: {
         about: "Emit MIDI notes played, on the next tick. Several notes in one tick are emitted as an array.",
-        params: { device: input, channel, lookahead, direction },
+        params: { device: input, channel, delay, direction },
     },
     V: {
         about: "Emit values at a given rate and direction.",

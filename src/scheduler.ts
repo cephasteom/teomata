@@ -4,7 +4,7 @@ import { cps, isPlaying, q } from './stores/global';
 import { showCells, stepCells } from './stores/cells';
 import { clearConsole, printLine } from './stores/console';
 import { stopRules } from './rules';
-import { clearMidiIn, midiTime, playNote, sendControl } from './lib/midi';
+import { discardReceived, midiTime, playNote, sendControl } from './lib/midi';
 
 // How far ahead of being heard each tick is worked out, which MIDI arriving
 // on the inputs waits on top of the tick. Tone's default is 0.1s; much
@@ -51,8 +51,8 @@ cps.subscribe((value) => {
 
 export const toggle = async () => {
     await start()
-    // MIDI played while stopped isn't heard on the first tick
-    clearMidiIn()
+    // MIDI played while stopped isn't received on the first tick
+    discardReceived()
     if (get(isPlaying)) {
         getTransport().stop()
         // Counts start again from 0

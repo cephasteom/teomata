@@ -11,8 +11,9 @@ let cache = new Map<number, Cached>()
 
 const cacheKey = (letter: string, args: string[]) => [letter, ...args].join("\n")
 
-// What rules saved, by square, for the letter that saved it, which the next
-// rule built there for that letter loads. Outlasts the rules themselves
+// State each square's rule saved, with the letter of the operation that saved
+// it. The next rule built on that square loads it if it has the same letter,
+// otherwise it's dropped. Unlike the cache, it survives clearRules
 export type Saved = { letter: string, data: unknown }
 
 let saved = new Map<number, Saved>()

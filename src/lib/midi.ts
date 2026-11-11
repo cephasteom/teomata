@@ -3,56 +3,10 @@ import { WebMidi, type Input, type Output, type MessageEvent } from "webmidi"
 import { getTransport, immediate } from "tone"
 import { q } from "../stores/global"
 
+// Devices
+
 export const inputs = writable<Input[]>([])
 export const outputs = writable<Output[]>([])
-
-// What arrived on the inputs since the rules last took it, in the order it
-// arrived. Devices count from 0 in the inputs list, as outputs do. `at` is
-// where it arrived on the transport, in ticks, with a fraction
-export type NoteIn = { device: number, channel: number, note: number, at: number }
-export type ControlIn = { device: number, channel: number, controller: number, value: number, at: number }
-export type MidiIn = { notes: NoteIn[], controls: ControlIn[] }
-
-const emptyMidiIn = (): MidiIn => ({ notes: [], controls: [] })
-
-let heard = emptyMidiIn()
-
-// Hands over what arrived since the last call, emptying it
-export const takeMidiIn = () => {
-    const taken = heard
-    heard = emptyMidiIn()
-    return taken
-}
-
-export const clearMidiIn = () => { heard = emptyMidiIn() }
-
-// Where a WebMidi timestamp falls on the transport, in ticks of the current q,
-// as the scheduler counts them, or undefined while it's stopped
-const tickAt = (timestamp: number) => {
-    const transport = getTransport()
-    if (transport.state !== "started") return undefined
-    const time = immediate() - (WebMidi.time - timestamp) / 1000
-    return transport.getTicksAtTime(time) / (transport.PPQ * 4 / get(q))
-}
-
-const listening = new WeakSet<Input>()
-
-// WebMidi reports a note on with velocity 0 as a note off, so it isn't heard
-const listen = (input: Input) => {
-    if (listening.has(input)) return
-    listening.add(input)
-    const device = () => get(inputs).indexOf(input)
-    input.addListener("noteon", ({ message, timestamp }: MessageEvent) => {
-        const at = tickAt(timestamp)
-        const [note] = message.dataBytes
-        if (at !== undefined) heard.notes.push({ device: device(), channel: message.channel, note, at })
-    })
-    input.addListener("controlchange", ({ message, timestamp }: MessageEvent) => {
-        const at = tickAt(timestamp)
-        const [controller, value] = message.dataBytes
-        if (at !== undefined) heard.controls.push({ device: device(), channel: message.channel, controller, value, at })
-    })
-}
 
 const listDevices = () => {
     inputs.set([...WebMidi.inputs])
@@ -68,7 +22,56 @@ WebMidi.enable()
     })
     .catch(error => console.warn("MIDI is unavailable", error))
 
-// Tone.js time to Midi.js time
+// Receiving
+
+export type NoteIn = { device: number, channel: number, note: number, at: number }
+export type ControlIn = { device: number, channel: number, controller: number, value: number, at: number }
+export type Received = { notes: NoteIn[], controls: ControlIn[] }
+
+let received: Received = { notes: [], controls: [] }
+
+// Hands over what was received since the last call, and starts afresh
+export const drainReceived = () => {
+    const drained = received
+    received = { notes: [], controls: [] }
+    return drained
+}
+
+export const discardReceived = () => { received = { notes: [], controls: [] } }
+
+// WebMidi timestamp to a tick of the current q, or undefined while the transport is stopped
+const tickAt = (timestamp: number) => {
+    const transport = getTransport()
+    if (transport.state !== "started") return undefined
+    const time = immediate() - (WebMidi.time - timestamp) / 1000
+    return transport.getTicksAtTime(time) / (transport.PPQ * 4 / get(q))
+}
+
+const record = <T>(list: T[], timestamp: number, event: (at: number) => T) => {
+    const at = tickAt(timestamp)
+    if (at !== undefined) list.push(event(at))
+}
+
+const listening = new WeakSet<Input>()
+
+// WebMidi reports note on with velocity 0 as note off, so it isn't recorded
+const listen = (input: Input) => {
+    if (listening.has(input)) return
+    listening.add(input)
+    const device = () => get(inputs).indexOf(input)
+    input.addListener("noteon", ({ message, timestamp }: MessageEvent) => {
+        const [note] = message.dataBytes
+        record(received.notes, timestamp, at => ({ device: device(), channel: message.channel, note, at }))
+    })
+    input.addListener("controlchange", ({ message, timestamp }: MessageEvent) => {
+        const [controller, value] = message.dataBytes
+        record(received.controls, timestamp, at => ({ device: device(), channel: message.channel, controller, value, at }))
+    })
+}
+
+// Sending
+
+// Tone time to WebMidi time
 export const midiTime = (time: number) => WebMidi.time + (time - immediate()) * 1000
 
 export const playNote = (device: number, channel: number, notes: number[], amp: number, dur: number, at?: number) => {

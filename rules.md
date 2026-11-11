@@ -33,8 +33,8 @@ Ctrl/Cmd+S saves the patch and Ctrl/Cmd+O opens one.
 ## Generators
 
 - **B** `bang(rate, direction)`: Emit bangs at a given rate and direction. Displayed as `B`.
-- **K** `knob(cc, device, channel, lookahead, direction)`: Emit the value of a MIDI CC when it moves, at most once per tick, from MIDI input `device`. `lookahead` works as for `N`. Displayed as `K<number>`, e.g. `K7`.
-- **N** `note(device, channel, lookahead, direction)`: Emit MIDI notes played on input `device`, on the next tick. Several notes in one tick are emitted as an array. A `lookahead` above `0` snaps notes to the nearest tick instead, and emits them `lookahead` cycles later. Beware feedback when the same device is used for output by `n`. Displayed as `N`.
+- **K** `knob(cc, device, channel, delay, direction)`: Emit the value of a MIDI CC when it moves, at most once per tick, from MIDI input `device`. `delay` works as for `N`. Displayed as `K<number>`, e.g. `K7`.
+- **N** `note(device, channel, delay, direction)`: Emit MIDI notes played on input `device`, on the next tick. Several notes in one tick are emitted as an array. A `delay` above `0` snaps notes to the nearest tick instead, and emits them `delay` cycles later. Beware feedback when the same device is used for output by `n`. Displayed as `N`.
 - **V** `value(value, rate, direction)`: Emit values at a given rate and direction. Displayed as the number.
 - **W** `wave(type, freq, rate, direction)`: Emit time varying values between 0 and 1, at a given rate and direction. `type` is a waveform name (`saw`, `sin`, `cos`, `tri`, `sqr`, or `noi`) or a number from `0` (`saw`) to `5` (`noi`). `freq` is the number of waveform cycles per bar. The waveform stays in phase with the transport, starting at the top of the first cycle. Displayed as `W`.
 

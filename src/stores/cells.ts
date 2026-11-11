@@ -4,8 +4,8 @@ import { rules } from "../rules"
 import { appliedOperations, setInputArg } from "./operations"
 import { randomDirection, randomValue } from "../lib/utils"
 import { drain } from "../rules/_events"
-import { hear } from "../rules/_midiIn"
-import { takeMidiIn } from "../lib/midi"
+import { receive } from "../rules/_midiIn"
+import { drainReceived } from "../lib/midi"
 
 export type direction = 'n' | 's' | 'e' | 'w' 
 // A bang, which for now counts as a 1 wherever a number is needed
@@ -62,7 +62,7 @@ export const stepCells = (tick: number) => {
     // The operations being edited run as they were until their arguments close
     const { operations: letters, args: given, inputs } = appliedOperations()
     // MIDI that arrived since the last tick joins this one
-    hear(takeMidiIn())
+    receive(drainReceived())
     grid = rules.reduce((cells, rule) => rule(cells, letters, given, inputs, tick), grid)
     const events = drain()
     const shown = [...grid]
