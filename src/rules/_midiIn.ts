@@ -10,12 +10,15 @@ let received: Received = { notes: [], controls: [] }
 
 export const receive = (midi: Received) => { received = midi }
 
+// Channel 0 listens on all channels
+const on = (channel: number, event: NoteIn | ControlIn) => channel === 0 || event.channel === channel
+
 export const notesReceived = (device: number, channel: number) =>
-    received.notes.filter(note => note.device === device && note.channel === channel)
+    received.notes.filter(note => note.device === device && on(channel, note))
 
 export const controlsReceived = (device: number, channel: number, controller: number) =>
     received.controls.filter(control =>
-        control.device === device && control.channel === channel && control.controller === controller)
+        control.device === device && on(channel, control) && control.controller === controller)
 
 // How many cycles a MIDI input generator holds what arrives. 
 // 0 quantizes to the next tick. 

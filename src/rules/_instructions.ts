@@ -1,7 +1,7 @@
 const direction = "n, e, s, w, x, y, xy, x?, y? or xy?. Or a number from 0 (n) to 9 (xy?)."
 const rate = "Number of values emitted per cycle."
 const device = "The MIDI output by its number, counting from 0."
-const channel = "A MIDI channel from 1 to 16."
+const channel = "A MIDI channel from 1 to 16, or 0 for all channels."
 const input = "The MIDI input by its number, counting from 0."
 const delay = "Delay output, in cycles. Useful for MIDI note and CC in as it make possible quantization to the nearest tick, rather than the next tick."
 const type = "saw, sin, cos, tri, sqr, or noi, or a number from 0 (saw) to 5 (noi)."
@@ -16,11 +16,11 @@ export const about = {
         params: { rate, direction },
     },
     K: {
-        about: "Emit the value of a MIDI CC when it moves, at most once per tick.",
+        about: "Emit MIDI CC values.",
         params: { cc: "The controller number, from 0 to 127.", device: input, channel, delay, direction },
     },
     N: {
-        about: "Emit MIDI notes played, on the next tick. Several notes in one tick are emitted as an array.",
+        about: "Emit MIDI notes played.",
         params: { device: input, channel, delay, direction },
     },
     V: {

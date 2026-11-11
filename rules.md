@@ -33,8 +33,8 @@ Ctrl/Cmd+S saves the patch and Ctrl/Cmd+O opens one.
 ## Generators
 
 - **B** `bang(rate, direction)`: Emit bangs at a given rate and direction. Displayed as `B`.
-- **K** `knob(cc, device, channel, delay, direction)`: Emit the value of a MIDI CC when it moves, at most once per tick, from MIDI input `device`. `delay` works as for `N`. Displayed as `K<number>`, e.g. `K7`.
-- **N** `note(device, channel, delay, direction)`: Emit MIDI notes played on input `device`, on the next tick. Several notes in one tick are emitted as an array. A `delay` above `0` snaps notes to the nearest tick instead, and emits them `delay` cycles later. Beware feedback when the same device is used for output by `n`. Displayed as `N`.
+- **K** `knob(cc, device, channel, delay, direction)`: Emit the value of a MIDI CC when it moves, at most once per tick, from MIDI input `device`. `channel` `0` listens on all channels. `delay` works as for `N`. Displayed as `K<number>`, e.g. `K7`.
+- **N** `note(device, channel, delay, direction)`: Emit MIDI notes played on input `device`, on the next tick. `channel` `0` listens on all channels. Several notes in one tick are emitted as an array. A `delay` above `0` snaps notes to the nearest tick instead, and emits them `delay` cycles later. Beware feedback when the same device is used for output by `n`. Displayed as `N`.
 - **V** `value(value, rate, direction)`: Emit values at a given rate and direction. Displayed as the number.
 - **W** `wave(type, freq, rate, direction)`: Emit time varying values between 0 and 1, at a given rate and direction. `type` is a waveform name (`saw`, `sin`, `cos`, `tri`, `sqr`, or `noi`) or a number from `0` (`saw`) to `5` (`noi`). `freq` is the number of waveform cycles per bar. The waveform stays in phase with the transport, starting at the top of the first cycle. Displayed as `W`.
 
@@ -58,7 +58,7 @@ Ctrl/Cmd+S saves the patch and Ctrl/Cmd+O opens one.
 
 ## Destinations
 
-* **n** `note(vel, dur, device, channel)`: Send incoming values as MIDI notes. Bangs are ignored. Notes play at velocity `vel` (0 to 127) for `dur` cycles, so `1` holds for a whole cycle and `.25` for a quarter. Numbers are rounded and wrapped to 0 to 127. Displayed as `n`.
-* **k** `knob(cc, device, channel)`: Send incoming value as MIDI CC messages. Bangs are ignored. Numbers are rounded and wrapped to 0 to 127, and an array sends its first number. Displayed as `cc<number>`, e.g. `cc7`.
+* **n** `note(vel, dur, device, channel)`: Send incoming values as MIDI notes. `channel` `0` sends on all channels. Bangs are ignored. Notes play at velocity `vel` (0 to 127) for `dur` cycles, so `1` holds for a whole cycle and `.25` for a quarter. Numbers are rounded and wrapped to 0 to 127. Displayed as `n`.
+* **k** `knob(cc, device, channel)`: Send incoming value as MIDI CC messages. `channel` `0` sends on all channels. Bangs are ignored. Numbers are rounded and wrapped to 0 to 127, and an array sends its first number. Displayed as `cc<number>`, e.g. `cc7`.
 * **q** `q()`: Set the global q, rounded and clamped from 1 to 64.
 * **t** `tempo()`: Set the global tempo (cps), clamped from 0.05 to 2. Bangs are ignored, and an array sets its first number.

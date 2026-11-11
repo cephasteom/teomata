@@ -66,11 +66,12 @@ export const deviceParam = (about: string): Param => ({
     accepts: isWhole,
 })
 
+// A MIDI channel from 1 to 16, or 0 for all of them
 export const channelParam = (about: string): Param => ({
     name: "channel",
     about,
     fallback: "1",
-    accepts: text => isWhole(text) && Number(text) >= 1 && Number(text) <= 16,
+    accepts: text => isWhole(text) && Number(text) <= 16,
 })
 
 // How many cycles between resets, from the first division of the cycle, or 0

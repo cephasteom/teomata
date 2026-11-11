@@ -74,10 +74,16 @@ const listen = (input: Input) => {
 // Tone time to WebMidi time
 export const midiTime = (time: number) => WebMidi.time + (time - immediate()) * 1000
 
+// The output channels to send on: channel 0 sends on all of them
+const channelsOf = (device: number, channel: number) => {
+    const channels = get(outputs)[device]?.channels ?? []
+    return channel === 0 ? channels.slice(1, 17) : [channels[channel]]
+}
+
 export const playNote = (device: number, channel: number, notes: number[], amp: number, dur: number, at?: number) => {
-    get(outputs)[device]?.channels[channel]?.playNote(notes, { rawAttack: amp, duration: dur * 1000, time: at })
+    for (const out of channelsOf(device, channel)) out?.playNote(notes, { rawAttack: amp, duration: dur * 1000, time: at })
 }
 
 export const sendControl = (device: number, channel: number, controller: number, value: number, at?: number) => {
-    get(outputs)[device]?.channels[channel]?.sendControlChange(controller, value, { time: at })
+    for (const out of channelsOf(device, channel)) out?.sendControlChange(controller, value, { time: at })
 }
