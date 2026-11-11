@@ -26,7 +26,7 @@
   let labelSources = $derived(labelSourcesFor($operations, $args))
 
   // Borders, outlines and input labels are hidden while arguments are open
-  let borders = $derived(isEditing ? new Map() : squareBordersFor($operations, $modes, $expansions))
+  let borders = $derived(isEditing ? new Map() : squareBordersFor($operations, $modes, $expansions, labelSources))
   let outlines = $derived(isEditing ? [] : inputOutlinesFor($operations, $modes, $expansions))
   let inputLabels = $derived(isEditing
     ? new Map<number, InputLabel>()

@@ -161,9 +161,11 @@ export const drawGrid = (ctx: CanvasRenderingContext2D, scene: Scene, view: View
       } else if (isEditing && i === shownSquare) {
         text(box, operations[editing], 1, 'bold ', shade(editingOff))
       } else if (operations[i]) {
-        // A rotate, or a square entangled with one, is italic
+        // A rotate, or a square entangled with one, is italic. A square
+        // entangled with an operation that's off is shown off too
         const style = operations[labelSources[i]] === 'r' ? 'italic bold ' : 'bold '
-        text(box, labels[i], labels[i].length, style, shade(modes[i] === 'off'))
+        const off = modes[i] === 'off' || modes[labelSources[i]] === 'off'
+        text(box, labels[i], labels[i].length, style, shade(off))
       } else if (input) {
         text(box, input.text, Math.max(1, input.text.length), '', shade(input.off))
       }

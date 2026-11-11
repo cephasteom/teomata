@@ -31,15 +31,18 @@ export const labelsFor = (
 }
 
 // Generators and destinations without inputs get a border of their own;
-// those with inputs are outlined together with them instead
+// those with inputs are outlined together with them instead. An entangled
+// square takes the border of its source, off when either is off
 export const squareBordersFor = (
-  operations: string[], modes: string[], expansions: (Expansion | null)[],
+  operations: string[], modes: string[], expansions: (Expansion | null)[], labelSources: number[],
 ) => {
   const borders = new Map<number, Border>()
   operations.forEach((letter, i) => {
-    const color = kindColor(letter)
+    const source = labelSources[i]
+    const color = letter && kindColor(operations[source])
     if (!color || expansions[i]) return
-    borders.set(i, { color: modes[i] === 'off' ? OFF_COLOR : color, thru: modes[i] === 'thru' })
+    const off = modes[i] === 'off' || modes[source] === 'off'
+    borders.set(i, { color: off ? OFF_COLOR : color, thru: modes[source] === 'thru' })
   })
   return borders
 }
