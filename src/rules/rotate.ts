@@ -12,7 +12,7 @@ export const rotate: Operation = {
     name: "rotate",
     kind: "operator",
     about: about.r.about,
-    params: [directionParam(about.r.params.direction, "n")],
+    params: [directionParam(about.r.params.dir, "n")],
     label: to => headingOf(to),
     rule: to => createRotate(headingOf(to) as heading),
 }

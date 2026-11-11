@@ -37,7 +37,7 @@ export const note: Operation = {
     name: "note",
     kind: "destination",
     about: about.n.about,
-    params: [velocity, duration, deviceParam(about.n.params.device), channelParam(about.n.params.channel)],
+    params: [velocity, duration, deviceParam(about.n.params.device), channelParam(about.n.params.ch)],
     rule: (vel, dur, device, channel) =>
         createNote(Math.round(Number(vel)), Number(dur), Number(device), Number(channel)),
 }

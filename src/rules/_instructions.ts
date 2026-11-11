@@ -1,7 +1,7 @@
-const direction = "n, e, s, w, x, y, xy, x?, y? or xy?. Or a number from 0 (n) to 9 (xy?)."
+const dir = "n, e, s, w, x, y, xy, x?, y? or xy?. Or a number from 0 (n) to 9 (xy?)."
 const rate = "Number of values emitted per cycle."
 const device = "The MIDI output by its number, counting from 0."
-const channel = "A MIDI channel from 1 to 16, or 0 for all channels."
+const ch = "A MIDI channel from 1 to 16, or 0 for all channels."
 const input = "The MIDI input by its number, counting from 0."
 const delay = "Delay output, in cycles. Useful for MIDI note and CC in as it make possible quantization to the nearest tick, rather than the next tick."
 const type = "saw, sin, cos, tri, sqr, or noi, or a number from 0 (saw) to 5 (noi)."
@@ -13,23 +13,23 @@ export const about = {
     // Generators
     B: {
         about: "Emit bangs at a given rate and direction.",
-        params: { rate, direction },
+        params: { rate, dir },
     },
     K: {
         about: "Emit MIDI CC values.",
-        params: { cc: "The controller number, from 0 to 127.", device: input, channel, delay, direction },
+        params: { cc: "The controller number, from 0 to 127.", device: input, ch, delay, dir },
     },
     N: {
         about: "Emit MIDI notes played.",
-        params: { device: input, channel, delay, direction },
+        params: { device: input, ch, delay, dir },
     },
     V: {
         about: "Emit values at a given rate and direction.",
-        params: { value: "Any number.", rate, direction },
+        params: { value: "Any number.", rate, dir },
     },
     W: {
         about: "Emit time varying values between 0 and 1, at a given rate and direction.",
-        params: { type, freq, rate, direction },
+        params: { type, freq, rate, dir },
     },
 
     // Operators
@@ -100,7 +100,7 @@ export const about = {
     },
     r: {
         about: "Turn incoming values to travel in a given direction or directions.",
-        params: { direction },
+        params: { dir },
     },
     s: {
         about: "Scale incoming values from one range to another. Bangs are 1.",
@@ -123,7 +123,7 @@ export const about = {
     // Destinations
     k: {
         about: "Send incoming value as MIDI CC messages. Bangs are ignored.",
-        params: { cc: "The controller number, from 0 to 127.", device, channel },
+        params: { cc: "The controller number, from 0 to 127.", device, ch },
     },
     n: {
         about: "Send incoming values as MIDI notes. Bangs are ignored.",
@@ -131,7 +131,7 @@ export const about = {
             vel: "The velocity, from 0 to 127.",
             dur: "Note duration, in cycles: 1 is a whole cycle, .25 a quarter.",
             device,
-            channel,
+            ch,
         },
     },
     q: {

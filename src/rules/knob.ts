@@ -28,7 +28,7 @@ export const knob: Operation = {
     name: "knob",
     kind: "destination",
     about: about.k.about,
-    params: [controller, deviceParam(about.k.params.device), channelParam(about.k.params.channel)],
+    params: [controller, deviceParam(about.k.params.device), channelParam(about.k.params.ch)],
     label: controller => `cc${controller}`,
     rule: (controller, device, channel) => createKnob(Number(device), Number(channel), Number(controller)),
 }

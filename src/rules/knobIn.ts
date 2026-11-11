@@ -24,9 +24,9 @@ export const knobIn: Operation = {
     params: [
         { ...controller, about: about.K.params.cc },
         deviceParam(about.K.params.device),
-        channelParam(about.K.params.channel),
+        channelParam(about.K.params.ch),
         delayParam(about.K.params.delay),
-        directionParam(about.K.params.direction),
+        directionParam(about.K.params.dir),
     ],
     label: controller => `K${controller}`,
     rule: (controller, device, channel, delay, to) =>

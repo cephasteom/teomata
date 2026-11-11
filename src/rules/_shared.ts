@@ -42,7 +42,7 @@ export const argFrom = (param: Param, value: number | number[]) => {
 // A direction: n, e, s or w, or x, y or xy for every one along that axis or
 // both, or with a ? for a random one of them, or its number from 0 to 9
 export const directionParam = (about: string, fallback = "e"): Param => ({
-    name: "direction",
+    name: "dir",
     about,
     fallback,
     accepts: text => isHeading(headingOf(text)),
@@ -68,7 +68,7 @@ export const deviceParam = (about: string): Param => ({
 
 // A MIDI channel from 1 to 16, or 0 for all of them
 export const channelParam = (about: string): Param => ({
-    name: "channel",
+    name: "ch",
     about,
     fallback: "1",
     accepts: text => isWhole(text) && Number(text) <= 16,

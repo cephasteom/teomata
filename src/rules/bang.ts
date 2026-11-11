@@ -12,7 +12,7 @@ export const bangGenerator: Operation = {
     name: "bang",
     kind: "generator",
     about: about.B.about,
-    params: [rateParam(about.B.params.rate), directionParam(about.B.params.direction)],
+    params: [rateParam(about.B.params.rate), directionParam(about.B.params.dir)],
     rule: (rate, to) => createBangGenerator(Number(rate), headingOf(to) as heading),
 }
 

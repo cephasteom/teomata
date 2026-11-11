@@ -26,7 +26,7 @@ export const valueGenerator: Operation = {
     name: "value",
     kind: "generator",
     about: about.V.about,
-    params: [valueParam(about.V.params.value), rateParam(about.V.params.rate), directionParam(about.V.params.direction)],
+    params: [valueParam(about.V.params.value), rateParam(about.V.params.rate), directionParam(about.V.params.dir)],
     label: value => value,
     rule: (value, rate, to) => createValueGenerator(Number(value), Number(rate), headingOf(to) as heading),
 }

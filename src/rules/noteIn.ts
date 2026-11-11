@@ -23,9 +23,9 @@ export const noteIn: Operation = {
     about: about.N.about,
     params: [
         deviceParam(about.N.params.device),
-        channelParam(about.N.params.channel),
+        channelParam(about.N.params.ch),
         delayParam(about.N.params.delay),
-        directionParam(about.N.params.direction),
+        directionParam(about.N.params.dir),
     ],
     rule: (device, channel, delay, to) =>
         createNoteIn(Number(device), Number(channel), headingOf(to) as heading, Number(delay)),

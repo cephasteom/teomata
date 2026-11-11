@@ -90,7 +90,7 @@ export const waveGenerator: Operation = {
         typeParam(about.W.params.type),
         freqParam(about.W.params.freq),
         rateParam(about.W.params.rate),
-        directionParam(about.W.params.direction),
+        directionParam(about.W.params.dir),
     ],
     rule: (type, freq, rate, to) =>
         createWaveGenerator(typeOf(type), Number(freq), Number(rate), headingOf(to) as heading),
