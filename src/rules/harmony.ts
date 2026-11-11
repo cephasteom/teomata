@@ -10,8 +10,9 @@ const notes: Record<string, number> = { c: 0, d: 2, e: 4, f: 5, g: 7, a: 9, b: 1
 // Each octave runs from its C upwards, so octave 3 is C3 (48) to B3
 const C0 = 12
 
-const MAX_OCTAVES = 8
 const MAX_OCTAVE = 8
+const MAX_DEGREE = 32
+const MAX_LENGTH = 32
 
 // A note name with an optional # or b, ignoring case, so cb is the B below c
 const isRoot = (text: string) => /^[a-g][#b]?$/i.test(text)
@@ -25,13 +26,16 @@ const semitones = (root: string) => {
     return notes[letter] + (accidental === "#" ? 1 : accidental === "b" ? -1 : 0)
 }
 
-// The harmony's notes, from the root in the given octave upwards, repeated an
-// octave higher for each octave after the first
-const harmonyNotes = (root: string, type: string, start: number, octaves: number) => {
+// length notes of the harmony, starting on its degree (0 is the root) above the
+// root in the given octave, carrying on into the octaves above. A length of 0
+// plays as many notes as the harmony has, so degree 1 of ma is 3, 5, 8
+const harmonyNotes = (root: string, type: string, degree: number, start: number, length: number) => {
     const base = C0 + 12 * start + semitones(root)
-    return Array.from({ length: octaves }, (_, octave) =>
-        harmonies[type.toLowerCase()].map(n => base + 12 * octave + n)
-    ).flat()
+    const steps = harmonies[type.toLowerCase()]
+    return Array.from({ length: length || steps.length }, (_, i) => {
+        const k = degree + i
+        return base + 12 * Math.floor(k / steps.length) + steps[k % steps.length]
+    })
 }
 
 const root: Param = {
@@ -57,16 +61,23 @@ const type: Param = {
     options: types.options,
 }
 
-const octaves: Param = {
-    name: "octaves",
-    about: about.h.params.octaves,
-    fallback: "1",
-    accepts: text => isWhole(text) && Number(text) >= 1 && Number(text) <= MAX_OCTAVES,
+const deg: Param = {
+    name: "deg",
+    about: about.h.params.deg,
+    fallback: "0",
+    accepts: text => isWhole(text) && Number(text) <= MAX_DEGREE,
 }
 
-const octave: Param = {
-    name: "octave",
-    about: about.h.params.octave,
+const len: Param = {
+    name: "len",
+    about: about.h.params.len,
+    fallback: "0",
+    accepts: text => isWhole(text) && Number(text) <= MAX_LENGTH,
+}
+
+const oct: Param = {
+    name: "oct",
+    about: about.h.params.oct,
     fallback: "3",
     accepts: text => isWhole(text) && Number(text) <= MAX_OCTAVE,
 }
@@ -75,12 +86,12 @@ export const harmony: Operation = {
     name: "harmony",
     kind: "operator",
     about: about.h.about,
-    params: [root, type, octave, octaves],
+    params: [root, type, deg, oct, len],
     // The root's letter in capitals, then the type, cut to 3 letters, such as Cma or F#d
     label: (root, type) => {
         const [name, kind] = [rootOf(root), types.nameOf(type)]
         return (name[0].toUpperCase() + name.slice(1).toLowerCase() + kind).slice(0, 3)
     },
-    rule: (root, type, octave, octaves) =>
-        createValues(harmonyNotes(rootOf(root), types.nameOf(type), Number(octave), Number(octaves))),
+    rule: (root, type, deg, oct, len) =>
+        createValues(harmonyNotes(rootOf(root), types.nameOf(type), Number(deg), Number(oct), Number(len))),
 }
