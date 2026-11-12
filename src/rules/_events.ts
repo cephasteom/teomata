@@ -5,7 +5,7 @@ import type { Cell } from "../stores/cells"
 // MIDI at the tick's time and prints the lines when the tick is drawn
 export type Event =
     | { type: "note", device: number, channel: number, notes: number[], amp: number, dur: number }
-    | { type: "cc", device: number, channel: number, controller: number, value: number }
+    | { type: "cc", device: number, channel: number, controller: number, value: number, ramp: number }
     | { type: "print", text: string }
     // Sets the global q or cps when the tick is heard
     | { type: "q", value: number }

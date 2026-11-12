@@ -124,7 +124,7 @@ export const about = {
     // Destinations
     k: {
         about: "Send incoming value as MIDI CC messages. Bangs are ignored.",
-        params: { cc: "The controller number, from 0 to 127.", device, ch },
+        params: { cc: "The controller number, from 0 to 127.", device, ch, ramp: "Time in cycles to ramp to each new value. 0 snaps to it." },
     },
     n: {
         about: "Send incoming values as MIDI notes. Bangs are ignored.",

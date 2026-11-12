@@ -4,7 +4,7 @@ import { cps, isPlaying, q } from './stores/global';
 import { showCells, stepCells } from './stores/cells';
 import { clearConsole, printLine } from './stores/console';
 import { stopRules } from './rules';
-import { discardReceived, midiTime, playNote, sendControl } from './lib/midi';
+import { discardReceived, midiTime, playNote, rampControl, sendRamps, stopRamps } from './lib/midi';
 
 // How far ahead of being heard each tick is worked out, which MIDI arriving
 // on the inputs waits on top of the tick. Tone's default is 0.1s; much
@@ -25,8 +25,11 @@ const loop = new Loop((time) => {
 	for (const event of events) {
 		// A note's duration is in cycles, sent as seconds at the current tempo
 		if (event.type === "note") playNote(event.device, event.channel, event.notes, event.amp, event.dur / get(cps), at)
-		if (event.type === "cc") sendControl(event.device, event.channel, event.controller, event.value, at)
+		// A ramp is in cycles too, sent as milliseconds
+		if (event.type === "cc") rampControl(event.device, event.channel, event.controller, event.value, at, event.ramp / get(cps) * 1000)
 	}
+	// Ramps send their steps up to the next tick, so a new value can take over from where they are
+	sendRamps(at + 1000 / (get(cps) * get(q)))
 	// The grid and console update when the tick is heard too
 	getDraw().schedule(() => {
 		showCells(shown, version)
@@ -57,6 +60,7 @@ export const toggle = async () => {
         getTransport().stop()
         // Counts start again from 0
         stopRules()
+        stopRamps()
     } else {
         // Each run starts with an empty console
         clearConsole()

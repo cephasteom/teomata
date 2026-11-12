@@ -87,3 +87,44 @@ export const playNote = (device: number, channel: number, notes: number[], amp: 
 export const sendControl = (device: number, channel: number, controller: number, value: number, at?: number) => {
     for (const out of channelsOf(device, channel)) out?.sendControlChange(controller, value, { time: at })
 }
+
+// Ramping controllers
+
+// A controller gliding a step at a time from one value to another, over
+// WebMidi times start to end. sent counts the steps sent so far
+type Ramp = { device: number, channel: number, controller: number, from: number, to: number, start: number, end: number, sent: number }
+
+const ramps = new Map<string, Ramp>()
+
+const stepsOf = ({ from, to }: Ramp) => Math.abs(to - from)
+const valueOf = (ramp: Ramp) => ramp.from + Math.sign(ramp.to - ramp.from) * ramp.sent
+
+// Sends a controller value at WebMidi time at, ramping to it over duration
+// milliseconds from the last value sent. A duration of 0, or a controller not
+// yet sent, snaps to it. The steps are sent by sendRamps
+export const rampControl = (device: number, channel: number, controller: number, value: number, at: number, duration: number) => {
+    const key = `${device}:${channel}:${controller}`
+    const last = ramps.get(key)
+    if (duration <= 0 || !last) {
+        sendControl(device, channel, controller, value, at)
+        ramps.set(key, { device, channel, controller, from: value, to: value, start: at, end: at, sent: 0 })
+        return
+    }
+    ramps.set(key, { device, channel, controller, from: valueOf(last), to: value, start: at, end: at + duration, sent: 0 })
+}
+
+// Sends the ramps' steps due before WebMidi time until, a value at a time
+export const sendRamps = (until: number) => {
+    for (const ramp of ramps.values()) {
+        const steps = stepsOf(ramp)
+        while (ramp.sent < steps) {
+            const at = ramp.start + (ramp.sent + 1) / steps * (ramp.end - ramp.start)
+            if (at >= until) break
+            ramp.sent++
+            sendControl(ramp.device, ramp.channel, ramp.controller, valueOf(ramp), at)
+        }
+    }
+}
+
+// Forgets the ramps and the values sent, so the next value snaps
+export const stopRamps = () => ramps.clear()

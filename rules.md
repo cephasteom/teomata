@@ -59,6 +59,6 @@ Ctrl/Cmd+S saves the patch and Ctrl/Cmd+O opens one.
 ## Destinations
 
 * **n** `note(vel, dur, device, ch)`: Send incoming values as MIDI notes. `ch` `0` sends on all channels. Bangs are ignored. Notes play at velocity `vel` (0 to 127) for `dur` cycles, so `1` holds for a whole cycle and `.25` for a quarter. Numbers are rounded and wrapped to 0 to 127. Displayed as `n`.
-* **k** `knob(cc, device, ch)`: Send incoming value as MIDI CC messages. `ch` `0` sends on all channels. Bangs are ignored. Numbers are rounded and wrapped to 0 to 127, and an array sends its first number. Displayed as `cc<number>`, e.g. `cc7`.
+* **k** `knob(cc, device, ch, ramp)`: Send incoming value as MIDI CC messages. `ch` `0` sends on all channels. `ramp` is the time in cycles to ramp to each new value, starting from the last value sent; `0` snaps to it. Bangs are ignored. Numbers are rounded and wrapped to 0 to 127, and an array sends its first number. Displayed as `cc<number>`, e.g. `cc7`.
 * **q** `q()`: Set the global q, rounded and clamped from 1 to 64.
 * **t** `tempo()`: Set the global tempo (cps), clamped from 0.05 to 2. Bangs are ignored, and an array sets its first number.
